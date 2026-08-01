@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pwlif-navy: #051836;
+  --color-pwlif-medium-blue: #042554;
+  --color-pwlif-green: #005C27;
+  --color-pwlif-leaf: #327B2F;
+  --color-pwlif-gold: #F5AB00;
+  --color-pwlif-cream: #FDFCF9;
+  --color-pwlif-card-light: #FFFFFF;
+
+  --color-wlp-navy: #051836;
+  --color-wlp-dark-slate: #042554;
+  --color-wlp-card-dark: #121A36;
+  --color-wlp-rose: #005C27;
+  --color-wlp-rose-gold: #F5AB00;
+  --color-wlp-amber: #F5AB00;
+  --color-wlp-coral: #005C27;
+  --color-wlp-alabaster: #FDFCF9;
+  --color-wlp-white: #FFFFFF;
+
+  --font-montserrat: var(--font-montserrat), sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
+}
+
+:root {
+  --pwlif-navy: #051836;
+  --pwlif-medium-blue: #042554;
+  --pwlif-green: #005C27;
+  --pwlif-leaf: #327B2F;
+  --pwlif-gold: #F5AB00;
+  --pwlif-cream: #FDFCF9;
+  --pwlif-card-light: #FFFFFF;
+
+  --wlp-navy: #051836;
+  --wlp-dark-slate: #042554;
+  --wlp-card-dark: #121A36;
+  --wlp-rose-gold: #F5AB00;
+  --wlp-amber: #F5AB00;
+  --wlp-coral: #005C27;
+  --wlp-alabaster: #FDFCF9;
+  --wlp-white: #FFFFFF;
+}
+
+body {
+  background-color: #FDFCF9;
+  color: #051836;
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Form inputs styling */
+input, textarea, select {
+  color: #051836;
+}
+
+/* Light / Warm Cream Backgrounds -> Dark Navy Text */
+.bg-\[\#FDFCF9\] input,
+.bg-white input,
+input.bg-white,
+textarea.bg-white,
+select.bg-white {
+  color: #051836 !important;
+}
+
+.bg-white input::placeholder,
+.bg-white textarea::placeholder,
+input.bg-white::placeholder,
+textarea.bg-white::placeholder {
+  color: rgba(5, 24, 54, 0.6) !important;
+  opacity: 1 !important;
+}
+
+/* Dark Navy Backgrounds (Admin / Dark Modals) -> White Text */
+.bg-\[\#051836\] input,
+.bg-\[\#042554\] input,
+.bg-\[\#121A36\] input,
+.bg-\[\#051836\] textarea,
+.bg-\[\#042554\] textarea,
+.bg-\[\#121A36\] textarea,
+.bg-\[\#051836\] select,
+.bg-\[\#042554\] select,
+.bg-\[\#121A36\] select,
+input.bg-\[\#051836\],
+input.bg-\[\#042554\],
+input.bg-\[\#121A36\],
+textarea.bg-\[\#051836\],
+textarea.bg-\[\#042554\],
+textarea.bg-\[\#121A36\],
+select.bg-\[\#051836\],
+select.bg-\[\#042554\],
+select.bg-\[\#121A36\] {
+  color: #FFFFFF !important;
+}
+
+.bg-\[\#051836\] input::placeholder,
+.bg-\[\#042554\] input::placeholder,
+.bg-\[\#121A36\] input::placeholder,
+input.bg-\[\#051836\]::placeholder,
+input.bg-\[\#042554\]::placeholder,
+input.bg-\[\#121A36\]::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+  opacity: 1 !important;
+}
+
+select option {
+  background-color: #051836 !important;
+  color: #FFFFFF !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* Warm Foundation Subtle Pattern */
+.bg-foundation-pattern {
+  background-color: #FDFCF9;
+  background-image: radial-gradient(rgba(0, 92, 39, 0.08) 0.6px, transparent 0.6px), radial-gradient(rgba(245, 171, 0, 0.08) 0.6px, #FDFCF9 0.6px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+}
+
+.bg-gallery-pattern {
+  background-color: #FDFCF9;
+  background-image: radial-gradient(rgba(0, 92, 39, 0.08) 0.6px, transparent 0.6px), radial-gradient(rgba(245, 171, 0, 0.08) 0.6px, #FDFCF9 0.6px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+}
+
+/* Glassmorphism Navigation */
+.nav-glass {
+  background-color: rgba(253, 252, 249, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(5, 24, 54, 0.08);
+}
+
+

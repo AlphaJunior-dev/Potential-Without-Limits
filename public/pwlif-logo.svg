@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160">
+  <defs>
+    <linearGradient id="pwlif-green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#327B2F" />
+      <stop offset="100%" stop-color="#005C27" />
+    </linearGradient>
+    <linearGradient id="pwlif-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5AB00" />
+      <stop offset="100%" stop-color="#E09600" />
+    </linearGradient>
+  </defs>
+
+  <!-- Logo Mark (Leaf / Flame Rising out of Navy Circle) -->
+  <g transform="translate(10, 10)">
+    <!-- Base Shield/Circle -->
+    <circle cx="70" cy="70" r="65" fill="#051836" />
+    
+    <!-- Outer Gold Ring Accent -->
+    <circle cx="70" cy="70" r="62" fill="none" stroke="#F5AB00" stroke-width="4" opacity="0.85" />
+    
+    <!-- Rising Flame / Growth Leaves -->
+    <path d="M 70 25 C 90 45, 105 70, 95 98 C 88 115, 68 122, 52 112 C 40 102, 38 85, 48 70 C 58 55, 70 25, 70 25 Z" fill="url(#pwlif-green-grad)" />
+    <path d="M 70 38 C 55 55, 42 75, 50 98 C 55 110, 70 115, 82 108 C 92 100, 92 85, 82 72 C 75 60, 70 38, 70 38 Z" fill="url(#pwlif-gold-grad)" opacity="0.9" />
+    
+    <!-- Center Star / Spark of Potential -->
+    <path d="M 70 58 L 73 68 L 83 70 L 75 76 L 77 86 L 70 80 L 63 86 L 65 76 L 57 70 L 67 68 Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- Typography -->
+  <!-- Main Title: POTENTIAL WITHOUT LIMITS -->
+  <text x="165" y="72" font-family="'Montserrat', 'Inter', sans-serif" font-weight="900" font-size="34" fill="#051836" letter-spacing="0.5">POTENTIAL WITHOUT LIMITS</text>
+  
+  <!-- Subtitle: FOUNDATION -->
+  <text x="167" y="112" font-family="'Montserrat', 'Inter', sans-serif" font-weight="800" font-size="28" fill="#005C27" letter-spacing="8">FOUNDATION</text>
+  
+  <!-- Gold Accent Line -->
+  <rect x="167" y="124" width="415" height="4" rx="2" fill="#F5AB00" />
+</svg>
