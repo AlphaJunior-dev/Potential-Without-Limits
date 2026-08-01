@@ -32,64 +32,65 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A1128] px-4 py-12 font-inter text-[#FAFAFA] relative overflow-hidden">
-      {/* Background Subtle Grid Accent */}
-      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#F28482_1px,transparent_1px)] [background-size:24px_24px]" />
-
-      <div className="bg-[#0A1128] border border-[#FAFAFA]/10 max-w-md w-full p-8 rounded-2xl shadow-2xl relative z-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFCF9] px-4 py-12 font-inter text-[#051836] relative overflow-hidden bg-foundation-pattern">
+      <div className="bg-white border border-[#051836]/10 max-w-md w-full p-8 rounded-3xl shadow-2xl relative z-10">
         <div className="flex flex-col items-center text-center mb-8">
           <Link href="/" className="mb-4">
-            <WlpLogo showText={false} className="h-12 w-auto" />
+            <img
+              src="/pwlif-logo.png"
+              alt="Potential Without Limits Foundation"
+              className="h-16 w-auto object-contain"
+            />
           </Link>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F28482]/10 border border-[#F28482]/20 text-[#F28482] text-xs font-montserrat font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#005C27]/10 border border-[#005C27]/20 text-[#005C27] text-xs font-montserrat font-bold uppercase tracking-wider mb-3">
             <KeyRound className="w-3.5 h-3.5" />
-            <span>Admin Management System</span>
+            <span>Foundation Admin Portal</span>
           </div>
-          <h1 className="font-montserrat text-2xl font-bold text-[#FAFAFA]">
-            WLP Admin Login
+          <h1 className="font-montserrat text-2xl font-black text-[#051836]">
+            PWLIF Admin Login
           </h1>
-          <p className="font-inter text-xs text-[#FAFAFA]/60 mt-1">
-            Authorized administrator access only
+          <p className="font-inter text-xs text-[#051836]/60 mt-1">
+            Authorized foundation administrator access only
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-lg bg-red-950/50 border border-red-800 text-xs text-red-200 font-inter">
+          <div className="mb-6 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-inter">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5 font-inter">
           <div>
-            <label className="block text-xs font-semibold text-[#FAFAFA]/70 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
               Admin Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#FAFAFA]/40 absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@wlp.org"
-                className="w-full pl-10 pr-4 py-3 bg-[#FAFAFA]/5 border border-[#FAFAFA]/10 rounded-lg text-sm text-[#FAFAFA] placeholder-[#FAFAFA]/30 focus:outline-none focus:border-[#F28482] focus:ring-1 focus:ring-[#F28482] transition"
+                className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] placeholder-[#051836]/40 focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#FAFAFA]/70 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
               Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-[#FAFAFA]/40 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-[#FAFAFA]/5 border border-[#FAFAFA]/10 rounded-lg text-sm text-[#FAFAFA] placeholder-[#FAFAFA]/30 focus:outline-none focus:border-[#F28482] focus:ring-1 focus:ring-[#F28482] transition"
+                className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] placeholder-[#051836]/40 focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
               />
             </div>
           </div>
@@ -97,19 +98,19 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#F28482] text-white font-medium py-3 px-4 rounded-lg hover:brightness-110 transition-all shadow-md flex items-center justify-center gap-2 font-inter mt-2 disabled:opacity-50 cursor-pointer"
+            className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-xs cursor-pointer mt-2 disabled:opacity-50"
           >
-            <span>{submitting ? "Authenticating..." : "Access Admin Dashboard"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{submitting ? "Authenticating..." : "Access Admin Portal"}</span>
+            <ArrowRight className="w-4 h-4 text-white" />
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-[#FAFAFA]/10 flex items-center justify-between text-xs text-[#FAFAFA]/50 font-inter">
+        <div className="mt-8 pt-6 border-t border-[#051836]/10 flex items-center justify-between text-xs text-[#051836]/60 font-inter">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#F28482]" />
-            <span>Secure Admin Protocol</span>
+            <ShieldCheck className="w-4 h-4 text-[#005C27]" />
+            <span>MFA Protected Portal</span>
           </div>
-          <Link href="/login" className="text-[#FAFAFA]/70 hover:text-white underline">
+          <Link href="/login" className="text-[#005C27] font-bold hover:underline">
             Sponsor Login
           </Link>
         </div>

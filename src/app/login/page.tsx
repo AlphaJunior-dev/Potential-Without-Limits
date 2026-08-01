@@ -50,58 +50,62 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center bg-wlp-alabaster px-4 py-12">
-      <div className="bg-wlp-white max-w-md w-full p-8 rounded-2xl shadow-xs border border-wlp-navy/5">
+    <div className="min-h-[85vh] flex items-center justify-center bg-[#FDFCF9] px-4 py-12 bg-foundation-pattern">
+      <div className="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl border border-[#051836]/10 text-left">
         <div className="flex flex-col items-center text-center mb-8">
           <Link href="/" className="mb-4">
-            <WlpLogo showText={false} className="h-12 w-auto" dark={false} />
+            <img
+              src="/pwlif-logo.png"
+              alt="Potential Without Limits Foundation"
+              className="h-16 w-auto object-contain"
+            />
           </Link>
-          <h1 className="font-montserrat text-2xl font-bold text-wlp-navy">
+          <h1 className="font-montserrat text-2xl font-black text-[#051836]">
             Sponsor Sign In
           </h1>
-          <p className="font-inter text-sm text-wlp-navy/70 mt-1">
-            Access your verified sponsor portal
+          <p className="font-inter text-xs text-[#051836]/70 mt-1">
+            Access your verified PWLIF sponsor hub
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2 text-xs text-red-700 font-inter">
+          <div className="mb-6 p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-xs text-red-700 font-inter">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5 font-inter">
+        <form onSubmit={handleSubmit} className="space-y-5 font-inter text-xs">
           <div>
-            <label className="block text-xs font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#0A1128]/40 absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                className="w-full pl-10 pr-4 py-3 bg-white text-[#0A1128] placeholder:text-[#0A1128]/40 border border-[#0A1128]/20 rounded-xl text-sm font-medium focus:outline-none focus:border-[#F28482] focus:ring-1 focus:ring-[#F28482] transition"
+                placeholder="sponsor@organization.org"
+                className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] text-[#051836] placeholder:text-[#051836]/40 border border-[#051836]/15 rounded-xl text-sm font-medium focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
               Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-[#0A1128]/40 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-white text-[#0A1128] placeholder:text-[#0A1128]/40 border border-[#0A1128]/20 rounded-xl text-sm font-medium focus:outline-none focus:border-[#F28482] focus:ring-1 focus:ring-[#F28482] transition"
+                className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] text-[#051836] placeholder:text-[#051836]/40 border border-[#051836]/15 rounded-xl text-sm font-medium focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
               />
             </div>
           </div>
@@ -109,20 +113,20 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#F28482] text-white font-bold py-3.5 px-4 rounded-xl hover:brightness-105 transition-all shadow-md flex items-center justify-center gap-2 font-inter mt-2 disabled:opacity-50 cursor-pointer text-sm"
+            className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-extrabold py-3.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 font-inter mt-2 disabled:opacity-50 cursor-pointer text-xs"
           >
-            <span>{submitting ? "Signing In..." : "Sign In"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{submitting ? "Signing In..." : "Sign In to Sponsor Hub"}</span>
+            <ArrowRight className="w-4 h-4 text-white" />
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-wlp-navy/5 text-center text-xs font-inter text-wlp-navy/70">
+        <div className="mt-8 pt-6 border-t border-[#051836]/10 text-center text-xs font-inter text-[#051836]/70">
           <span>Don&apos;t have a sponsor account? </span>
           <Link
             href="/register"
-            className="text-wlp-coral font-semibold hover:underline"
+            className="text-[#005C27] font-bold hover:underline"
           >
-            Apply as a Sponsor
+            Apply &amp; Register Here
           </Link>
         </div>
       </div>

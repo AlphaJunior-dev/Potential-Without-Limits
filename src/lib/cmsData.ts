@@ -89,36 +89,36 @@ export interface SupportInquiry {
 export const INITIAL_FAQ_ITEMS: FaqItem[] = [
   {
     id: "faq-1",
-    question: "How does Without Limits Potential protect youth privacy?",
-    answer: "Public profiles display anonymized first names, general regions, and verified skill tags only. Raw video reels, source code repositories, audio stems, and direct creator contact pathways are strictly locked behind multi-factor authenticated corporate sponsor accounts.",
+    question: "How does Potential Without Limits Foundation protect child safety and privacy?",
+    answer: "Public profiles display verified first names, ages, and community regions only. Every child profile is published under 100% verified parental/guardian consent records, and all sponsor interactions are safeguarded by foundation officers.",
     category: "Security & Privacy",
     order: 1,
   },
   {
     id: "faq-2",
-    question: "How do corporate sponsors receive login credentials?",
-    answer: "Sponsors cannot self-register. After scheduling and completing a 15-minute admissions vetting call with our executive team, verified sponsors are issued credentials directly by an Admin.",
+    question: "What are the available Sponsorship Categories?",
+    answer: "PWLIF offers 5 tailored categories: Child Sponsor (direct child education grants), Program Sponsor (lab hardware & equipment), Foundation Sponsor (annual core support), Corporate Partner (CSR matching), and Strategic Partner (global alliance).",
     category: "Sponsors",
     order: 2,
   },
   {
     id: "faq-3",
-    question: "What happens on a sponsor's first login?",
-    answer: "Upon first login, sponsors are directed to a mandatory 'Complete Your Profile' setup where they provide their full name, LinkedIn URL, CSR focus areas, and set a new personal password.",
+    question: "What benefits come with different Membership Tiers?",
+    answer: "Membership Tiers range from Bronze ($150/mo), Silver ($500/mo), Gold ($1,500/mo), to Platinum ($5,000+/mo). Tiers include quarterly audited impact reports, dedicated foundation concierge, and community lab naming opportunities.",
     category: "Sponsors",
     order: 3,
   },
   {
     id: "faq-4",
-    question: "How are sponsorship funds and equipment grants deployed?",
-    answer: "100% of corporate sponsorship funds are deployed directly toward hardware lab equipment, software licenses, educational stipends, or mentorship programs agreed upon in verified contracts.",
+    question: "How do I Sponsor a Specific Child's Dream?",
+    answer: "You can browse the Child Dream Directory (/talents), select a child's profile, and click 'Sponsor This Dream'. You can also link or adopt dreams directly within your Sponsor Hub.",
     category: "General",
     order: 4,
   },
   {
     id: "faq-5",
-    question: "How does a youth creator qualify for WLP admissions?",
-    answer: "Every creator undergoes a rigorous multi-stage portfolio audit evaluating technical proficiency in industry tools (e.g. React, Python, Blender, ROS 2, Logic Pro) alongside identity verification.",
+    question: "How are sponsorship funds distributed and audited?",
+    answer: "100% of direct child sponsorship grants go toward educational equipment, tuition, and learning labs. Annual financial audit PDFs are publicly published in the Transparency section of our website.",
     category: "Talent Admissions",
     order: 5,
   },
@@ -126,101 +126,101 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
 
 export const INITIAL_MISSION_VISION: MissionVisionData = {
   mission:
-    "To empower unseen youth talent by connecting them with verified corporate sponsors, fostering growth, and building unlimited futures through direct funding, mentorship, and industry access.",
+    "To empower children and young innovators worldwide by connecting them with dedicated sponsors, providing direct educational grants, equipment, and transparent stewardship to build unlimited futures.",
   vision:
-    "To be the premier high-security, dual-sided marketplace where every talented young individual finds their champion, and every sponsor discovers impactful opportunities to shape the next generation of innovators.",
+    "To be the global benchmark for transparent, child-centered humanitarian sponsorship, where every child's dream is nurtured and every sponsor sees verified, life-changing impact.",
   foundersNote:
-    "Without Limits Potential was born from a simple truth: talent is everywhere, but opportunity is not. We built this space to be the bridge—a secure, elite exhibition where corporate leaders can discover and champion the next generation of innovators without compromising youth safety.",
+    "Potential Without Limits Foundation was founded on a simple truth: talent and passion are universal, but access to education and tools is not. We built PWLIF to create a direct, transparent bridge between compassionate sponsors and young dreamers under strict child protection standards.",
   foundersTitle:
-    "Executive Director & Founder, Without Limits Potential",
+    "Executive Director & Founder, Potential Without Limits Foundation",
   pillars: [
     {
-      title: "Admissions & Rigorous Vetting",
+      title: "Verified Parental Consent & Child Safety",
       description:
-        "Every youth portfolio and corporate backer is manually verified by our admissions panel to guarantee safety, integrity, and operational trust.",
+        "Every child profile is published under verified parental/guardian consent records and strict privacy protections.",
     },
     {
-      title: "Direct Equipment & Grant Impact",
+      title: "100% Direct Grant Deployment",
       description:
-        "Sponsorship funds bypass unnecessary intermediaries to directly acquire hardware, software licenses, and career-defining learning resources.",
+        "Sponsorship funds bypass unnecessary intermediaries to directly acquire learning hardware, tuition, and community lab resources.",
     },
     {
-      title: "Monitored Industry Mentorship",
+      title: "Transparent Audited Impact",
       description:
-        "Connecting youth creators with senior engineers, producers, and designers through structured, privacy-shielded communication channels.",
+        "Sponsors receive quarterly financial audits, progress reports, and milestone updates on every child supported.",
     },
   ],
   lastUpdated: "2026-08-01",
 };
 
 export const INITIAL_BRANDING: BrandingConfig = {
-  logoUrl: "",
-  siteTitle: "WITHOUT LIMITS POTENTIAL",
-  primaryColor: "#050814",
-  secondaryColor: "#F28482",
-  backgroundColor: "#050814",
-  cardBackgroundColor: "#121A36",
-  textColor: "#F8FAFC",
+  logoUrl: "/pwlif-logo.png",
+  siteTitle: "Potential Without Limits Foundation",
+  primaryColor: "#051836",
+  secondaryColor: "#005C27",
+  backgroundColor: "#FDFCF9",
+  cardBackgroundColor: "#FFFFFF",
+  textColor: "#051836",
   headerFont: "Montserrat",
   bodyFont: "Inter",
   heroMediaType: "image",
   heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
   heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  heroHeadline: "Exceptional Creators. Verified Futures.",
-  heroSubheadline: "A high-security, dual-sided marketplace connecting verified corporate sponsors directly with top-tier youth talent in Technology, Digital Art, Sound Design, and Robotics.",
-  heroCtaText: "Book a Vetting Call",
+  heroHeadline: "Empowering Every Child's Dream. Building Potential Without Limits.",
+  heroSubheadline: "Directly sponsor young innovators, fund educational equipment grants, and track transparent child impact across 24 global communities.",
+  heroCtaText: "Sponsor a Dream Today",
   statsMetrics: [
-    { value: "100%", label: "Admissions Vetted" },
-    { value: "$2.4M+", label: "Equipment Grants" },
-    { value: "48 hrs", label: "Vetting Call Turnaround" },
-    { value: "50+", label: "Corporate Backers" },
+    { value: "100%", label: "Parental Consent Verified" },
+    { value: "$2.4M+", label: "Direct Educational Grants" },
+    { value: "340+", label: "Children Impacted" },
+    { value: "24", label: "Global Communities" },
   ],
   pathSteps: [
     {
       stepNumber: "STEP 01",
-      title: "1. Discovery",
-      description: "Explore the curated exhibition of anonymized youth talent across Technology, Robotics, Music, and Digital Art.",
+      title: "1. Discover Dreams",
+      description: "Explore the curated directory of child dream profiles across Technology, Robotics, Music, and Digital Arts.",
     },
     {
       stepNumber: "STEP 02",
-      title: "2. Vetting Call",
-      description: "Schedule a direct call with our admissions executive team to verify your corporate credentials and CSR objectives.",
+      title: "2. Choose Category & Tier",
+      description: "Select from Child Sponsorship, Program Sponsorship, or Foundation Partnership membership tiers.",
     },
     {
       stepNumber: "STEP 03",
-      title: "3. Secure Access",
-      description: "Receive unique login credentials to unlock raw 16:9 media reels, source repositories, and direct creator channels.",
+      title: "3. Direct Adoption",
+      description: "Complete sponsor registration with 100% verified parental consent & child safety shields.",
     },
     {
       stepNumber: "STEP 04",
-      title: "4. Direct Impact",
-      description: "Fund equipment labs, provide software licenses, or offer career-defining grants directly to promising youth creators.",
+      title: "4. Track Impact",
+      description: "Receive audited progress updates, direct milestone reports, and transparent financial stewardship.",
     },
   ],
 };
 
 export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
-  termsContent: `Terms of Service - Without Limits Potential (WLP)
+  termsContent: `Terms of Service - Potential Without Limits Foundation (PWLIF)
 
-1. Acceptance of Terms: By accessing Without Limits Potential, corporate sponsors and users agree to abide by our institutional safety protocols, verification guidelines, and privacy shield standards.
+1. Acceptance of Terms: By accessing the Potential Without Limits Foundation platform, sponsors, donors, and partners agree to abide by our child protection standards, parental consent guidelines, and transparent stewardship protocols.
 
-2. Sponsor Conduct & Vetting: Corporate accounts are provisioned exclusively after manual credentials verification. Unauthorized distribution of minor talent contact paths or raw media assets is strictly prohibited.
+2. Sponsor Conduct & Ethics: Sponsor accounts are granted to support educational and creative development. Any unauthorized distribution or inappropriate communication is strictly prohibited and subject to immediate revocation.
 
-3. Grant & Funding Integrity: 100% of sponsorship grants allocated to youth talent must be deployed towards hardware, software licenses, educational programs, or direct stipends as agreed upon in sponsorship contracts.`,
-  privacyContent: `Privacy Policy & Youth Shield Protocol
+3. Grant & Stewardship Integrity: 100% of sponsorship grants allocated to children and youth programs must be deployed towards educational hardware, learning materials, tuition, or community lab resources as specified in sponsorship terms.`,
+  privacyContent: `Child Protection & Privacy Shield Protocol
 
-1. Anonymized Public Data: Public profiles exhibit first names, age, and general region only. Full names, exact street addresses, and direct contact methods are strictly protected behind multi-factor authorization.
+1. Parental & Guardian Consent: Public child profiles display verified first names, age, and community regions only. Every profile is backed by signed parental consent records on file.
 
-2. Encrypted Vault Storage: Raw 16:9 media reels, source repositories, and audio stems are stored in encrypted cloud vaults accessible solely by verified corporate sponsors.
+2. Data Encryption & Safety: Personal child identification, document records, and location details are encrypted and protected behind multi-factor administrative access.
 
-3. Monitored Communication: All sponsor-talent communications are routed through WLP Admissions security channels to guarantee minor protection.`,
-  securityStandardsContent: `WLP Security & Technical Vetting Standards
+3. Monitored Communications: All sponsor updates, letters, and progress milestones are facilitated through PWLIF foundation officers to ensure complete minor safety.`,
+  securityStandardsContent: `PWLIF Child Protection & Safeguarding Standards
 
-1. Technical Audit Protocol: Every creator on WLP undergoes a multi-tiered technical assessment evaluating proficiency in industry tools (React, Python, Blender, Procreate, Logic Pro, ROS 2).
+1. Child Safety & Parental Consent Verification: Every youth profile is published only after formal, signed parental/guardian consent and identity verification by our foundation safety panel.
 
-2. Zero-Trust Access Control: Access to sensitive creator files requires verified sponsor credentials and continuous session monitoring.
+2. Transparent Financial Stewardship: 100% of direct grant contributions are tracked, audited annually, and published in open transparency reports.
 
-3. Compliance Audit Trails: All administrative credential generation, content modifications, and inquiry linkage actions are logged in immutable audit records.`,
+3. Immutable Compliance Logging: All administrative actions, sponsor approvals, password updates, and credential changes are recorded in immutable security audit logs.`,
   lastUpdated: "2026-08-01",
 };
 
@@ -238,8 +238,8 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
     id: "team-2",
     name: "Marcus Vance",
-    role: "Head of Talent Admissions & Vetting",
-    bio: "10+ years in educational admissions and youth talent curation. Oversees WLP's multi-tier identity protection and portfolio verification system.",
+    role: "Head of Child Protection & Vetting",
+    bio: "10+ years in educational admissions and youth advocacy. Oversees PWLIF's parental consent verification and child safety protection system.",
     photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
     linkedinUrl: "https://linkedin.com/in/marcus-vance",
     order: 2,
@@ -247,8 +247,8 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
     id: "team-3",
     name: "Sophia Thorne",
-    role: "Corporate Sponsor Relations Director",
-    bio: "Drives corporate partnership strategy, matching Fortune 500 CSR initiatives and venture funds with verified youth creators.",
+    role: "Director of Sponsor Relations & Global Partnerships",
+    bio: "Drives foundation partnership strategy, matching individual sponsors, family foundations, and CSR initiatives with verified youth dreamers.",
     photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
     linkedinUrl: "https://linkedin.com/in/sophiathorne",
     twitterUrl: "https://twitter.com/sthorne_impact",
@@ -257,8 +257,8 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
     id: "team-4",
     name: "Devon Chen",
-    role: "Lead Creative & Media Curator",
-    bio: "Award-winning digital artist and sound designer who curates 16:9 exhibition previews and maintains raw media security standards.",
+    role: "Lead Community & Education Curator",
+    bio: "Coordinates community youth labs, digital arts workshops, and maintains child safety media standards across global learning hubs.",
     photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
     linkedinUrl: "https://linkedin.com/in/devonchen-media",
     order: 4,
