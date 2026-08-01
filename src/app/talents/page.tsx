@@ -130,7 +130,7 @@ export default function TalentsPage() {
                   </span>
 
                   <span className="absolute top-3 right-3 bg-emerald-950/80 backdrop-blur-md text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Parent Consent Verified
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Parental Consent Verified ✓
                   </span>
                 </div>
 

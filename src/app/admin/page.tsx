@@ -746,19 +746,19 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-white/70 font-semibold mb-1">Company / VC</label>
+                  <label className="block text-white/70 font-semibold mb-1">Organization / Foundation</label>
                   <input
                     type="text"
                     value={manualCompany}
                     onChange={(e) => setManualCompany(e.target.value)}
-                    placeholder="Acme Corp"
-                    className="w-full p-2.5 bg-[#0A1128] border border-white/15 rounded-xl text-white focus:outline-none focus:border-[#F28482]"
+                    placeholder="Acme Foundation"
+                    className="w-full p-2.5 bg-[#0A1128] border border-white/15 rounded-xl text-white focus:outline-none focus:border-[#005C27]"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="bg-[#F28482] hover:brightness-110 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                  className="bg-[#005C27] hover:brightness-110 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                 >
                   <Key className="w-4 h-4" />
                   <span>Generate Credentials</span>
@@ -794,7 +794,7 @@ export default function AdminDashboardPage() {
                             href={sponsor.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#F28482] hover:underline text-[10px] inline-flex items-center gap-1"
+                            className="text-[#005C27] hover:underline text-[10px] inline-flex items-center gap-1"
                           >
                             LinkedIn Record <ExternalLink className="w-2.5 h-2.5" />
                           </a>
@@ -842,16 +842,16 @@ export default function AdminDashboardPage() {
                               }
                               className="bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] px-3 py-1.5 rounded-lg border border-white/15 inline-flex items-center gap-1.5 cursor-pointer"
                             >
-                              <Key className="w-3 h-3 text-[#F28482]" />
+                              <Key className="w-3 h-3 text-[#005C27]" />
                               <span>View Token</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => handleGenerateCredentialsClick(sponsor.id, sponsor.name)}
-                              className="bg-[#F28482] hover:brightness-110 text-white font-bold px-3 py-1.5 rounded-lg transition text-[11px] inline-flex items-center gap-1 cursor-pointer shadow-xs"
+                              className="bg-[#005C27] hover:brightness-110 text-white font-bold px-3 py-1.5 rounded-lg transition text-[11px] inline-flex items-center gap-1 cursor-pointer shadow-xs"
                             >
                               <Sparkles className="w-3 h-3" />
-                              <span>Issue 1-Click Credentials</span>
+                              <span>Approve Sponsorship</span>
                             </button>
                           )}
                         </td>
