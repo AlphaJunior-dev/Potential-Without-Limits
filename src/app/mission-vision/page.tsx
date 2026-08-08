@@ -3,11 +3,21 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
-import { Target, Compass, ShieldCheck, ArrowRight, Award, Lock, Sparkles, Heart } from "lucide-react";
+import { Target, Compass, ShieldCheck, Heart, Sparkles, Award } from "lucide-react";
 
 export default function MissionVisionPage() {
-  const { missionVision } = useAuth();
+  const values = [
+    { name: "Hope", desc: "Instilling optimism and belief in a brighter future for every child." },
+    { name: "Integrity", desc: "Upholding the highest moral and ethical standards in all actions." },
+    { name: "Compassion", desc: "Demonstrating deep empathy and care for vulnerable youth." },
+    { name: "Excellence", desc: "Striving for quality and distinction in programs and stewardship." },
+    { name: "Accountability", desc: "Taking full responsibility for outcomes and grant utilization." },
+    { name: "Innovation", desc: "Embracing creative technology and modern learning tools." },
+    { name: "Inclusion", desc: "Ensuring equal opportunities for youth of all backgrounds." },
+    { name: "Respect", desc: "Honoring the dignity, rights, and voice of every child." },
+    { name: "Empowerment", desc: "Equipping youth with confidence and self-reliance skills." },
+    { name: "Transparency", desc: "Maintaining open, audited, and honest institutional operations." },
+  ];
 
   return (
     <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] bg-foundation-pattern py-16 px-4 sm:px-6 lg:px-8">
@@ -24,18 +34,18 @@ export default function MissionVisionPage() {
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/20 text-[#005C27] text-xs font-semibold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5 text-[#005C27]" />
-            <span>Strategic Plan 2027–2032 • Foundation Identity</span>
+            <span>Humanitarian Foundation Identity</span>
           </div>
 
           <h1 className="font-montserrat text-4xl sm:text-6xl font-black tracking-tight text-[#051836]">
             Our Mission &amp; Vision
           </h1>
           <p className="font-inter text-base sm:text-lg text-[#051836]/70 max-w-3xl mx-auto leading-relaxed">
-            Empowering vulnerable children and youth across Africa — beginning in Ethiopia, with global reach — through education, talent development, mentorship, and transparent humanitarian stewardship.
+            Empowering vulnerable children and young people across Africa through education, talent development, mentorship, and transparent humanitarian stewardship.
           </p>
         </div>
 
-        {/* Mission & Vision Side-by-Side Grid */}
+        {/* Mission & Vision Side-by-Side Grid (Light Palette) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Mission Card */}
           <div className="bg-white rounded-3xl p-8 sm:p-10 border border-[#051836]/10 shadow-2xl relative overflow-hidden flex flex-col justify-between">
@@ -55,7 +65,7 @@ export default function MissionVisionPage() {
               </h2>
 
               <p className="text-sm sm:text-base text-[#051836]/80 leading-relaxed font-medium">
-                &quot;{missionVision?.mission}&quot;
+                &quot;To identify, nurture, and empower vulnerable children and young people — including orphans, street children, and youth from conflict-affected and marginalized communities — by providing access to education, skills development, mentorship, and resources that unlock their full potential.&quot;
               </p>
             </div>
 
@@ -63,42 +73,42 @@ export default function MissionVisionPage() {
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Verified Governance
               </span>
-              <span>PWLIF Strategic Plan 2027–2032</span>
+              <span>Child Safety Shield Protocol</span>
             </div>
           </div>
 
-          {/* Vision Card */}
-          <div className="bg-[#051836] text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#051836]/10 relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute top-0 left-0 right-0 h-2 bg-[#F5AB00]" />
+          {/* Vision Card (Light Palette) */}
+          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-[#051836]/10 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-[#005C27]" />
             <div>
               <div className="flex items-center justify-between mb-6">
-                <div className="p-3 rounded-2xl bg-white/10 text-[#F5AB00] border border-white/15">
+                <div className="p-3 rounded-2xl bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/20">
                   <Compass className="w-7 h-7" />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest text-white/50">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#051836]/40">
                   Long-Term Vision
                 </span>
               </div>
 
-              <h2 className="font-montserrat text-2xl font-black text-white mb-4">
+              <h2 className="font-montserrat text-2xl font-black text-[#051836] mb-4">
                 Our Vision
               </h2>
 
-              <p className="text-sm sm:text-base text-white/80 leading-relaxed font-medium">
-                &quot;{missionVision?.vision}&quot;
+              <p className="text-sm sm:text-base text-[#051836]/80 leading-relaxed font-medium">
+                &quot;A world where every child and young person, regardless of background or circumstance, has the opportunity to discover and develop their unique potential and contribute meaningfully to society.&quot;
               </p>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10 text-xs text-white/60 font-medium flex items-center justify-between">
+            <div className="mt-8 pt-4 border-t border-[#051836]/10 text-xs text-[#051836]/50 font-medium flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-[#F5AB00]" /> Child Safety Shield
+                <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Global Outreach
               </span>
               <span>Pan-African &amp; Global Scope</span>
             </div>
           </div>
         </div>
 
-        {/* Founder's Letter Card */}
+        {/* Founder's Statement Card */}
         <div className="bg-white p-8 sm:p-10 rounded-3xl border border-[#005C27]/20 shadow-2xl space-y-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="w-24 h-24 rounded-2xl overflow-hidden relative shrink-0 border-2 border-[#005C27]">
@@ -117,32 +127,32 @@ export default function MissionVisionPage() {
                 Rafiki Emmanuel
               </h3>
               <p className="text-xs text-[#051836]/60">
-                {missionVision?.foundersTitle || "Founder & President, Potential Without Limits International Foundation (PWLIF)"}
+                Founder &amp; President, Potential Without Limits International Foundation (PWLIF)
               </p>
             </div>
           </div>
 
           <div className="prose prose-sm text-[#051836]/80 space-y-4 leading-relaxed font-serif italic border-t border-[#051836]/10 pt-6 text-sm sm:text-base">
-            &quot;{missionVision?.foundersNote}&quot;
+            &quot;Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. No child should be defined by poverty, homelessness, conflict, or limited opportunities. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success. Together with our supporters, volunteers, and partners, we are building a future where potential truly has no limits.&quot;
           </div>
         </div>
 
-        {/* 10 Core Values & Pillars */}
+        {/* 10 Core Values Grid */}
         <div className="space-y-8">
           <div className="text-center max-w-xl mx-auto">
             <h3 className="font-montserrat text-xs font-bold uppercase tracking-widest text-[#005C27] mb-1">
-              Guiding Principles
+              Foundational Principles
             </h3>
             <h4 className="font-montserrat text-2xl sm:text-3xl font-black text-[#051836]">
               Our 10 Core Values
             </h4>
             <p className="text-xs sm:text-sm text-[#051836]/70 mt-2">
-              The foundational principles guiding every program, grant, and community intervention across PWLIF.
+              The core principles guiding every program, grant, and community intervention across PWLIF.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-inter">
-            {(missionVision?.pillars || []).map((pillar, idx) => (
+            {values.map((v, idx) => (
               <div key={idx} className="bg-white p-6 rounded-2xl border border-[#051836]/10 shadow-lg space-y-3 hover:border-[#005C27]/40 transition-all">
                 <div className="flex items-center justify-between">
                   <div className="w-8 h-8 rounded-xl bg-[#005C27]/10 text-[#005C27] flex items-center justify-center font-montserrat font-black text-xs border border-[#005C27]/20">
@@ -151,36 +161,14 @@ export default function MissionVisionPage() {
                   <Award className="w-4 h-4 text-[#005C27]" />
                 </div>
                 <h5 className="font-montserrat font-bold text-base text-[#051836]">
-                  {pillar.title}
+                  {v.name}
                 </h5>
                 <p className="text-xs text-[#051836]/70 leading-relaxed">
-                  {pillar.description}
+                  {v.desc}
                 </p>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Strategic Plan Spotlight */}
-        <div className="bg-white p-8 sm:p-10 rounded-3xl border border-[#051836]/10 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-              Strategic Plan 2027–2032
-            </span>
-            <h3 className="font-montserrat font-bold text-xl text-[#051836]">
-              Explore Strategic Plan Objectives
-            </h3>
-            <p className="text-xs text-[#051836]/70 max-w-xl">
-              Read about our six strategic objectives, organizational structure, child safeguarding framework, and implementation roadmap.
-            </p>
-          </div>
-          <Link
-            href="/strategic-plan"
-            className="bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-6 rounded-xl transition shadow-md flex items-center gap-2 text-xs shrink-0"
-          >
-            <span>View Strategic Plan</span>
-            <ArrowRight className="w-4 h-4 text-white" />
-          </Link>
         </div>
 
         {/* Call to Action Banner */}

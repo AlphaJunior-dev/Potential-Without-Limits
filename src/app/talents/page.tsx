@@ -70,7 +70,7 @@ export default function TalentsPage() {
               Empower Youth Dreams
             </h1>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl leading-relaxed">
-              Explore verified child dream profiles across Technology, Digital Art, Sound Design, and Robotics. Every profile is backed by 100% verified parental consent records.
+              Explore verified child dream profiles across Technology, Music, Digital Art, Robotics, Sports, Academics, Leadership, and Entrepreneurship. Every profile is backed by 100% verified parental consent records.
             </p>
           </div>
 

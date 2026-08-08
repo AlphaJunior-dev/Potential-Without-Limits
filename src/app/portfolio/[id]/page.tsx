@@ -51,12 +51,12 @@ export default function PortfolioDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] pb-20 bg-foundation-pattern">
-      {/* Navigation Top Bar */}
-      <div className="bg-[#051836] border-b border-white/10 py-4 px-4 sm:px-6 lg:px-8 text-white">
+      {/* Navigation Top Bar (Light Palette) */}
+      <div className="bg-[#FDFCF9] border-b border-[#051836]/10 py-4 px-4 sm:px-6 lg:px-8 text-[#051836]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-white/80 hover:text-[#F5AB00] transition"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#051836]/80 hover:text-[#005C27] transition"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Foundation Homepage</span>

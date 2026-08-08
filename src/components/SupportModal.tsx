@@ -72,7 +72,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Eleanor Vance"
+                  placeholder="e.g. John Mwangi"
                   className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                 />
               </div>
@@ -84,7 +84,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="e.g. eleanor@organization.org"
+                  placeholder="e.g. john@example.org"
                   className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                 />
               </div>

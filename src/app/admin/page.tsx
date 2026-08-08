@@ -568,14 +568,19 @@ export default function AdminDashboardPage() {
                 setActiveSection("transparency");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
                 activeSection === "transparency"
                   ? "bg-[#005C27] text-white font-extrabold"
                   : "text-[#051836]/70 hover:bg-[#051836]/5 hover:text-[#051836]"
               }`}
             >
-              <FileText className="w-4 h-4 text-[#F5AB00]" />
-              <span>Transparency Financial CMS</span>
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-4 h-4 text-[#F5AB00]" />
+                <span>Transparency Financial CMS</span>
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 flex items-center gap-1">
+                <Lock className="w-2.5 h-2.5 text-amber-700" /> Classified
+              </span>
             </button>
 
             <button

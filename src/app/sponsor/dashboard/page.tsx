@@ -841,10 +841,16 @@ export default function SponsorDashboardPage() {
                   onChange={(e) => setAlertCategory(e.target.value)}
                   className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
                 >
-                  <option value="AI & Technology">Technology &amp; Software</option>
-                  <option value="Robotics & Engineering">Robotics &amp; Engineering</option>
-                  <option value="Digital Art & 3D Design">Digital Art &amp; Design</option>
-                  <option value="Music & Sound Design">Music &amp; Sound Production</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Robotics">Robotics</option>
+                  <option value="Digital Art">Digital Art</option>
+                  <option value="Music">Music</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Academics">Academics</option>
+                  <option value="Leadership">Leadership</option>
+                  <option value="Entrepreneurship">Entrepreneurship</option>
+                  <option value="Biotech">Biotech</option>
+                  <option value="Creative Writing">Creative Writing</option>
                 </select>
               </div>
 

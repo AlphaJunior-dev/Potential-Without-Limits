@@ -66,31 +66,6 @@ export default function BookACallPage() {
             Potential Without Limits International Foundation (PWLIF) connects passionate sponsors with young innovators under strict child safety protocols. Schedule a brief 15-minute orientation call with our foundation team to learn about child dream adoption and sponsorship tiers.
           </p>
 
-          {/* Toggle View Mode Buttons */}
-          <div className="flex items-center justify-center gap-3 pt-2">
-            <button
-              onClick={() => setActiveView("calendly")}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                activeView === "calendly"
-                  ? "bg-[#005C27] text-white shadow-md"
-                  : "bg-white text-[#051836] border border-[#051836]/15 hover:border-[#005C27]"
-              }`}
-            >
-              <Calendar className="w-4 h-4 text-white" />
-              <span>Live Calendly Scheduler</span>
-            </button>
-            <button
-              onClick={() => setActiveView("form")}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                activeView === "form"
-                  ? "bg-[#005C27] text-white shadow-md"
-                  : "bg-white text-[#051836] border border-[#051836]/15 hover:border-[#005C27]"
-              }`}
-            >
-              <Mail className="w-4 h-4 text-white" />
-              <span>Direct Orientation Form</span>
-            </button>
-          </div>
         </div>
 
         {/* 3-Step Journey */}
@@ -100,10 +75,10 @@ export default function BookACallPage() {
               01
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
-              1. Book Orientation Call
+              1. Submit Orientation Form
             </h4>
             <p className="text-xs text-[#051836]/70 leading-relaxed">
-              Select your preferred time slot using our live Calendly calendar widget below.
+              Fill out your details, sponsorship category, and preferred time slot.
             </p>
           </div>
 
@@ -112,10 +87,10 @@ export default function BookACallPage() {
               02
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
-              2. Orientation &amp; Align Goals
+              2. Orientation &amp; Vetting
             </h4>
             <p className="text-xs text-[#051836]/70 leading-relaxed">
-              Our foundation officers align on your sponsorship preferences, child dream adoption, or corporate CSR goals.
+              Our foundation officers align on your sponsorship preferences and child dream adoption.
             </p>
           </div>
 
@@ -124,40 +99,16 @@ export default function BookACallPage() {
               03
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
-              3. Activated Sponsorship Hub
+              3. Activated Sponsor Hub
             </h4>
             <p className="text-xs text-[#051836]/70 leading-relaxed">
-              Upon approval, your sponsor credentials are activated to track child progress and impact reports.
+              Upon approval, your sponsor credentials are activated for private dashboard access.
             </p>
           </div>
         </div>
 
-        {/* VIEW 1: Live Calendly Inline Widget Embed */}
-        {activeView === "calendly" && (
-          <div className="bg-white rounded-3xl p-4 sm:p-8 border border-[#051836]/10 shadow-2xl overflow-hidden">
-            <div className="mb-4 text-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-                Potential Without Limits International Foundation Calendly Portal
-              </span>
-            </div>
-            
-            {/* Calendly inline widget begin */}
-            <div
-              className="calendly-inline-widget w-full rounded-2xl"
-              data-url="https://calendly.com/withoutlimitspotential/onboarding-call?background_color=fdfcf9&text_color=051836&primary_color=0e7a4c"
-              style={{ minWidth: "320px", height: "700px" }}
-            />
-            <Script
-              src="https://assets.calendly.com/assets/external/widget.js"
-              strategy="lazyOnload"
-            />
-            {/* Calendly inline widget end */}
-          </div>
-        )}
-
-        {/* VIEW 2: Direct Priority Request Form */}
-        {activeView === "form" && (
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#051836]/10 shadow-2xl">
+        {/* Direct Orientation Form */}
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#051836]/10 shadow-2xl">
             {submitted ? (
               <div className="py-12 text-center space-y-4">
                 <div className="inline-flex p-4 rounded-full bg-emerald-50 text-[#005C27] mb-2 border border-[#005C27]/20">
@@ -232,7 +183,7 @@ export default function BookACallPage() {
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g. Eleanor Vance"
+                        placeholder="e.g. John Mwangi"
                         className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                       />
                     </div>
@@ -249,7 +200,7 @@ export default function BookACallPage() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="e.g. eleanor@organization.org"
+                        placeholder="e.g. john@example.org"
                         className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                       />
                     </div>
@@ -267,7 +218,7 @@ export default function BookACallPage() {
                           required
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
-                          placeholder="e.g. NextGen Foundation / Individual Sponsor"
+                          placeholder="e.g. Organization or Individual Sponsor"
                           className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                         />
                       </div>
@@ -369,7 +320,6 @@ export default function BookACallPage() {
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   );
