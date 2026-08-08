@@ -43,7 +43,8 @@ export default function BookACallPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
-      {/* Calendly External Script */}
+      {/* Calendly External Assets & Script */}
+      <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
       <Script
         src="https://assets.calendly.com/assets/external/widget.js"
         strategy="lazyOnload"
@@ -72,8 +73,8 @@ export default function BookACallPage() {
             Potential Without Limits International Foundation (PWLIF) connects passionate sponsors with young innovators under strict child safety protocols. Schedule a brief 15-minute orientation call with our foundation team to learn about child dream adoption and sponsorship tiers.
           </p>
 
-          {/* Toggle View Mode Buttons */}
-          <div className="flex items-center justify-center gap-3 pt-2">
+          {/* Toggle View Mode & Popup Widget Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
               onClick={() => setActiveView("calendly")}
               className={`px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
@@ -84,6 +85,21 @@ export default function BookACallPage() {
             >
               <Calendar className="w-4 h-4 text-white" />
               <span>Live Calendly Scheduler</span>
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && (window as any).Calendly) {
+                  (window as any).Calendly.initPopupWidget({
+                    url: 'https://calendly.com/withoutlimitspotential/onboarding-call?background_color=fdfcf9&text_color=051836&primary_color=0e7a4c'
+                  });
+                } else {
+                  window.open('https://calendly.com/withoutlimitspotential/onboarding-call?background_color=fdfcf9&text_color=051836&primary_color=0e7a4c', '_blank');
+                }
+              }}
+              className="bg-[#051836] text-white hover:bg-[#042554] px-5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+            >
+              <Calendar className="w-4 h-4 text-[#F5AB00]" />
+              <span>Launch Popup Widget</span>
             </button>
             <button
               onClick={() => setActiveView("form")}
@@ -150,7 +166,7 @@ export default function BookACallPage() {
             {/* Official Calendly Inline Widget */}
             <div
               className="calendly-inline-widget w-full rounded-2xl overflow-hidden"
-              data-url="https://calendly.com/withoutlimitspotential/onboarding-call?primary_color=f28482"
+              data-url="https://calendly.com/withoutlimitspotential/onboarding-call?background_color=fdfcf9&text_color=051836&primary_color=0e7a4c"
               style={{ minWidth: "320px", height: "700px" }}
             />
           </div>
