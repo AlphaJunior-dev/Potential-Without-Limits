@@ -45,9 +45,26 @@ export interface BrandingConfig {
   heroMediaType: "image" | "video" | "none";
   heroImage: string;
   heroVideoUrl?: string;
+  heroBadgeText?: string;
   heroHeadline: string;
   heroSubheadline: string;
   heroCtaText: string;
+  heroSecondaryCtaText?: string;
+  heroCardLocation?: string;
+  heroCardTitle?: string;
+  heroCardDescription?: string;
+  videoSectionBadge?: string;
+  videoSectionTitle?: string;
+  videoSectionSubtitle?: string;
+  sponsorSectionBadge?: string;
+  sponsorSectionTitle?: string;
+  sponsorSectionSubtitle?: string;
+  pathwaySectionBadge?: string;
+  pathwaySectionTitle?: string;
+  pathwaySectionSubtitle?: string;
+  transparencySectionBadge?: string;
+  transparencySectionTitle?: string;
+  transparencySectionSubtitle?: string;
   statsMetrics: StatMetric[];
   pathSteps: PathStep[];
 }
@@ -118,33 +135,25 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
   {
     id: "faq-5",
     question: "How are sponsorship funds distributed and audited?",
-    answer: "100% of direct child sponsorship grants go toward educational equipment, tuition, and learning labs. Annual financial audit PDFs are publicly published in the Transparency section of our website.",
-    category: "Child Protection",
+    answer: "Grants are allocated directly towards child tuition, musical instruments, robotics components, and local lab facilities. PWLIF publishes annual open financial audits.",
+    category: "General",
     order: 5,
   },
 ];
 
 export const INITIAL_MISSION_VISION: MissionVisionData = {
   mission:
-    "To identify, nurture, and empower vulnerable children and youth through education, talent development, mentorship, psychosocial support, and strategic partnerships that create sustainable opportunities for lifelong success.",
+    "Potential Without Limits International Foundation (PWLIF) is dedicated to discovering, fostering, and funding high-potential youth creators, innovators, and students in underserved African communities — starting in Ethiopia — by pairing them with international sponsors through audited educational grants.",
   vision:
-    "A world where every child and young person, regardless of their circumstances, discovers their full potential and thrives through education, opportunity, and hope.",
+    "A self-sustaining ecosystem of regional Talent Development Centres, equipped with modern robotics, digital art studios, and educational hardware, where every child can turn raw potential into lifelong purpose.",
   foundersNote:
-    "Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. No child should be defined by poverty, homelessness, conflict, or limited opportunities. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success. Together with our supporters, volunteers, and partners, we are building a future where potential truly has no limits.",
+    "Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success.",
   foundersTitle:
     "Rafiki Emmanuel — Founder & President, Potential Without Limits International Foundation (PWLIF)",
   pillars: [
     {
-      title: "Education Access",
-      description: "Providing quality academic tuition, learning resources, and educational grants for vulnerable youth across Africa.",
-    },
-    {
-      title: "Talent Discovery & Development",
-      description: "Identifying and nurturing latent artistic, athletic, technical, and leadership gifts in young dreamers.",
-    },
-    {
-      title: "Child Protection & Psychosocial Well-being",
-      description: "Comprehensive health care, counseling, and 100% verified guardian consent safeguards for every child.",
+      title: "Direct Child Educational Grants",
+      description: "Direct funding for equipment, tuition, assistive tech, and learning supplies with 100% financial auditability.",
     },
     {
       title: "Youth Leadership & Entrepreneurship",
@@ -175,35 +184,51 @@ export const INITIAL_BRANDING: BrandingConfig = {
   heroMediaType: "image",
   heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
   heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  heroBadgeText: "Potential Without Limits International Foundation (PWLIF)",
   heroHeadline: "Unlocking Potential. Transforming Lives.",
   heroSubheadline: "Connecting dedicated sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship.",
   heroCtaText: "Sponsor a Dream Today",
+  heroSecondaryCtaText: "Book Sponsor Orientation",
+  heroCardLocation: "Mathare Youth Tech Lab • Nairobi, Kenya",
+  heroCardTitle: "Engineering Hope & Assistive Tech",
+  heroCardDescription: "Direct sponsorship equipped Sarah with high-precision soldering gear to build Swahili AI screen readers for 50 blind students.",
+  videoSectionBadge: "Humanitarian Spotlight",
+  videoSectionTitle: "Foundation Introduction & Impact",
+  videoSectionSubtitle: "Watch how our direct child sponsorship model bridges resources with unseen talent around the world.",
+  sponsorSectionBadge: "Direct Child Sponsorship",
+  sponsorSectionTitle: "Sponsor a Child's Dream",
+  sponsorSectionSubtitle: "Each child profile features an active dream, current situation, and specific equipment or tuition needs.",
+  pathwaySectionBadge: "Transformational Pathway",
+  pathwaySectionTitle: "From Potential to Purpose",
+  pathwaySectionSubtitle: "Our structured 4-phase journey transforms talent through direct equipment grants and parental consent verification.",
+  transparencySectionBadge: "Accountability & Stewardship",
+  transparencySectionTitle: "Institutional Transparency",
+  transparencySectionSubtitle: "PWLIF publishes independent financial audits and annual grant distribution reports for public inspection.",
   statsMetrics: [
-    { value: "100%", label: "Parental Consent Verified" },
-    { value: "$2.4M+", label: "Direct Educational Grants" },
-    { value: "340+", label: "Children Impacted" },
+    { value: "340+", label: "Youth Sponsored" },
     { value: "24", label: "Global Communities" },
+    { value: "100%", label: "Direct Grant Audit" },
   ],
   pathSteps: [
     {
       stepNumber: "STEP 01",
-      title: "1. Discover Dreams",
-      description: "Explore the curated directory of child dream profiles across Technology, Robotics, Music, Digital Arts, Sports, and Academics.",
+      title: "Identification & Consent",
+      description: "Local community leaders identify unseen talent; parental consent and guardian safety verification logged.",
     },
     {
       stepNumber: "STEP 02",
-      title: "2. Choose Category & Tier",
-      description: "Select from Child Sponsorship, Program Sponsorship, Foundation Sponsorship, or Corporate Partner tiers.",
+      title: "Direct Dream Adoption",
+      description: "Foundation sponsors adopt specific child dreams, allocating targeted equipment or tuition grants.",
     },
     {
       stepNumber: "STEP 03",
-      title: "3. Direct Adoption",
-      description: "Complete sponsor registration with 100% verified parental consent & child safety shields.",
+      title: "Equipment & Lab Deployment",
+      description: "100% audited hardware, musical instruments, or lab components delivered to the youth innovator.",
     },
     {
       stepNumber: "STEP 04",
-      title: "4. Track Impact",
-      description: "Receive audited progress updates, direct milestone reports, and transparent financial stewardship.",
+      title: "Community Purpose",
+      description: "The child deploys their solution or art to lift their school, village, or local conservatory.",
     },
   ],
 };

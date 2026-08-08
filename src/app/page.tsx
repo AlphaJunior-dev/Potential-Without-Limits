@@ -58,7 +58,7 @@ export default function HomePage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/30 text-[#005C27] text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-[#F5AB00]" />
-              <span>Potential Without Limits International Foundation (PWLIF)</span>
+              <span>{branding?.heroBadgeText || "Potential Without Limits International Foundation (PWLIF)"}</span>
             </div>
 
             <h1 className="font-montserrat text-4xl sm:text-6xl font-black text-[#051836] leading-[1.08] tracking-tight">
@@ -83,25 +83,25 @@ export default function HomePage() {
                 href="/book-a-call"
                 className="bg-[#051836] text-white border border-[#051836] hover:bg-[#042554] px-8 py-4 rounded-2xl font-montserrat font-bold text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Book Sponsor Orientation</span>
+                <span>{branding?.heroSecondaryCtaText || "Book Sponsor Orientation"}</span>
                 <ArrowRight className="w-4 h-4 text-[#F5AB00]" />
               </Link>
             </div>
 
             {/* Impact Metric Chips */}
             <div className="pt-6 grid grid-cols-3 gap-4 border-t border-[#051836]/10 text-xs">
-              <div>
-                <span className="font-black text-2xl text-[#005C27] block">340+</span>
-                <span className="text-[#051836]/70 text-[11px]">Youth Sponsored</span>
-              </div>
-              <div>
-                <span className="font-black text-2xl text-[#051836] block">24</span>
-                <span className="text-[#051836]/70 text-[11px]">Global Communities</span>
-              </div>
-              <div>
-                <span className="font-black text-2xl text-[#F5AB00] block">100%</span>
-                <span className="text-[#051836]/70 text-[11px]">Direct Grant Audit</span>
-              </div>
+              {(branding?.statsMetrics && branding.statsMetrics.length > 0 ? branding.statsMetrics : [
+                { value: "340+", label: "Youth Sponsored" },
+                { value: "24", label: "Global Communities" },
+                { value: "100%", label: "Direct Grant Audit" },
+              ]).slice(0, 3).map((metric, idx) => (
+                <div key={idx}>
+                  <span className={`font-black text-2xl block ${idx === 0 ? "text-[#005C27]" : idx === 1 ? "text-[#051836]" : "text-[#F5AB00]"}`}>
+                    {metric.value}
+                  </span>
+                  <span className="text-[#051836]/70 text-[11px]">{metric.label}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -134,13 +134,13 @@ export default function HomePage() {
 
               <div className="absolute inset-0 bg-gradient-to-t from-[#051836] via-[#051836]/30 to-transparent flex flex-col justify-end p-6 text-white">
                 <span className="text-xs font-mono font-bold text-[#F5AB00] uppercase tracking-wider mb-1 flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5" /> Mathare Youth Tech Lab • Nairobi, Kenya
+                  <Globe className="w-3.5 h-3.5" /> {branding?.heroCardLocation || "Mathare Youth Tech Lab • Nairobi, Kenya"}
                 </span>
                 <h3 className="font-montserrat font-bold text-xl text-white">
-                  Engineering Hope &amp; Assistive Tech
+                  {branding?.heroCardTitle || "Engineering Hope & Assistive Tech"}
                 </h3>
                 <p className="text-xs text-white/80 mt-1 line-clamp-2">
-                  Direct sponsorship equipped Sarah with high-precision soldering gear to build Swahili AI screen readers for 50 blind students.
+                  {branding?.heroCardDescription || "Direct sponsorship equipped Sarah with high-precision soldering gear to build Swahili AI screen readers for 50 blind students."}
                 </p>
               </div>
             </div>
@@ -152,13 +152,13 @@ export default function HomePage() {
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-            Humanitarian Spotlight
+            {branding?.videoSectionBadge || "Humanitarian Spotlight"}
           </span>
           <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-[#051836]">
-            Foundation Introduction &amp; Impact
+            {branding?.videoSectionTitle || "Foundation Introduction & Impact"}
           </h2>
           <p className="text-xs sm:text-sm text-[#051836]/70 leading-relaxed">
-            Watch how our direct child sponsorship model bridges resources with unseen talent around the world.
+            {branding?.videoSectionSubtitle || "Watch how our direct child sponsorship model bridges resources with unseen talent around the world."}
           </p>
         </div>
 
@@ -205,16 +205,16 @@ export default function HomePage() {
 
       {/* 3. SPONSOR A DREAM SECTION */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12 border-t border-[#051836]/10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between, gap-6">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#005C27] flex items-center gap-1.5">
-              <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" /> Direct Child Sponsorship
+              <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" /> {branding?.sponsorSectionBadge || "Direct Child Sponsorship"}
             </span>
             <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-[#051836]">
-              Sponsor a Child&apos;s Dream
+              {branding?.sponsorSectionTitle || "Sponsor a Child's Dream"}
             </h2>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl">
-              Each child profile features an active dream, current situation, and specific equipment or tuition needs.
+              {branding?.sponsorSectionSubtitle || "Each child profile features an active dream, current situation, and specific equipment or tuition needs."}
             </p>
           </div>
 
@@ -301,48 +301,48 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-[#F5AB00]">
-              Transformational Pathway
+              {branding?.pathwaySectionBadge || "Transformational Pathway"}
             </span>
             <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-white">
-              From Potential to Purpose
+              {branding?.pathwaySectionTitle || "From Potential to Purpose"}
             </h2>
             <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-              Our structured 4-phase journey transforms talent through direct equipment grants and parental consent verification.
+              {branding?.pathwaySectionSubtitle || "Our structured 4-phase journey transforms talent through direct equipment grants and parental consent verification."}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
+            {(branding?.pathSteps && branding.pathSteps.length > 0 ? branding.pathSteps : [
               {
-                step: "Phase 1",
+                stepNumber: "STEP 01",
                 title: "Identification & Consent",
-                desc: "Local community leaders identify unseen talent; parental consent and guardian safety verification logged.",
+                description: "Local community leaders identify unseen talent; parental consent and guardian safety verification logged.",
               },
               {
-                step: "Phase 2",
+                stepNumber: "STEP 02",
                 title: "Direct Dream Adoption",
-                desc: "Foundation sponsors adopt specific child dreams, allocating targeted equipment or tuition grants.",
+                description: "Foundation sponsors adopt specific child dreams, allocating targeted equipment or tuition grants.",
               },
               {
-                step: "Phase 3",
+                stepNumber: "STEP 03",
                 title: "Equipment & Lab Deployment",
-                desc: "100% audited hardware, musical instruments, or lab components delivered to the youth innovator.",
+                description: "100% audited hardware, musical instruments, or lab components delivered to the youth innovator.",
               },
               {
-                step: "Phase 4",
+                stepNumber: "STEP 04",
                 title: "Community Purpose",
-                desc: "The child deploys their solution or art to lift their school, village, or local conservatory.",
+                description: "The child deploys their solution or art to lift their school, village, or local conservatory.",
               },
-            ].map((p, idx) => (
+            ]).map((p, idx) => (
               <div key={idx} className="bg-[#042554] p-6 rounded-3xl border border-white/10 space-y-3 relative">
                 <span className="bg-[#005C27] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  {p.step}
+                  {p.stepNumber || `Phase ${idx + 1}`}
                 </span>
                 <h3 className="font-montserrat font-bold text-lg text-white pt-1">
                   {p.title}
                 </h3>
                 <p className="text-xs text-white/70 leading-relaxed">
-                  {p.desc}
+                  {p.description}
                 </p>
               </div>
             ))}
@@ -354,13 +354,13 @@ export default function HomePage() {
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-10">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-            Accountability &amp; Stewardship
+            {branding?.transparencySectionBadge || "Accountability & Stewardship"}
           </span>
           <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-[#051836]">
-            Institutional Transparency
+            {branding?.transparencySectionTitle || "Institutional Transparency"}
           </h2>
           <p className="text-xs sm:text-sm text-[#051836]/70 leading-relaxed">
-            PWLIF publishes independent financial audits and annual grant distribution reports for public inspection.
+            {branding?.transparencySectionSubtitle || "PWLIF publishes independent financial audits and annual grant distribution reports for public inspection."}
           </p>
         </div>
 
@@ -407,25 +407,25 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Strategic Plan & Engagement Hub Cards */}
+        {/* Foundation Engagement Hub Cards */}
         <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
-                Foundation Strategy
+                Foundation Mission
               </span>
               <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                Strategic Plan 2027–2032
+                Mission &amp; Vision
               </h3>
               <p className="text-xs text-[#051836]/70 leading-relaxed">
-                Review our 5-year strategic objectives, talent development centres, child safeguarding framework, and expansion roadmap across Africa.
+                Review our core humanitarian mission, strategic pillars, and vision for youth innovation across Africa.
               </p>
             </div>
             <Link
-              href="/strategic-plan"
+              href="/mission-vision"
               className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md"
             >
-              <span>Read Strategic Plan</span>
+              <span>Explore Mission &amp; Vision</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </Link>
           </div>

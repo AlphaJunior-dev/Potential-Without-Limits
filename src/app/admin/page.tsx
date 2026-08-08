@@ -2084,6 +2084,16 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
+                  <label className="block text-[#051836]/80 font-semibold mb-1">Hero Top Badge Text</label>
+                  <input
+                    type="text"
+                    value={brandingForm.heroBadgeText || ""}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, heroBadgeText: e.target.value })}
+                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-[#051836]/80 font-semibold mb-1">Main Headline</label>
                   <input
                     type="text"
@@ -2105,7 +2115,7 @@ export default function AdminDashboardPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">CTA Button Text</label>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Primary CTA Button Text</label>
                     <input
                       type="text"
                       value={brandingForm.heroCtaText}
@@ -2114,6 +2124,50 @@ export default function AdminDashboardPage() {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Secondary CTA Button Text</label>
+                    <input
+                      type="text"
+                      value={brandingForm.heroSecondaryCtaText || ""}
+                      onChange={(e) => setBrandingForm({ ...brandingForm, heroSecondaryCtaText: e.target.value })}
+                      className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  <div>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Hero Card Location Tag</label>
+                    <input
+                      type="text"
+                      value={brandingForm.heroCardLocation || ""}
+                      onChange={(e) => setBrandingForm({ ...brandingForm, heroCardLocation: e.target.value })}
+                      className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Hero Card Title</label>
+                    <input
+                      type="text"
+                      value={brandingForm.heroCardTitle || ""}
+                      onChange={(e) => setBrandingForm({ ...brandingForm, heroCardTitle: e.target.value })}
+                      className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Hero Card Description</label>
+                    <input
+                      type="text"
+                      value={brandingForm.heroCardDescription || ""}
+                      onChange={(e) => setBrandingForm({ ...brandingForm, heroCardDescription: e.target.value })}
+                      className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   {brandingForm.heroMediaType === "image" && (
                     <div>
                       <label className="block text-[#051836]/80 font-semibold mb-1">Hero Image (File Upload or URL)</label>
@@ -2171,6 +2225,133 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Homepage Section Titles & Badges Controls */}
+                <div className="space-y-4 pt-6 border-t border-[#051836]/10">
+                  <h3 className="font-montserrat font-bold text-sm text-[#051836] uppercase tracking-wider">
+                    4. Homepage Section Titles &amp; Headers CMS
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Video Section Badge</label>
+                      <input
+                        type="text"
+                        value={brandingForm.videoSectionBadge || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, videoSectionBadge: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Video Section Title</label>
+                      <input
+                        type="text"
+                        value={brandingForm.videoSectionTitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, videoSectionTitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Video Section Subtitle</label>
+                      <input
+                        type="text"
+                        value={brandingForm.videoSectionSubtitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, videoSectionSubtitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Sponsor Section Badge</label>
+                      <input
+                        type="text"
+                        value={brandingForm.sponsorSectionBadge || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, sponsorSectionBadge: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Sponsor Section Title</label>
+                      <input
+                        type="text"
+                        value={brandingForm.sponsorSectionTitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, sponsorSectionTitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Sponsor Section Subtitle</label>
+                      <input
+                        type="text"
+                        value={brandingForm.sponsorSectionSubtitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, sponsorSectionSubtitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Pathway Section Badge</label>
+                      <input
+                        type="text"
+                        value={brandingForm.pathwaySectionBadge || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, pathwaySectionBadge: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Pathway Section Title</label>
+                      <input
+                        type="text"
+                        value={brandingForm.pathwaySectionTitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, pathwaySectionTitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Pathway Section Subtitle</label>
+                      <input
+                        type="text"
+                        value={brandingForm.pathwaySectionSubtitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, pathwaySectionSubtitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Transparency Section Badge</label>
+                      <input
+                        type="text"
+                        value={brandingForm.transparencySectionBadge || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, transparencySectionBadge: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Transparency Section Title</label>
+                      <input
+                        type="text"
+                        value={brandingForm.transparencySectionTitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, transparencySectionTitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Transparency Section Subtitle</label>
+                      <input
+                        type="text"
+                        value={brandingForm.transparencySectionSubtitle || ""}
+                        onChange={(e) => setBrandingForm({ ...brandingForm, transparencySectionSubtitle: e.target.value })}
+                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] text-xs"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
