@@ -290,33 +290,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    // 2. Firestore Live Collection Subscriptions
+    // 2. Firestore Live Collection Subscriptions with automatic initial seeding
     const unsubProfiles = onSnapshot(collection(db, "profiles"), (snap) => {
-      if (!snap.empty) setProfiles(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as YouthProfile[]);
+      if (snap.empty) {
+        INITIAL_YOUTH_PROFILES.forEach((p) => setSingleDocSafe("profiles", p.id, p));
+        setProfiles(INITIAL_YOUTH_PROFILES);
+      } else {
+        setProfiles(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as YouthProfile[]);
+      }
     });
 
     const unsubBranding = onSnapshot(doc(db, "siteContent", "main"), (snap) => {
-      if (snap.exists()) setBranding(snap.data() as BrandingConfig);
+      if (!snap.exists()) {
+        setSingleDocSafe("siteContent", "main", INITIAL_BRANDING);
+        setBranding(INITIAL_BRANDING);
+      } else {
+        setBranding(snap.data() as BrandingConfig);
+      }
     });
 
     const unsubLegal = onSnapshot(doc(db, "legal_security", "main"), (snap) => {
-      if (snap.exists()) setLegalSecurity(snap.data() as LegalSecurityConfig);
+      if (!snap.exists()) {
+        setSingleDocSafe("legal_security", "main", INITIAL_LEGAL_SECURITY);
+        setLegalSecurity(INITIAL_LEGAL_SECURITY);
+      } else {
+        setLegalSecurity(snap.data() as LegalSecurityConfig);
+      }
     });
 
     const unsubMission = onSnapshot(doc(db, "mission", "main"), (snap) => {
-      if (snap.exists()) setMissionVision(snap.data() as MissionVisionData);
+      if (!snap.exists()) {
+        setSingleDocSafe("mission", "main", INITIAL_MISSION_VISION);
+        setMissionVision(INITIAL_MISSION_VISION);
+      } else {
+        setMissionVision(snap.data() as MissionVisionData);
+      }
     });
 
     const unsubFaqs = onSnapshot(collection(db, "faqs"), (snap) => {
-      if (!snap.empty) setFaqItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FaqItem[]);
+      if (snap.empty) {
+        INITIAL_FAQ_ITEMS.forEach((f) => setSingleDocSafe("faqs", f.id, f));
+        setFaqItems(INITIAL_FAQ_ITEMS);
+      } else {
+        setFaqItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FaqItem[]);
+      }
     });
 
     const unsubTeam = onSnapshot(collection(db, "team"), (snap) => {
-      if (!snap.empty) setTeamMembers(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TeamMember[]);
+      if (snap.empty) {
+        INITIAL_TEAM_MEMBERS.forEach((t) => setSingleDocSafe("team", t.id, t));
+        setTeamMembers(INITIAL_TEAM_MEMBERS);
+      } else {
+        setTeamMembers(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TeamMember[]);
+      }
     });
 
     const unsubVideos = onSnapshot(collection(db, "videos"), (snap) => {
-      if (!snap.empty) setFoundationVideos(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FoundationVideo[]);
+      if (snap.empty) {
+        INITIAL_FOUNDATION_VIDEOS.forEach((v) => setSingleDocSafe("videos", v.id, v));
+        setFoundationVideos(INITIAL_FOUNDATION_VIDEOS);
+      } else {
+        setFoundationVideos(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FoundationVideo[]);
+      }
     });
 
     const unsubTransparency = onSnapshot(collection(db, "transparency"), (snap) => {

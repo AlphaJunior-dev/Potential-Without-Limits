@@ -1,26 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function for admin check
-    function isAdmin() {
-      return request.auth != null;
+    match /{document=**} {
+      allow read, write: if true;
     }
-
-    // Publicly readable content collections (anyone can read, authenticated admins can write)
-    match /siteContent/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /profiles/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /videos/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /faqs/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /mission/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /team/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /transparency/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /bookings/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
-    match /sponsors/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /inquiries/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
-    match /support_inquiries/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
-    match /audit_logs/{doc} { allow read: if true; allow write: if isAdmin(); }
-    
-    // Default fallback
-    match /{document=**} { allow read: if true; allow write: if isAdmin(); }
   }
 }
