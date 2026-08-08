@@ -47,12 +47,12 @@ export function Navbar() {
         {/* Brand Logo & Title */}
         <Link
           href="/"
-          aria-label="Potential Without Limits Foundation"
+          aria-label="Potential Without Limits International Foundation"
           className="flex items-center gap-3 hover:opacity-95 transition-opacity"
         >
           <img
             src="/pwlif-logo.png"
-            alt="Potential Without Limits Foundation Logo"
+            alt="Potential Without Limits International Foundation Logo"
             className="h-14 sm:h-16 w-auto object-contain"
           />
         </Link>
@@ -85,7 +85,7 @@ export function Navbar() {
                 className="bg-[#051836] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#042554] transition shadow-xs inline-flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4 text-[#F5AB00]" />
-                <span>Command Hub</span>
+                <span>Admin Portal</span>
               </Link>
               <button
                 onClick={logout}

@@ -50,7 +50,7 @@ export default function BookACallPage() {
           <Link href="/" className="inline-block mb-2">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-16 w-auto mx-auto object-contain"
             />
           </Link>
@@ -64,7 +64,7 @@ export default function BookACallPage() {
             Schedule a Sponsor Orientation
           </h1>
           <p className="font-inter text-base text-[#051836]/70 max-w-2xl mx-auto leading-relaxed">
-            Potential Without Limits Foundation (PWLIF) connects passionate sponsors with young innovators under strict child safety protocols. Schedule a brief 15-minute orientation call with our foundation team to learn about child dream adoption and sponsorship tiers.
+            Potential Without Limits International Foundation (PWLIF) connects passionate sponsors with young innovators under strict child safety protocols. Schedule a brief 15-minute orientation call with our foundation team to learn about child dream adoption and sponsorship tiers.
           </p>
 
           {/* Toggle View Mode Buttons */}
@@ -138,7 +138,7 @@ export default function BookACallPage() {
           <div className="bg-white rounded-3xl p-4 sm:p-8 border border-[#051836]/10 shadow-2xl overflow-hidden">
             <div className="mb-4 text-center">
               <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-                Potential Without Limits Foundation Calendly Portal
+                Potential Without Limits International Foundation Calendly Portal
               </span>
             </div>
             

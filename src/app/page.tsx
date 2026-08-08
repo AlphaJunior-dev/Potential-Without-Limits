@@ -34,6 +34,10 @@ export default function HomePage() {
     "Music",
     "Digital Art",
     "Robotics",
+    "Sports",
+    "Academics",
+    "Leadership",
+    "Entrepreneurship",
   ];
 
   const activeProfiles = profiles && profiles.length > 0 ? profiles : INITIAL_YOUTH_PROFILES;
@@ -54,7 +58,7 @@ export default function HomePage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/30 text-[#005C27] text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-[#F5AB00]" />
-              <span>Potential Without Limits Foundation (PWLIF)</span>
+              <span>Potential Without Limits International Foundation (PWLIF)</span>
             </div>
 
             <h1 className="font-montserrat text-4xl sm:text-6xl font-black text-[#051836] leading-[1.08] tracking-tight">
@@ -62,7 +66,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base sm:text-lg text-[#051836]/80 leading-relaxed font-normal">
-              A humanitarian foundation bridging direct sponsor support with young innovators, composers, artists, and robotics builders across vulnerable global communities.
+              A humanitarian foundation connecting sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -175,7 +179,7 @@ export default function HomePage() {
                       {activeVideo?.category || "Foundation Story"} • {activeVideo?.duration || "3:45"}
                     </span>
                     <h3 className="font-montserrat font-bold text-base text-white">
-                      {activeVideo?.title || "Potential Without Limits Foundation Intro"}
+                      {activeVideo?.title || "Potential Without Limits International Foundation Intro"}
                     </h3>
                   </div>
                   <span className="bg-[#005C27] text-white text-xs font-bold px-3 py-1.5 rounded-xl">
@@ -390,6 +394,72 @@ export default function HomePage() {
               </a>
             </div>
           ))}
+        </div>
+
+        {/* Strategic Plan & Engagement Hub Cards */}
+        <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
+                Foundation Strategy
+              </span>
+              <h3 className="font-montserrat font-bold text-lg text-[#051836]">
+                Strategic Plan 2027–2032
+              </h3>
+              <p className="text-xs text-[#051836]/70 leading-relaxed">
+                Review our 5-year strategic objectives, talent development centres, child safeguarding framework, and expansion roadmap across Africa.
+              </p>
+            </div>
+            <Link
+              href="/strategic-plan"
+              className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md"
+            >
+              <span>Read Strategic Plan</span>
+              <ArrowRight className="w-4 h-4 text-white" />
+            </Link>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
+                Youth Mentorship
+              </span>
+              <h3 className="font-montserrat font-bold text-lg text-[#051836]">
+                Volunteer &amp; Become a Mentor
+              </h3>
+              <p className="text-xs text-[#051836]/70 leading-relaxed">
+                Share your expertise as an educator, technical mentor, or community volunteer at our Talent Development Centres.
+              </p>
+            </div>
+            <Link
+              href="/volunteer"
+              className="w-full bg-[#051836] hover:bg-[#042554] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md"
+            >
+              <span>Join as Volunteer</span>
+              <ArrowRight className="w-4 h-4 text-[#F5AB00]" />
+            </Link>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
+                Financial Support
+              </span>
+              <h3 className="font-montserrat font-bold text-lg text-[#051836]">
+                Ways to Donate &amp; Partner
+              </h3>
+              <p className="text-xs text-[#051836]/70 leading-relaxed">
+                Explore one-time contributions, monthly giving, corporate CSR matching, and community lab sponsorships.
+              </p>
+            </div>
+            <Link
+              href="/donate"
+              className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md"
+            >
+              <span>Support Our Programs</span>
+              <ArrowRight className="w-4 h-4 text-white" />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

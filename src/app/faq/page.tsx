@@ -18,7 +18,7 @@ export default function FaqPage() {
   const [openId, setOpenId] = useState<string | null>(faqItems[0]?.id || "faq-1");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  const categories = ["All", "Security & Privacy", "Sponsors", "Talent Admissions", "General"];
+  const categories = ["All", "Security & Privacy", "Sponsors", "Child Protection", "General"];
 
   const filteredItems = faqItems.filter(
     (item) => selectedCategory === "All" || item.category === selectedCategory
@@ -32,7 +32,7 @@ export default function FaqPage() {
           <Link href="/" className="inline-block mb-2">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-16 w-auto mx-auto object-contain"
             />
           </Link>

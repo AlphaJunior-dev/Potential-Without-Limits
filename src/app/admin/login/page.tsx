@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
           <Link href="/" className="mb-4">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-16 w-auto object-contain"
             />
           </Link>

@@ -71,7 +71,7 @@ export interface FaqItem {
   id: string;
   question: string;
   answer: string;
-  category: "General" | "Security & Privacy" | "Sponsors" | "Talent Admissions";
+  category: "General" | "Security & Privacy" | "Sponsors" | "Child Protection";
   order: number;
 }
 
@@ -89,7 +89,7 @@ export interface SupportInquiry {
 export const INITIAL_FAQ_ITEMS: FaqItem[] = [
   {
     id: "faq-1",
-    question: "How does Potential Without Limits Foundation protect child safety and privacy?",
+    question: "How does Potential Without Limits International Foundation protect child safety and privacy?",
     answer: "Public profiles display verified first names, ages, and community regions only. Every child profile is published under 100% verified parental/guardian consent records, and all sponsor interactions are safeguarded by foundation officers.",
     category: "Security & Privacy",
     order: 1,
@@ -119,35 +119,44 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
     id: "faq-5",
     question: "How are sponsorship funds distributed and audited?",
     answer: "100% of direct child sponsorship grants go toward educational equipment, tuition, and learning labs. Annual financial audit PDFs are publicly published in the Transparency section of our website.",
-    category: "Talent Admissions",
+    category: "Child Protection",
     order: 5,
   },
 ];
 
 export const INITIAL_MISSION_VISION: MissionVisionData = {
   mission:
-    "To empower children and young innovators worldwide by connecting them with dedicated sponsors, providing direct educational grants, equipment, and transparent stewardship to build unlimited futures.",
+    "To identify, nurture, and empower vulnerable children and youth through education, talent development, mentorship, psychosocial support, and strategic partnerships that create sustainable opportunities for lifelong success.",
   vision:
-    "To be the global benchmark for transparent, child-centered humanitarian sponsorship, where every child's dream is nurtured and every sponsor sees verified, life-changing impact.",
+    "A world where every child and young person, regardless of their circumstances, discovers their full potential and thrives through education, opportunity, and hope.",
   foundersNote:
-    "Potential Without Limits Foundation was founded on a simple truth: talent and passion are universal, but access to education and tools is not. We built PWLIF to create a direct, transparent bridge between compassionate sponsors and young dreamers under strict child protection standards.",
+    "Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. No child should be defined by poverty, homelessness, conflict, or limited opportunities. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success. Together with our supporters, volunteers, and partners, we are building a future where potential truly has no limits.",
   foundersTitle:
-    "Executive Director & Founder, Potential Without Limits Foundation",
+    "Rafiki Emmanuel — Founder & President, Potential Without Limits International Foundation (PWLIF)",
   pillars: [
     {
-      title: "Verified Parental Consent & Child Safety",
-      description:
-        "Every child profile is published under verified parental/guardian consent records and strict privacy protections.",
+      title: "Education Access",
+      description: "Providing quality academic tuition, learning resources, and educational grants for vulnerable youth across Africa.",
     },
     {
-      title: "100% Direct Grant Deployment",
-      description:
-        "Sponsorship funds bypass unnecessary intermediaries to directly acquire learning hardware, tuition, and community lab resources.",
+      title: "Talent Discovery & Development",
+      description: "Identifying and nurturing latent artistic, athletic, technical, and leadership gifts in young dreamers.",
     },
     {
-      title: "Transparent Audited Impact",
-      description:
-        "Sponsors receive quarterly financial audits, progress reports, and milestone updates on every child supported.",
+      title: "Child Protection & Psychosocial Well-being",
+      description: "Comprehensive health care, counseling, and 100% verified guardian consent safeguards for every child.",
+    },
+    {
+      title: "Youth Leadership & Entrepreneurship",
+      description: "Practical mentorship and confidence building to equip youth for self-reliance and community impact.",
+    },
+    {
+      title: "Digital Literacy & Innovation",
+      description: "Equipping youth with modern computer skills, coding, robotics, and creative digital media tools.",
+    },
+    {
+      title: "Sustainable Partnerships Across Africa",
+      description: "Collaborating with local schools, international sponsors, and community foundations to build lasting opportunity.",
     },
   ],
   lastUpdated: "2026-08-01",
@@ -155,7 +164,7 @@ export const INITIAL_MISSION_VISION: MissionVisionData = {
 
 export const INITIAL_BRANDING: BrandingConfig = {
   logoUrl: "/pwlif-logo.png",
-  siteTitle: "Potential Without Limits Foundation",
+  siteTitle: "Potential Without Limits International Foundation",
   primaryColor: "#051836",
   secondaryColor: "#005C27",
   backgroundColor: "#FDFCF9",
@@ -166,8 +175,8 @@ export const INITIAL_BRANDING: BrandingConfig = {
   heroMediaType: "image",
   heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
   heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  heroHeadline: "Empowering Every Child's Dream. Building Potential Without Limits.",
-  heroSubheadline: "Directly sponsor young innovators, fund educational equipment grants, and track transparent child impact across 24 global communities.",
+  heroHeadline: "Unlocking Potential. Transforming Lives.",
+  heroSubheadline: "Connecting dedicated sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship.",
   heroCtaText: "Sponsor a Dream Today",
   statsMetrics: [
     { value: "100%", label: "Parental Consent Verified" },
@@ -179,12 +188,12 @@ export const INITIAL_BRANDING: BrandingConfig = {
     {
       stepNumber: "STEP 01",
       title: "1. Discover Dreams",
-      description: "Explore the curated directory of child dream profiles across Technology, Robotics, Music, and Digital Arts.",
+      description: "Explore the curated directory of child dream profiles across Technology, Robotics, Music, Digital Arts, Sports, and Academics.",
     },
     {
       stepNumber: "STEP 02",
       title: "2. Choose Category & Tier",
-      description: "Select from Child Sponsorship, Program Sponsorship, or Foundation Partnership membership tiers.",
+      description: "Select from Child Sponsorship, Program Sponsorship, Foundation Sponsorship, or Corporate Partner tiers.",
     },
     {
       stepNumber: "STEP 03",
@@ -200,9 +209,9 @@ export const INITIAL_BRANDING: BrandingConfig = {
 };
 
 export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
-  termsContent: `Terms of Service - Potential Without Limits Foundation (PWLIF)
+  termsContent: `Terms of Service - Potential Without Limits International Foundation (PWLIF)
 
-1. Acceptance of Terms: By accessing the Potential Without Limits Foundation platform, sponsors, donors, and partners agree to abide by our child protection standards, parental consent guidelines, and transparent stewardship protocols.
+1. Acceptance of Terms: By accessing the Potential Without Limits International Foundation platform, sponsors, donors, and partners agree to abide by our child protection standards, parental consent guidelines, and transparent stewardship protocols.
 
 2. Sponsor Conduct & Ethics: Sponsor accounts are granted to support educational and creative development. Any unauthorized distribution or inappropriate communication is strictly prohibited and subject to immediate revocation.
 
@@ -227,41 +236,39 @@ export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   {
     id: "team-1",
-    name: "Eleanor Andersen",
-    role: "Founder & Executive Director",
-    bio: "Former tech executive and youth advocacy leader passionate about democratizing access to high-growth tech and creative industries for underrepresented youth.",
-    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/eleanor-a",
-    twitterUrl: "https://twitter.com/eleanor_wlp",
+    name: "Rafiki Emmanuel",
+    role: "Founder & President",
+    bio: "Teacher, youth mentor, and community volunteer who met talented children whose gifts were limited only by poverty and circumstance — and built PWLIF to give every child a real pathway.",
+    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+    linkedinUrl: "https://linkedin.com/in/rafiki-emmanuel",
+    twitterUrl: "https://twitter.com/rafiki_pwlif",
     order: 1,
   },
   {
     id: "team-2",
-    name: "Marcus Vance",
-    role: "Head of Child Protection & Vetting",
-    bio: "10+ years in educational admissions and youth advocacy. Oversees PWLIF's parental consent verification and child safety protection system.",
-    photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/marcus-vance",
+    name: "Dr. Amara Kone",
+    role: "Lead Educator & Youth Mentor (Africa Region)",
+    bio: "Dedicated educational director overseeing STEM workshops, learning centers, and academic sponsorship programs in Ethiopia and East Africa.",
+    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+    linkedinUrl: "https://linkedin.com/in/amara-kone",
     order: 2,
   },
   {
     id: "team-3",
-    name: "Sophia Thorne",
-    role: "Director of Sponsor Relations & Global Partnerships",
-    bio: "Drives foundation partnership strategy, matching individual sponsors, family foundations, and CSR initiatives with verified youth dreamers.",
+    name: "Sarah Jenkins",
+    role: "Director of Volunteer & Sponsor Relations",
+    bio: "Coordinates global volunteer mentors, family foundation partnerships, and child protection verification.",
     photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/sophiathorne",
-    twitterUrl: "https://twitter.com/sthorne_impact",
+    linkedinUrl: "https://linkedin.com/in/sarahjenkins-pwlif",
     order: 3,
   },
   {
     id: "team-4",
-    name: "Devon Chen",
-    role: "Lead Community & Education Curator",
-    bio: "Coordinates community youth labs, digital arts workshops, and maintains child safety media standards across global learning hubs.",
-    photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/devonchen-media",
+    name: "Marcus Vance",
+    role: "Head of Child Safeguarding & Ethics",
+    bio: "10+ years in child advocacy and ethical compliance. Oversees PWLIF's parental consent protocols and safety standards.",
+    photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
+    linkedinUrl: "https://linkedin.com/in/marcus-vance",
     order: 4,
   },
 ];
-

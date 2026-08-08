@@ -33,14 +33,7 @@ module.exports = {
           text: '#051836',
           muted: '#5A6B80',
         },
-        pwlif: {
-          navy: "#051836",
-          "medium-blue": "#042554",
-          green: "#005C27",
-          leaf: "#327B2F",
-          gold: "#F5AB00",
-          cream: "#FDFCF9",
-        },
+
       },
     },
   },

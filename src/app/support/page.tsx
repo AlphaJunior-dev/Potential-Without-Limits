@@ -41,7 +41,7 @@ export default function SupportPage() {
           <Link href="/" className="inline-block mb-2">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-16 w-auto mx-auto object-contain"
             />
           </Link>

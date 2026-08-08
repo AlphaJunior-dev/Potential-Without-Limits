@@ -47,7 +47,7 @@ function RegisterForm() {
           <Link href="/" className="inline-block">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-16 w-auto mx-auto object-contain"
             />
           </Link>
@@ -55,7 +55,7 @@ function RegisterForm() {
             Sponsor Registration &amp; Dream Adoption
           </h1>
           <p className="font-inter text-xs text-[#051836]/70 max-w-md mx-auto">
-            Join Potential Without Limits Foundation (PWLIF) to directly sponsor child dreams, fund educational grants, and receive audited impact reports.
+            Join Potential Without Limits International Foundation (PWLIF) to directly sponsor child dreams, fund educational grants, and receive audited impact reports.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ function RegisterForm() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Eleanor Vance / NextGen Global Foundation"
+              placeholder="e.g. Rafiki Emmanuel / Hope for Tomorrow Foundation"
               className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27]"
             />
           </div>
@@ -91,7 +91,7 @@ function RegisterForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="eleanor@nextgenglobal.org"
+              placeholder="contact@yourfoundation.org"
               className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27]"
             />
           </div>
@@ -122,7 +122,7 @@ function RegisterForm() {
               required
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
-              placeholder="https://linkedin.com/in/eleanorvance"
+              placeholder="https://linkedin.com/in/yourprofile"
               className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27]"
             />
           </div>

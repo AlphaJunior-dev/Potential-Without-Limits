@@ -35,7 +35,7 @@ export default function SponsorDashboardPage() {
   const { user, userStatus, pendingSponsors, inquiries, profiles, sendInquiry, updateSponsorProfile, completeFirstTimeProfile, updateSponsorPassword } = useAuth();
   
   const [activeTab, setActiveTab] = useState<
-    "overview" | "exhibition" | "partnerships" | "messages" | "security" | "certificates" | "alerts"
+    "overview" | "exhibition" | "partnerships" | "security" | "certificates" | "alerts"
   >("overview");
 
   // Find active sponsor or fallback
@@ -79,7 +79,7 @@ export default function SponsorDashboardPage() {
   const [messageText, setMessageText] = useState("");
   const [messageSentNotice, setMessageSentNotice] = useState(false);
 
-  const availableCategories = ["All", "Technology", "Robotics", "Digital Art", "Music", "Biotech", "Creative Writing"];
+  const availableCategories = ["All", "Technology", "Robotics", "Digital Art", "Music", "Sports", "Academics", "Leadership", "Entrepreneurship", "Biotech", "Creative Writing"];
 
   const activeProfiles = profiles && profiles.length > 0 ? profiles : INITIAL_YOUTH_PROFILES;
 
@@ -211,7 +211,7 @@ export default function SponsorDashboardPage() {
       )}
 
       {/* Top Banner Header */}
-      <div className="bg-[#051836] text-white py-8 px-4 sm:px-6 lg:px-8 border-b border-[#005C27]/20">
+      <div className="bg-white text-[#051836] py-8 px-4 sm:px-6 lg:px-8 border-b border-[#051836]/10 shadow-xs">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
@@ -219,11 +219,11 @@ export default function SponsorDashboardPage() {
                 <img
                   src="/pwlif-logo.png"
                   alt="PWLIF"
-                  className="h-10 w-auto object-contain brightness-0 invert"
+                  className="h-10 w-auto object-contain"
                 />
               </Link>
-              <div className="h-5 w-px bg-white/20" />
-              <h1 className="font-montserrat font-black text-2xl sm:text-3xl text-white">
+              <div className="h-5 w-px bg-[#051836]/20" />
+              <h1 className="font-montserrat font-black text-2xl sm:text-3xl text-[#051836]">
                 My Sponsorship Hub
               </h1>
             </div>
@@ -237,7 +237,7 @@ export default function SponsorDashboardPage() {
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-white/80">
+            <p className="text-xs sm:text-sm text-[#051836]/80">
               Welcome back, <strong>{sponsorMatch?.name || "Verified Sponsor"}</strong> ({sponsorMatch?.company || "PWLIF Impact Partner"}). Child dream tracking &amp; financial audit downloads active.
             </p>
           </div>
@@ -291,20 +291,7 @@ export default function SponsorDashboardPage() {
             <span>My Sponsored Dreams</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab("messages")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "messages"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Message History</span>
-            <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] px-2 py-0.5 rounded-full font-extrabold">
-              {sponsorInquiries.length}
-            </span>
-          </button>
+
 
           <button
             onClick={() => setActiveTab("security")}
@@ -368,7 +355,7 @@ export default function SponsorDashboardPage() {
                   </span>
                   <p className="font-bold text-[#051836] text-sm flex items-center gap-1.5">
                     <Building2 className="w-4 h-4 text-[#051836]/40" />
-                    {sponsorMatch?.company || "PWLIF Impact Partner"}
+                    {sponsorMatch?.company || "NextGen Ventures"}
                   </p>
                 </div>
 
@@ -378,8 +365,22 @@ export default function SponsorDashboardPage() {
                   </span>
                   <p className="font-bold text-[#051836] text-sm flex items-center gap-1.5">
                     <User className="w-4 h-4 text-[#051836]/40" />
-                    {sponsorMatch?.name || "Corporate Backer"}
+                    {sponsorMatch?.name || "Sophia Martinez"}
                   </p>
+                </div>
+
+                <div>
+                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
+                    Sponsorship Category &amp; Tier
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#005C27]/10 text-[#005C27] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#005C27]/20">
+                      {sponsorMatch?.sponsorCategory || "Child Sponsor"}
+                    </span>
+                    <span className="bg-[#F5AB00]/15 text-[#051836] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#051836]/20">
+                      {sponsorMatch?.membershipTier || "Gold Tier"}
+                    </span>
+                  </div>
                 </div>
 
                 <div>
@@ -628,66 +629,6 @@ export default function SponsorDashboardPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* TAB 4: MESSAGE HISTORY */}
-        {activeTab === "messages" && (
-          <div className="bg-white rounded-3xl border border-[#051836]/10 shadow-xl overflow-hidden text-[#051836]">
-            <div className="p-6 border-b border-[#051836]/10">
-              <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-[#005C27]" />
-                <span>Sponsorship Message &amp; Inquiry History</span>
-              </h2>
-              <p className="text-xs text-[#051836]/70 mt-0.5">
-                Log of all direct sponsorship proposals routed through PWLIF foundation channels.
-              </p>
-            </div>
-
-            {sponsorInquiries.length === 0 ? (
-              <div className="p-12 text-center space-y-3">
-                <p className="text-xs text-[#051836]/60">
-                  You haven&apos;t initiated any sponsorship inquiries yet.
-                </p>
-                <button
-                  onClick={() => setActiveTab("exhibition")}
-                  className="text-xs font-bold text-[#005C27] hover:underline"
-                >
-                  Browse Child Dream Directory →
-                </button>
-              </div>
-            ) : (
-              <div className="divide-y divide-[#051836]/10 font-inter text-xs">
-                {sponsorInquiries.map((inq) => (
-                  <div key={inq.id} className="p-6 flex flex-col md:flex-row justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="font-montserrat font-bold text-base text-[#051836]">
-                          Child: {inq.talentName}
-                        </span>
-                        <span className="bg-emerald-100 text-[#005C27] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#005C27]/20 uppercase">
-                          {inq.status}
-                        </span>
-                      </div>
-                      <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#051836]/10 text-xs text-[#051836]/80 font-medium">
-                        &quot;{inq.message}&quot;
-                      </div>
-                      <span className="text-[10px] text-[#051836]/40 block font-mono">
-                        Initiated on {inq.createdAt}
-                      </span>
-                    </div>
-
-                    <Link
-                      href={`/portfolio/${inq.talentId}`}
-                      className="self-start md:self-center bg-[#F8FAFC] text-[#051836] border border-[#051836]/15 px-4 py-2.5 rounded-xl text-xs font-semibold hover:border-[#005C27] hover:text-[#005C27] transition flex items-center gap-1.5 shrink-0"
-                    >
-                      <span>View Portfolio</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#005C27]" />
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 

@@ -60,7 +60,7 @@ export default function AdminTalentPage() {
                 name: firstName,
                 age: Number(age),
                 category,
-                location: location || "Chicago, IL",
+                location: location || "Addis Ababa, Ethiopia",
                 bio,
                 coverPhoto: coverPhoto || p.coverPhoto,
                 rawMediaUrl: rawMediaUrl || p.rawMediaUrl,
@@ -75,7 +75,7 @@ export default function AdminTalentPage() {
         name: firstName,
         age: Number(age),
         category,
-        location: location || "Remote",
+        location: location || "Addis Ababa, Ethiopia",
         bio,
         coverPhoto:
           coverPhoto ||
@@ -86,11 +86,11 @@ export default function AdminTalentPage() {
         status: "active",
         inquiriesCount: 0,
         skills: [category, "Creative Innovation"],
-        dream: "Mastering technical skills and community innovation.",
+        dream: "Mastering skills and community innovation.",
         current_situation: bio,
         progress: "Actively participating in local community youth labs.",
-        current_needs: "Educational grant & laptop hardware",
-        country_community: location || "Remote",
+        current_needs: "Educational grant & equipment support",
+        country_community: location || "Addis Ababa, Ethiopia",
         consentRecord: {
           parentalConsent: true,
           mediaReleasePermission: true,
@@ -98,18 +98,18 @@ export default function AdminTalentPage() {
           guardianName: "Parent/Guardian",
         },
       };
-      setProfiles((prev) => [newTalent, ...prev]);
+      setProfiles([newTalent, ...profiles]);
     }
-
     setFirstName("");
     setAge("");
-    setBio("");
+    setCategory("Technology");
     setLocation("");
+    setBio("");
     setCoverPhoto("");
     setRawMediaUrl("");
   };
 
-  const handleEdit = (p: YouthProfile) => {
+  const handleEditClick = (p: YouthProfile) => {
     setEditingId(p.id);
     setFirstName(p.name);
     setAge(p.age.toString());
@@ -120,17 +120,17 @@ export default function AdminTalentPage() {
     setRawMediaUrl(p.rawMediaUrl || "");
   };
 
-  const handleDelete = (id: string) => {
-    setProfiles((prev) => prev.filter((p) => p.id !== id));
+  const handleDeleteClick = (id: string) => {
+    setProfiles(profiles.filter((p) => p.id !== id));
   };
 
-  const handleToggleStatus = (id: string) => {
+  const handleToggleHomepageFeature = (id: string) => {
     setProfiles((prev) =>
       prev.map((p) =>
         p.id === id
           ? {
               ...p,
-              status: p.status === "active" ? "archived" : "active",
+              featuredOnHomepage: !p.featuredOnHomepage,
             }
           : p
       )
@@ -138,187 +138,187 @@ export default function AdminTalentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-inter text-[#0A1128] pb-16">
+    <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] pb-16 bg-foundation-pattern">
       {/* Header */}
-      <header className="bg-[#0A1128] text-white px-6 py-4 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="bg-white text-[#051836] px-6 py-4 border-b border-[#051836]/10 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-white/60 hover:text-white transition">
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/admin" className="text-[#051836]/60 hover:text-[#051836] transition">
+            <ArrowLeft className="w-5 h-5 text-[#005C27]" />
           </Link>
-          <div>
-            <h1 className="font-montserrat font-bold text-lg tracking-wider">
-              Talent Directory &amp; Dual-Media CMS
-            </h1>
-            <p className="text-xs text-white/60">
-              Manage public 16:9 cover photos &amp; raw sponsor media pipelines
-            </p>
+          <div className="flex items-center gap-3">
+            <img src="/pwlif-logo.png" alt="PWLIF" className="h-8 w-auto object-contain" />
+            <div>
+              <h1 className="font-montserrat font-bold text-lg tracking-tight text-[#051836]">
+                Talent Directory &amp; CMS
+              </h1>
+              <p className="text-xs text-[#051836]/60">
+                Manage public child dream profiles, media pipelines, and homepage spotlights.
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-[#051836]/60 uppercase tracking-wider">
             RBAC Role:
           </span>
           <select
             value={adminRole}
             onChange={(e) => setAdminRole(e.target.value as any)}
-            className="bg-white/10 text-white text-xs font-bold py-1.5 px-3 rounded-md border border-white/20"
+            className="bg-[#F8FAFC] text-[#051836] text-xs font-bold py-1.5 px-3 rounded-md border border-[#051836]/15 focus:outline-none focus:border-[#005C27]"
           >
-            <option value="Super Admin" className="bg-[#0A1128]">Super Admin</option>
-            <option value="Curator" className="bg-[#0A1128]">Talent Curator</option>
-            <option value="Vetting Officer" className="bg-[#0A1128]">Vetting Officer</option>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Curator">Talent Curator</option>
+            <option value="Vetting Officer">Vetting Officer</option>
           </select>
-          <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" /> Verified Session
+          <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-[#005C27]/20 flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#005C27]" /> Verified Session
           </span>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-4 border-b border-[#0A1128]/10 pb-4 text-xs font-semibold uppercase tracking-wider">
-          <Link href="/admin" className="text-[#0A1128]/60 hover:text-[#0A1128]">
-            Control Center
+        <div className="flex items-center gap-4 border-b border-[#051836]/10 pb-4 text-xs font-semibold uppercase tracking-wider">
+          <Link href="/admin" className="text-[#051836]/60 hover:text-[#005C27]">
+            Admin Portal
           </Link>
-          <span className="text-[#0A1128]/30">&gt;</span>
-          <Link href="/admin/vetting" className="text-[#0A1128]/60 hover:text-[#0A1128]">
-            Vetting Queue
+          <span className="text-[#051836]/30">&gt;</span>
+          <Link href="/admin/vetting" className="text-[#051836]/60 hover:text-[#005C27]">
+            Sponsor Onboarding
           </Link>
-          <span className="text-[#0A1128]/30">&gt;</span>
-          <span className="text-[#F28482] font-bold">Talent Directory (CMS)</span>
+          <span className="text-[#051836]/30">&gt;</span>
+          <span className="text-[#005C27] font-bold">Talent Directory</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form Column */}
-          <div className="bg-white p-6 rounded-2xl border border-[#0A1128]/5 shadow-xs h-fit space-y-4">
-            <h2 className="font-montserrat font-bold text-base text-[#0A1128] border-b border-[#0A1128]/5 pb-3">
-              {editingId ? "Edit Youth Record" : "Add Youth Record (CMS Entry)"}
+          <div className="bg-white p-6 rounded-2xl border border-[#051836]/10 shadow-lg h-fit space-y-4">
+            <h2 className="font-montserrat font-bold text-base text-[#051836] border-b border-[#051836]/10 pb-3">
+              {editingId ? "Edit Child Profile" : "Add Child Profile (CMS Entry)"}
             </h2>
 
             <form onSubmit={handleSaveTalent} className="space-y-4 text-xs font-inter">
               <div>
-                <label className="block font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-1">
-                  First Name (Strict Privacy Policy)
+                <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
+                  First Name (Child Privacy Standard)
                 </label>
                 <input
                   type="text"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="e.g. Sarah"
-                  className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg focus:outline-none focus:border-[#F28482]"
+                  placeholder="e.g. Dawit"
+                  className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-1">
+                  <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
                     Age
                   </label>
                   <input
                     type="number"
                     required
-                    min={12}
-                    max={25}
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    placeholder="18"
-                    className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg"
+                    className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
                   />
                 </div>
-
                 <div>
-                  <label className="block font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-1">
+                  <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg"
+                    className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
                   >
                     <option value="Technology">Technology</option>
                     <option value="Music">Music</option>
                     <option value="Digital Art">Digital Art</option>
+                    <option value="Sports (Football)">Sports (Football)</option>
+                    <option value="Academics">Academics</option>
                     <option value="Robotics">Robotics</option>
-                    <option value="Biotech">Biotech</option>
-                    <option value="Creative Writing">Creative Writing</option>
-                    <option value="Dance & Performance">Dance &amp; Performance</option>
+                    <option value="Leadership">Leadership</option>
+                    <option value="Entrepreneurship">Entrepreneurship</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-1">
-                  Location / City
+                <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
+                  Location / Community
                 </label>
                 <input
                   type="text"
+                  required
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. Chicago, IL"
-                  className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg"
+                  placeholder="e.g. Addis Ababa, Ethiopia"
+                  className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-[#0A1128]/80 uppercase tracking-wider mb-1">
-                  Bio &amp; Achievements
+                <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
+                  Bio / Talent Summary
                 </label>
                 <textarea
                   rows={3}
                   required
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Summarize key projects, skills, and sponsorship goals..."
-                  className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg"
+                  placeholder="Summarize the child's gift, ambition, and background..."
+                  className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
                 />
               </div>
 
-              <div className="pt-2 border-t border-[#0A1128]/5 space-y-3">
-                <span className="font-montserrat font-bold text-xs uppercase tracking-wider text-[#0A1128]/70 block">
-                  Media Asset Configuration
-                </span>
-
-                <div>
-                  <label className="block font-semibold text-[#0A1128]/80 text-[11px] mb-1">
-                    1. Public 16:9 Cover Photo (Gallery Preview)
-                  </label>
-                  <input
-                    type="url"
-                    value={coverPhoto}
-                    onChange={(e) => setCoverPhoto(e.target.value)}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-[#0A1128]/80 text-[11px] mb-1">
-                    2. Full Raw Asset URL (Sponsor Player)
-                  </label>
-                  <input
-                    type="url"
-                    value={rawMediaUrl}
-                    onChange={(e) => setRawMediaUrl(e.target.value)}
-                    placeholder="https://commondatastorage.googleapis.com/.../video.mp4"
-                    className="w-full p-2.5 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg text-xs"
-                  />
-                </div>
+              <div>
+                <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
+                  Cover Photo Image URL
+                </label>
+                <input
+                  type="url"
+                  value={coverPhoto}
+                  onChange={(e) => setCoverPhoto(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
+                />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
+              <div>
+                <label className="block font-semibold text-[#051836]/80 uppercase tracking-wider mb-1">
+                  Video Reel Stream URL
+                </label>
+                <input
+                  type="url"
+                  value={rawMediaUrl}
+                  onChange={(e) => setRawMediaUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg focus:outline-none focus:border-[#005C27]"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-[#051836]/10 flex gap-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#F28482] hover:brightness-105 text-white font-bold py-2.5 px-4 rounded-lg transition text-xs cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                  className="flex-1 bg-[#005C27] hover:bg-[#327B2F] text-white font-bold py-2.5 px-4 rounded-lg transition text-xs cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>{editingId ? "Update Record" : "Publish Record"}</span>
+                  <Sparkles className="w-3.5 h-3.5 text-[#F5AB00]" />
+                  <span>{editingId ? "Update Profile" : "Save Child Profile"}</span>
                 </button>
                 {editingId && (
                   <button
                     type="button"
-                    onClick={() => setEditingId(null)}
-                    className="px-3 py-2.5 text-xs text-[#0A1128]/60 hover:text-[#0A1128]"
+                    onClick={() => {
+                      setEditingId(null);
+                      setFirstName("");
+                      setAge("");
+                      setBio("");
+                    }}
+                    className="px-3 py-2.5 rounded-lg bg-[#F8FAFC] text-[#051836] text-xs border border-[#051836]/15"
                   >
                     Cancel
                   </button>
@@ -327,93 +327,88 @@ export default function AdminTalentPage() {
             </form>
           </div>
 
-          {/* Directory Table Column */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-[#0A1128]/5 shadow-xs overflow-hidden">
-            <div className="p-6 border-b border-[#0A1128]/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <h2 className="font-montserrat font-bold text-lg text-[#0A1128]">
-                Published Roster ({profiles.length})
-              </h2>
-
-              <div className="relative w-full sm:w-64">
-                <Search className="w-3.5 h-3.5 text-[#0A1128]/40 absolute left-3 top-3" />
+          {/* Profiles Grid List */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#051836]/10 shadow-xs">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-[#051836]/40 absolute left-3 top-2.5" />
                 <input
                   type="text"
                   value={talentSearch}
                   onChange={(e) => setTalentSearch(e.target.value)}
-                  placeholder="Search profiles..."
-                  className="w-full pl-9 pr-3 py-2 bg-[#FAFAFA] border border-[#0A1128]/10 rounded-lg text-xs"
+                  placeholder="Search child directory..."
+                  className="w-full pl-9 pr-4 py-1.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-xs text-[#051836] focus:outline-none focus:border-[#005C27]"
                 />
               </div>
+
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="bg-[#F8FAFC] border border-[#051836]/15 text-xs text-[#051836] rounded-lg p-1.5 focus:outline-none"
+              >
+                <option value="All">All Categories</option>
+                <option value="Technology">Technology</option>
+                <option value="Music">Music</option>
+                <option value="Digital Art">Digital Art</option>
+                <option value="Sports (Football)">Sports (Football)</option>
+                <option value="Academics">Academics</option>
+                <option value="Robotics">Robotics</option>
+                <option value="Leadership">Leadership</option>
+                <option value="Entrepreneurship">Entrepreneurship</option>
+              </select>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-[#FAFAFA] border-b border-[#0A1128]/5 text-[11px] font-bold uppercase tracking-wider text-[#0A1128]/60">
-                    <th className="py-3 px-4">Talent</th>
-                    <th className="py-3 px-4">Category</th>
-                    <th className="py-3 px-4">Inquiries</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#0A1128]/5">
-                  {filteredProfiles.map((p) => (
-                    <tr key={p.id} className="hover:bg-[#FAFAFA]/60 transition">
-                      <td className="py-3 px-4 font-bold text-[#0A1128] flex items-center gap-2">
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 bg-[#0A1128]/10">
-                          <Image src={p.coverPhoto} alt={p.name} fill className="object-cover" />
-                        </div>
-                        <div>
-                          <p>{p.name}, {p.age}</p>
-                          <span className="text-[10px] text-[#0A1128]/50">{p.location}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-[#0A1128]/70">
-                        {p.category}
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[#0A1128]">
-                        {p.inquiriesCount}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                            p.status === "active"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : p.status === "sponsored"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {p.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleToggleStatus(p.id)}
-                            className="text-[11px] font-semibold text-[#0A1128]/60 hover:text-[#0A1128]"
-                          >
-                            {p.status === "active" ? "Archive" : "Publish"}
-                          </button>
-                          <button
-                            onClick={() => handleEdit(p)}
-                            className="text-[#F28482] hover:text-[#0A1128] p-1 cursor-pointer"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {filteredProfiles.map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-2xl p-4 border border-[#051836]/10 shadow-sm flex flex-col justify-between space-y-3"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-14 h-14 rounded-xl relative overflow-hidden bg-[#F8FAFC] shrink-0 border border-[#051836]/10">
+                      <Image src={p.coverPhoto} alt={p.name} fill className="object-cover" />
+                    </div>
+                    <div>
+                      <h3 className="font-montserrat font-bold text-sm text-[#051836]">
+                        {p.name}, {p.age}
+                      </h3>
+                      <span className="text-[10px] text-[#005C27] font-bold block">
+                        {p.category} • {p.country_community || p.location}
+                      </span>
+                      <p className="text-[11px] text-[#051836]/70 line-clamp-2 mt-1">{p.bio}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#051836]/10">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleHomepageFeature(p.id)}
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                        p.featuredOnHomepage
+                          ? "bg-[#005C27]/10 text-[#005C27] border-[#005C27]/30"
+                          : "bg-[#F8FAFC] text-[#051836]/50 border-[#051836]/10 hover:text-[#051836]"
+                      }`}
+                    >
+                      {p.featuredOnHomepage ? "★ Featured on Homepage" : "+ Feature on Homepage"}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditClick(p)}
+                        className="p-1.5 bg-[#F8FAFC] hover:bg-[#051836]/10 text-[#051836] rounded-lg text-xs border border-[#051836]/10"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(p.id)}
+                        className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs border border-red-200"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -24,9 +24,11 @@ export default function TalentsPage() {
     "Technology",
     "Music",
     "Digital Art",
+    "Sports (Football)",
+    "Academics",
     "Robotics",
-    "Biotech",
-    "Creative Writing",
+    "Leadership",
+    "Entrepreneurship",
   ];
 
   const activeProfiles = profiles && profiles.length > 0 ? profiles : INITIAL_YOUTH_PROFILES;

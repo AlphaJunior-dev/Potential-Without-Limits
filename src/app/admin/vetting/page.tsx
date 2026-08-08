@@ -28,8 +28,8 @@ export default function AdminVettingPage() {
 
   const [vettingStatusFilter, setVettingStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
   const [logs, setLogs] = useState<Array<{ id: string; msg: string; time: string }>>([
-    { id: "vlog-1", msg: "Sophia Martinez approved as Verified Partner", time: "2026-07-27 16:20" },
-    { id: "vlog-2", msg: "David Chen approved as Verified Partner", time: "2026-07-26 11:05" },
+    { id: "vlog-1", msg: "Hope for Tomorrow Foundation approved as Verified Partner", time: "2026-07-27 16:20" },
+    { id: "vlog-2", msg: "Sunrise Education Trust approved as Verified Partner", time: "2026-07-26 11:05" },
   ]);
 
   if (!mfaVerified) {
@@ -42,82 +42,85 @@ export default function AdminVettingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-inter text-[#0A1128] pb-16">
+    <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] pb-16 bg-foundation-pattern">
       {/* Admin Top Header */}
-      <header className="bg-[#0A1128] text-white px-6 py-4 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="bg-white text-[#051836] px-6 py-4 border-b border-[#051836]/10 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-white/60 hover:text-white transition">
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/admin" className="text-[#051836]/60 hover:text-[#051836] transition">
+            <ArrowLeft className="w-5 h-5 text-[#005C27]" />
           </Link>
-          <div>
-            <h1 className="font-montserrat font-bold text-lg tracking-wider">
-              Sponsor Vetting &amp; Approvals
-            </h1>
-            <p className="text-xs text-white/60">
-              Review corporate LinkedIn registrations &amp; grant portfolio access
-            </p>
+          <div className="flex items-center gap-3">
+            <img src="/pwlif-logo.png" alt="PWLIF" className="h-8 w-auto object-contain" />
+            <div>
+              <h1 className="font-montserrat font-bold text-lg tracking-tight text-[#051836]">
+                Sponsor Vetting &amp; Onboarding
+              </h1>
+              <p className="text-xs text-[#051836]/60">
+                Review incoming sponsor applications, verify categories and tiers, and approve access.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* RBAC Indicator */}
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-[#051836]/60 uppercase tracking-wider">
             RBAC Role:
           </span>
           <select
             value={adminRole}
             onChange={(e) => setAdminRole(e.target.value as any)}
-            className="bg-white/10 text-white text-xs font-bold py-1.5 px-3 rounded-md border border-white/20"
+            className="bg-[#F8FAFC] text-[#051836] text-xs font-bold py-1.5 px-3 rounded-md border border-[#051836]/15 focus:outline-none focus:border-[#005C27]"
           >
-            <option value="Super Admin" className="bg-[#0A1128]">Super Admin</option>
-            <option value="Vetting Officer" className="bg-[#0A1128]">Vetting Officer</option>
-            <option value="Curator" className="bg-[#0A1128]">Talent Curator</option>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Vetting Officer">Vetting Officer</option>
+            <option value="Curator">Talent Curator</option>
           </select>
-          <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" /> Verified Session
+          <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-[#005C27]/20 flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#005C27]" /> Verified Session
           </span>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center gap-4 border-b border-[#0A1128]/10 pb-4 text-xs font-semibold uppercase tracking-wider">
-          <Link href="/admin" className="text-[#0A1128]/60 hover:text-[#0A1128]">
-            Control Center
+        <div className="flex items-center gap-4 border-b border-[#051836]/10 pb-4 text-xs font-semibold uppercase tracking-wider">
+          <Link href="/admin" className="text-[#051836]/60 hover:text-[#005C27]">
+            Admin Portal
           </Link>
-          <span className="text-[#0A1128]/30">&gt;</span>
-          <span className="text-[#F28482] font-bold">Vetting Queue</span>
-          <span className="text-[#0A1128]/30">&gt;</span>
-          <Link href="/admin/talent" className="text-[#0A1128]/60 hover:text-[#0A1128]">
-            Talent CMS
+          <span className="text-[#051836]/30">&gt;</span>
+          <span className="text-[#005C27] font-bold">Sponsor Vetting</span>
+          <span className="text-[#051836]/30">&gt;</span>
+          <Link href="/admin/talent" className="text-[#051836]/60 hover:text-[#005C27]">
+            Talent Directory
           </Link>
         </div>
 
         {/* Vetting Table Card */}
-        <div className="bg-white rounded-2xl border border-[#0A1128]/5 shadow-xs overflow-hidden">
-          <div className="p-6 border-b border-[#0A1128]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-[#051836]/10 shadow-lg overflow-hidden">
+          <div className="p-6 border-b border-[#051836]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-montserrat font-bold text-lg text-[#0A1128] flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#F28482]" />
-                <span>Pending Corporate Sponsor Applications</span>
+              <h2 className="font-montserrat font-bold text-lg text-[#051836] flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[#005C27]" />
+                <span>Foundation Sponsor Applications Queue</span>
               </h2>
-              <p className="text-xs text-[#0A1128]/60 mt-0.5">
-                Verify mandatory LinkedIn credentials prior to granting raw media unlock rights.
+              <p className="text-xs text-[#051836]/60 mt-0.5">
+                Review sponsor background verification, LinkedIn profiles, and grant authorization status.
               </p>
             </div>
 
-            {/* Filter Selector */}
+            {/* Filter Pills */}
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#0A1128]/40" />
+              <Filter className="w-4 h-4 text-[#051836]/40" />
               <select
                 value={vettingStatusFilter}
                 onChange={(e) => setVettingStatusFilter(e.target.value as any)}
-                className="bg-[#FAFAFA] border border-[#0A1128]/10 text-xs font-medium py-1.5 px-3 rounded-lg text-[#0A1128]"
+                className="bg-[#F8FAFC] border border-[#051836]/15 text-xs font-medium py-1.5 px-3 rounded-lg text-[#051836] focus:outline-none focus:border-[#005C27]"
               >
-                <option value="pending">Pending Queue Only ({pendingSponsors.filter(s => s.status === "pending").length})</option>
-                <option value="approved">Approved Partners ({pendingSponsors.filter(s => s.status === "approved").length})</option>
+                <option value="pending">Pending Approval ({pendingSponsors.filter(s => s.status === 'pending').length})</option>
+                <option value="approved">Approved Sponsors ({pendingSponsors.filter(s => s.status === 'approved').length})</option>
                 <option value="rejected">Rejected</option>
-                <option value="all">All Submissions</option>
+                <option value="all">All Applications ({pendingSponsors.length})</option>
               </select>
             </div>
           </div>
@@ -125,59 +128,54 @@ export default function AdminVettingPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#FAFAFA] border-b border-[#0A1128]/5 text-[11px] font-bold uppercase tracking-wider text-[#0A1128]/60">
-                  <th className="py-3.5 px-6">Applicant Name</th>
-                  <th className="py-3.5 px-6">Corporate Email</th>
-                  <th className="py-3.5 px-6">LinkedIn Verification</th>
-                  <th className="py-3.5 px-6">Registration Date</th>
-                  <th className="py-3.5 px-6">Status</th>
-                  <th className="py-3.5 px-6 text-right">Verification Action</th>
+                <tr className="bg-[#F8FAFC] border-b border-[#051836]/10 text-[11px] font-bold uppercase tracking-wider text-[#051836]/60">
+                  <th className="py-3 px-6">Representative &amp; Email</th>
+                  <th className="py-3 px-6">Organization / Foundation</th>
+                  <th className="py-3 px-6">Category &amp; Tier</th>
+                  <th className="py-3 px-6">LinkedIn Verification</th>
+                  <th className="py-3 px-6">Registration Date</th>
+                  <th className="py-3 px-6 text-right">Approval Decision</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0A1128]/5 text-xs">
+              <tbody className="divide-y divide-[#051836]/10 text-xs">
                 {filteredSponsors.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[#0A1128]/50">
-                      No sponsor applications matching filter criteria.
+                    <td colSpan={6} className="py-12 text-center text-[#051836]/50">
+                      No sponsor applications matching current filter criteria.
                     </td>
                   </tr>
                 ) : (
                   filteredSponsors.map((sponsor) => (
-                    <tr key={sponsor.id} className="hover:bg-[#FAFAFA]/60 transition">
-                      <td className="py-4 px-6 font-bold text-[#0A1128]">
+                    <tr key={sponsor.id} className="hover:bg-[#F8FAFC] transition">
+                      <td className="py-4 px-6 font-bold text-[#051836]">
                         {sponsor.name}
+                        <div className="text-[11px] font-mono text-[#051836]/60 font-normal">{sponsor.email}</div>
                       </td>
-                      <td className="py-4 px-6 text-[#0A1128]/70">
-                        {sponsor.email}
+                      <td className="py-4 px-6 text-[#051836]/80 font-semibold">
+                        {sponsor.company || "Independent Sponsor"}
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-0.5 rounded-full w-fit">
+                            {sponsor.sponsorCategory || "Child Sponsor"}
+                          </span>
+                          <span className="bg-[#F5AB00]/15 text-[#051836] text-[10px] font-bold px-2.5 py-0.5 rounded-full w-fit">
+                            {sponsor.membershipTier || "Gold Tier"}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-4 px-6">
                         <a
                           href={sponsor.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#F28482] font-semibold hover:underline inline-flex items-center gap-1"
+                          className="text-[#005C27] font-semibold hover:underline inline-flex items-center gap-1"
                         >
-                          <span>{sponsor.linkedin}</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          LinkedIn Profile <ExternalLink className="w-3 h-3" />
                         </a>
                       </td>
-                      <td className="py-4 px-6 text-[#0A1128]/50">
+                      <td className="py-4 px-6 text-[#051836]/50 font-mono text-[11px]">
                         {sponsor.createdAt}
-                      </td>
-                      <td className="py-4 px-6">
-                        {sponsor.status === "approved" ? (
-                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase px-2.5 py-1 rounded inline-flex items-center gap-1">
-                            <ShieldCheck className="w-3 h-3" /> Approved
-                          </span>
-                        ) : sponsor.status === "rejected" ? (
-                          <span className="bg-red-100 text-red-800 text-[10px] font-bold uppercase px-2.5 py-1 rounded inline-flex items-center gap-1">
-                            <XCircle className="w-3 h-3" /> Rejected
-                          </span>
-                        ) : (
-                          <span className="bg-amber-100 text-amber-800 text-[10px] font-bold uppercase px-2.5 py-1 rounded inline-flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> Pending Review
-                          </span>
-                        )}
                       </td>
                       <td className="py-4 px-6 text-right">
                         {sponsor.status === "pending" ? (
@@ -185,31 +183,25 @@ export default function AdminVettingPage() {
                             <button
                               onClick={() => {
                                 approveSponsor(sponsor.id);
-                                setLogs((prev) => [
-                                  {
-                                    id: "vlog-" + Date.now(),
-                                    msg: `Approved ${sponsor.name} (${sponsor.email})`,
-                                    time: new Date().toISOString().replace("T", " ").split(".")[0],
-                                  },
-                                  ...prev,
-                                ]);
+                                setLogs([{ id: "vlog-" + Date.now(), msg: `${sponsor.name} approved`, time: new Date().toLocaleTimeString() }, ...logs]);
                               }}
-                              className="bg-[#F28482] hover:brightness-105 text-white px-3.5 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs"
+                              className="bg-[#005C27] hover:bg-[#327B2F] text-white px-3.5 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Verify &amp; Approve</span>
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Approve &amp; Create Account
                             </button>
                             <button
                               onClick={() => rejectSponsor(sponsor.id)}
-                              className="text-red-600 hover:text-red-800 font-semibold px-2 py-1 text-xs cursor-pointer"
+                              className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer border border-red-200"
                             >
-                              Reject
+                              <XCircle className="w-3.5 h-3.5" /> Reject
                             </button>
                           </div>
-                        ) : (
-                          <span className="text-[11px] text-[#0A1128]/40 italic">
-                            Action Completed
+                        ) : sponsor.status === "approved" ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#005C27] bg-[#005C27]/10 px-2.5 py-1 rounded-full border border-[#005C27]/20">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Active &amp; Approved
                           </span>
+                        ) : (
+                          <span className="text-[11px] text-[#051836]/40 italic">Application Rejected</span>
                         )}
                       </td>
                     </tr>
@@ -220,16 +212,16 @@ export default function AdminVettingPage() {
           </div>
         </div>
 
-        {/* Action Log History */}
-        <div className="bg-white p-6 rounded-2xl border border-[#0A1128]/5 shadow-xs space-y-4">
-          <h3 className="font-montserrat font-bold text-sm text-[#0A1128]">
-            Vetting Action Audit Log
+        {/* Audit Log Box */}
+        <div className="bg-white p-6 rounded-2xl border border-[#051836]/10 shadow-xs space-y-4">
+          <h3 className="font-montserrat font-bold text-sm text-[#051836]">
+            Sponsor Vetting Activity Log
           </h3>
           <div className="space-y-2">
             {logs.map((log) => (
-              <div key={log.id} className="p-3 rounded-lg bg-[#FAFAFA] border border-[#0A1128]/5 text-xs flex justify-between">
-                <span>{log.msg}</span>
-                <span className="text-[10px] text-[#0A1128]/40 font-mono">{log.time}</span>
+              <div key={log.id} className="p-3 rounded-lg bg-[#F8FAFC] border border-[#051836]/10 text-xs flex justify-between text-[#051836]">
+                <span>✓ {log.msg}</span>
+                <span className="text-[10px] text-[#051836]/50 font-mono">{log.time}</span>
               </div>
             ))}
           </div>

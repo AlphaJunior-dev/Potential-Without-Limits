@@ -13,7 +13,7 @@ export function PwlifLogoMark({ className = "h-12 w-auto" }: { className?: strin
   return (
     <img
       src="/pwlif-logo.png"
-      alt="Potential Without Limits Foundation Logo"
+      alt="Potential Without Limits International Foundation"
       className={`${className} object-contain`}
     />
   );
@@ -30,7 +30,7 @@ export function PwlifLogo({
     <div className="flex items-center gap-3 select-none cursor-pointer">
       <img
         src="/pwlif-logo.png"
-        alt="Potential Without Limits Foundation"
+        alt="Potential Without Limits International Foundation"
         className={`${className} object-contain`}
       />
     </div>

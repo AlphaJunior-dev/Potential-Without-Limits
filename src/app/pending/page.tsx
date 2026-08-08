@@ -14,7 +14,7 @@ export default function PendingPage() {
           <Link href="/">
             <img
               src="/pwlif-logo.png"
-              alt="Potential Without Limits Foundation"
+              alt="Potential Without Limits International Foundation"
               className="h-12 w-auto object-contain"
             />
           </Link>
@@ -80,7 +80,7 @@ export default function PendingPage() {
 
       {/* Bottom Footer Note */}
       <footer className="max-w-7xl w-full mx-auto py-4 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between text-xs text-[#051836]/60 gap-2 border-t border-[#051836]/10">
-        <div>&copy; 2026 Potential Without Limits Foundation (PWLIF). All rights reserved.</div>
+        <div>&copy; 2026 Potential Without Limits International Foundation (PWLIF). All rights reserved.</div>
         <div className="flex items-center gap-4">
           <Link href="/privacy" className="hover:text-[#005C27] transition">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-[#005C27] transition">Terms of Service</Link>
