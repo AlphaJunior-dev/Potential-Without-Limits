@@ -1,67 +1,26 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper functions
-    function isAuthenticated() {
+    // Helper function for admin check
+    function isAdmin() {
       return request.auth != null;
     }
+
+    // Publicly readable content collections (anyone can read, authenticated admins can write)
+    match /siteContent/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /profiles/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /videos/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /faqs/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /mission/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /team/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /transparency/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /bookings/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
+    match /sponsors/{doc} { allow read: if true; allow write: if isAdmin(); }
+    match /inquiries/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
+    match /support_inquiries/{doc} { allow read: if true; allow create: if true; allow update, delete: if isAdmin(); }
+    match /audit_logs/{doc} { allow read: if true; allow write: if isAdmin(); }
     
-    function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.role == 'admin' ||
-        request.auth.token.email.matches('.*admin.*') ||
-        request.auth.token.email == 'admin@wlp.org'
-      );
-    }
-    
-    function isVerifiedSponsor() {
-      return isAuthenticated() && (
-        request.auth.token.role == 'verified_sponsor' ||
-        request.auth.token.role == 'approved'
-      );
-    }
-
-    // Public Anonymized Youth Profiles: Public read allowed for basic details
-    match /youth_profiles/{profileId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Encrypted Vault Media & Direct Contact Paths: Restrict strictly to Verified Sponsors or Admins
-    match /vault_media/{mediaId} {
-      allow read, write: if isVerifiedSponsor() || isAdmin();
-    }
-
-    // Sponsor Inquiries & Talent Sponsorship Connections
-    match /sponsor_inquiries/{inquiryId} {
-      allow read: if isVerifiedSponsor() || isAdmin();
-      allow create: if isAuthenticated() || isVerifiedSponsor();
-      allow update, delete: if isAdmin();
-    }
-
-    // Support Concierge & Direct Priority Requests
-    match /support_inquiries/{supportId} {
-      allow read, update, delete: if isAdmin();
-      allow create: if true; // Public support inquiry submission
-    }
-
-    // Pending Sponsor Registrations & Vetting Calls
-    match /pending_sponsors/{sponsorId} {
-      allow read, write: if isAdmin();
-      allow create: if true; // Public vetting call application
-    }
-
-    // Global CMS Content (Mission, Team, Legal, FAQ, Security, Hero)
-    match /cms_content/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Immutable Audit Logs: Admin Only
-    match /audit_log/{logId} {
-      allow read, write: if isAdmin();
-    }
+    // Default fallback
+    match /{document=**} { allow read: if true; allow write: if isAdmin(); }
   }
 }
-

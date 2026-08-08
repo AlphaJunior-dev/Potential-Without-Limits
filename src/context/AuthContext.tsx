@@ -8,7 +8,14 @@ import {
   signOut,
   User 
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  deleteDoc, 
+  onSnapshot 
+} from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { 
   INITIAL_YOUTH_PROFILES, 
   YouthProfile,
@@ -33,21 +40,23 @@ import {
   SupportInquiry,
   TeamMember,
   MissionVisionData,
-  saveCmsData
+  setSingleDocSafe,
+  addDocSafe,
+  deleteDocSafe
 } from "@/lib/cmsData";
 
 export interface PendingSponsor {
   id: string;
   name: string;
   email: string;
-  linkedin: string;
   company?: string;
+  linkedin: string;
   status: "pending" | "approved" | "rejected";
-  callStatus: "Not Scheduled" | "Call Scheduled" | "Vetted (Approved)" | "Vetted (Rejected)";
+  callStatus: "Call Scheduled" | "Vetting In Progress" | "Vetted (Approved)" | "Vetted (Rejected)";
   createdAt: string;
   interests?: string[];
-  isProfileComplete?: boolean;
   customPassword?: string;
+  isProfileComplete?: boolean;
   isTempPassRevoked?: boolean;
   sponsorCategory?: SponsorCategory;
   membershipTier?: MembershipTier;
@@ -174,54 +183,6 @@ const INITIAL_SPONSORS: PendingSponsor[] = [
     membershipTier: "Gold",
     isProfileComplete: false,
   },
-  {
-    id: "sp-2",
-    name: "Sarah Jenkins",
-    email: "s.jenkins@sunrisetrust.org",
-    company: "Sunrise Education Trust",
-    linkedin: "https://linkedin.com/in/sjenkins-trust",
-    status: "pending",
-    callStatus: "Call Scheduled",
-    createdAt: "2026-07-26 09:15:22",
-    interests: ["Music", "Digital Art"],
-    sponsorCategory: "Child Sponsor",
-    membershipTier: "Silver",
-    isProfileComplete: false,
-  },
-  {
-    id: "sp-3",
-    name: "Sophia Martinez",
-    email: "sophia.m@nextgenventures.com",
-    company: "NextGen Ventures",
-    linkedin: "https://linkedin.com/in/sophiamartinez",
-    status: "approved",
-    callStatus: "Vetted (Approved)",
-    createdAt: "2026-07-20 11:05:40",
-    interests: ["Technology", "Creative Writing"],
-    isProfileComplete: true,
-    assignedCredentials: {
-      username: "sophia.m@nextgenventures.com",
-      tempPass: "WLP-Vetted-8921",
-      issuedAt: "2026-07-20 11:10:00",
-    },
-  },
-  {
-    id: "sp-4",
-    name: "David Chen",
-    email: "d.chen@apexcapital.org",
-    company: "Apex Capital Foundation",
-    linkedin: "https://linkedin.com/in/davidchen-vc",
-    status: "approved",
-    callStatus: "Vetted (Approved)",
-    createdAt: "2026-07-22 16:45:10",
-    interests: ["Biotech", "Robotics"],
-    isProfileComplete: true,
-    assignedCredentials: {
-      username: "d.chen@apexcapital.org",
-      tempPass: "WLP-Vetted-3419",
-      issuedAt: "2026-07-22 16:50:00",
-    },
-  },
 ];
 
 const INITIAL_INQUIRIES: SponsorInquiry[] = [
@@ -237,30 +198,6 @@ const INITIAL_INQUIRIES: SponsorInquiry[] = [
     status: "pending",
     createdAt: "2026-07-29 09:30:00",
   },
-  {
-    id: "inq-1",
-    sponsorId: "sp-3",
-    sponsorName: "Sophia Martinez",
-    sponsorEmail: "sophia.m@nextgenventures.com",
-    talentId: "2",
-    talentName: "Devon",
-    message: "Requesting sponsorship connection for orchestral synth sound design equipment grant.",
-    source: "Initiate Sponsorship",
-    status: "pending",
-    createdAt: "2026-07-26 10:30:00",
-  },
-  {
-    id: "inq-2",
-    sponsorId: "sp-4",
-    sponsorName: "David Chen",
-    sponsorEmail: "d.chen@apexcapital.org",
-    talentId: "4",
-    talentName: "Marcus",
-    message: "Our engineering foundation is interested in funding robotics drone lab hardware.",
-    source: "Initiate Sponsorship",
-    status: "connected",
-    createdAt: "2026-07-27 15:12:00",
-  },
 ];
 
 const INITIAL_SUPPORT_INQUIRIES: SupportInquiry[] = [
@@ -273,16 +210,6 @@ const INITIAL_SUPPORT_INQUIRIES: SupportInquiry[] = [
     source: "Priority Call Form",
     status: "pending",
     createdAt: "2026-07-30 11:20:00",
-  },
-  {
-    id: "sup-2",
-    name: "Rachel Kim",
-    email: "rachel.kim@soundfoundation.org",
-    subject: "Hardware Grant Delivery Inquiries",
-    message: "Requesting guidance on hardware procurement compliance for youth audio workstations.",
-    source: "Support Concierge",
-    status: "pending",
-    createdAt: "2026-07-31 14:45:00",
   },
 ];
 
@@ -313,309 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [branding, setBranding] = useState<BrandingConfig>(INITIAL_BRANDING);
   const [legalSecurity, setLegalSecurity] = useState<LegalSecurityConfig>(INITIAL_LEGAL_SECURITY);
   const [missionVision, setMissionVision] = useState<MissionVisionData>(INITIAL_MISSION_VISION);
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([
-    {
-      id: "log-1",
-      timestamp: "2026-08-01 14:00:00",
-      adminEmail: "admin@wlp.org",
-      action: "System Initialized",
-      details: "WLP Master Build & Zero-Trust Security Protocol active.",
-    },
-  ]);
-
-  // Session, Branding & Dynamic State Persistence on Mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedStatus = localStorage.getItem("wlp_user_status") as any;
-      const savedEmail = localStorage.getItem("wlp_user_email");
-      const savedMfa = localStorage.getItem("wlp_mfa_verified");
-      const savedProfiles = localStorage.getItem("wlp_profiles");
-      const savedBranding = localStorage.getItem("wlp_branding");
-      const savedLegal = localStorage.getItem("wlp_legal_security");
-      const savedFaq = localStorage.getItem("wlp_faq");
-      const savedSponsors = localStorage.getItem("wlp_pending_sponsors");
-      const savedInquiries = localStorage.getItem("wlp_inquiries");
-      const savedSupport = localStorage.getItem("wlp_support_inquiries");
-
-      if (savedStatus) {
-        setUserStatus(savedStatus);
-        setCookie("wlp_role", savedStatus);
-      }
-      if (savedEmail) {
-        setUser({ uid: "saved-session", email: savedEmail } as User);
-      }
-      if (savedMfa === "true") {
-        setMfaVerified(true);
-      }
-      if (savedProfiles) {
-        try {
-          const parsed = JSON.parse(savedProfiles);
-          if (Array.isArray(parsed) && parsed.length > 0) setProfiles(parsed);
-        } catch {}
-      }
-      if (savedBranding) {
-        try {
-          const parsed = JSON.parse(savedBranding);
-          if (parsed.primaryColor) setBranding(parsed);
-        } catch {}
-      }
-      if (savedLegal) {
-        try {
-          const parsed = JSON.parse(savedLegal);
-          if (parsed.termsContent) setLegalSecurity(parsed);
-        } catch {}
-      }
-      if (savedFaq) {
-        try {
-          const parsed = JSON.parse(savedFaq);
-          if (Array.isArray(parsed) && parsed.length > 0) setFaqItems(parsed);
-        } catch {}
-      }
-      if (savedSponsors) {
-        try {
-          const parsed = JSON.parse(savedSponsors);
-          if (Array.isArray(parsed) && parsed.length > 0) setPendingSponsors(parsed);
-        } catch {}
-      }
-      if (savedInquiries) {
-        try {
-          const parsed = JSON.parse(savedInquiries);
-          if (Array.isArray(parsed) && parsed.length > 0) setInquiries(parsed);
-        } catch {}
-      }
-      if (savedSupport) {
-        try {
-          const parsed = JSON.parse(savedSupport);
-          if (Array.isArray(parsed) && parsed.length > 0) setSupportInquiries(parsed);
-        } catch {}
-      }
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        if (currentUser.email && currentUser.email.toLowerCase().includes("admin")) {
-          setUserStatus("admin");
-          setCookie("wlp_role", "admin");
-          localStorage.setItem("wlp_user_status", "admin");
-          localStorage.setItem("wlp_user_email", currentUser.email);
-        } else {
-          setUserStatus("approved");
-          setCookie("wlp_role", "approved");
-          localStorage.setItem("wlp_user_status", "approved");
-          localStorage.setItem("wlp_user_email", currentUser.email || "");
-        }
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const logAuditAction = (action: string, details: string) => {
-    const entry: AuditLogEntry = {
-      id: "log-" + Date.now(),
-      timestamp: new Date().toISOString().replace("T", " ").split(".")[0],
-      adminEmail: user?.email || "admin@wlp.org",
-      action,
-      details,
-    };
-    setAuditLogs((prev) => [entry, ...prev]);
-  };
-
-  const submitSupportInquiry = (name: string, email: string, subject: string, message: string, source: SupportInquiry["source"] = "Support Concierge") => {
-    const newInquiry: SupportInquiry = {
-      id: "sup-" + Date.now(),
-      name,
-      email,
-      subject,
-      message,
-      source,
-      status: "pending",
-      createdAt: new Date().toISOString().replace("T", " ").split(".")[0],
-    };
-
-    const updated = [newInquiry, ...supportInquiries];
-    setSupportInquiries(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_support_inquiries", JSON.stringify(updated));
-    }
-  };
-
-  const resolveSupportInquiry = (id: string) => {
-    const updated = supportInquiries.map((s) => (s.id === id ? { ...s, status: "resolved" as const } : s));
-    setSupportInquiries(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_support_inquiries", JSON.stringify(updated));
-    }
-    logAuditAction("Support Inquiry Resolved", `Resolved inquiry ID: ${id}`);
-  };
-
-  const provisionSponsorManual = (email: string, name?: string, company?: string) => {
-    const tempPass = "WLP-" + Math.floor(1000 + Math.random() * 9000);
-    const now = new Date();
-    const formattedDate = `${now.toISOString().split("T")[0]} ${now.toTimeString().split(" ")[0]}`;
-
-    const newSponsor: PendingSponsor = {
-      id: "sp-" + Date.now(),
-      name: name || email.split("@")[0],
-      email,
-      company: company || "Corporate Sponsor",
-      linkedin: "https://linkedin.com",
-      status: "approved",
-      callStatus: "Vetted (Approved)",
-      createdAt: formattedDate,
-      isProfileComplete: false,
-      assignedCredentials: {
-        username: email,
-        tempPass,
-        issuedAt: formattedDate,
-      },
-    };
-
-    const updated = [newSponsor, ...pendingSponsors];
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
-    }
-    logAuditAction("Manual Sponsor Provisioned", `Created credentials for ${email}`);
-    return { username: email, tempPass };
-  };
-
-  const persistProfiles = (newProfiles: YouthProfile[]) => {
-    setProfiles(newProfiles);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_profiles", JSON.stringify(newProfiles));
-    }
-  };
-
-  const addProfile = (newProfile: YouthProfile) => {
-    const updated = [newProfile, ...profiles];
-    persistProfiles(updated);
-    logAuditAction("Talent Added", `Added ${newProfile.name} (${newProfile.category})`);
-  };
-
-  const updateProfile = (updatedProfile: YouthProfile) => {
-    const updated = profiles.map((p) => (p.id === updatedProfile.id ? updatedProfile : p));
-    persistProfiles(updated);
-    logAuditAction("Talent Updated", `Updated ${updatedProfile.name}`);
-  };
-
-  const deleteProfile = (id: string) => {
-    const updated = profiles.filter((p) => p.id !== id);
-    persistProfiles(updated);
-    logAuditAction("Talent Deleted", `Deleted talent ID: ${id}`);
-  };
-
-  const deleteSponsor = (id: string) => {
-    const target = pendingSponsors.find((s) => s.id === id);
-    const updated = pendingSponsors.filter((s) => s.id !== id);
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
-    }
-    if (target) {
-      logAuditAction("Sponsor Deleted & Access Revoked", `Removed sponsor ${target.name} (${target.email}) and revoked all dashboard access permissions.`);
-      if (user?.email?.toLowerCase() === target.email.toLowerCase()) {
-        logout();
-      }
-    }
-  };
-
-  const updateSponsorPassword = (email: string, newPass: string) => {
-    const updated = pendingSponsors.map((s) => {
-      if (s.email.toLowerCase() === email.toLowerCase()) {
-        return {
-          ...s,
-          customPassword: newPass,
-          isTempPassRevoked: true,
-          assignedCredentials: s.assignedCredentials
-            ? { ...s.assignedCredentials, tempPass: "" }
-            : undefined,
-        };
-      }
-      return s;
-    });
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
-    }
-    logAuditAction("Sponsor Password Changed", `Updated password for ${email}. Temporary password invalidated.`);
-  };
-
-  const login = async (email: string, pass: string) => {
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // Check for admin login: admin@wlp.org / admin123
-    if (normalizedEmail === "admin@wlp.org" || normalizedEmail.includes("admin")) {
-      const mockUser = { uid: "admin-uid", email: "admin@wlp.org" } as User;
-      setUser(mockUser);
-      setUserStatus("admin");
-      setMfaVerified(true);
-      setCookie("wlp_role", "admin");
-      localStorage.setItem("wlp_user_status", "admin");
-      localStorage.setItem("wlp_user_email", "admin@wlp.org");
-      localStorage.setItem("wlp_mfa_verified", "true");
-      return;
-    }
-
-    // Lookup sponsor in pendingSponsors database
-    const match = pendingSponsors.find(
-      (s) => s.email.toLowerCase() === normalizedEmail || s.assignedCredentials?.username.toLowerCase() === normalizedEmail
-    );
-
-    if (match) {
-      if (match.status === "rejected") {
-        throw new Error("Access Revoked: Your sponsor account has been revoked or removed by Administrator.");
-      }
-
-      // Verify Password (custom password takes priority and invalidates tempPass)
-      if (match.customPassword) {
-        if (pass !== match.customPassword) {
-          throw new Error("Invalid password. Note: Your temporary password was updated and is no longer valid.");
-        }
-      } else if (match.assignedCredentials?.tempPass) {
-        if (pass !== match.assignedCredentials.tempPass && pass !== "sponsor123") {
-          throw new Error("Invalid password. Please check your assigned temporary credentials.");
-        }
-      } else if (pass !== "sponsor123") {
-        throw new Error("Invalid password. Account credentials pending administrator issuance.");
-      }
-
-      // Grant access! If approved, userStatus is "approved" (navigates directly to dashboard)
-      if (match.status === "approved") {
-        const mockUser = { uid: match.id, email: match.email } as User;
-        setUser(mockUser);
-        setUserStatus("approved");
-        setCookie("wlp_role", "approved");
-        localStorage.setItem("wlp_user_status", "approved");
-        localStorage.setItem("wlp_user_email", match.email);
-        return;
-      } else {
-        const mockUser = { uid: match.id, email: match.email } as User;
-        setUser(mockUser);
-        setUserStatus("pending");
-        setCookie("wlp_role", "pending");
-        localStorage.setItem("wlp_user_status", "pending");
-        localStorage.setItem("wlp_user_email", match.email);
-        return;
-      }
-    }
-
-    // Default fallback for demo sponsor
-    if (normalizedEmail === "sponsor@wlp.org") {
-      const mockUser = { uid: "sp-mock", email: "sponsor@wlp.org" } as User;
-      setUser(mockUser);
-      setUserStatus("approved");
-      setCookie("wlp_role", "approved");
-      localStorage.setItem("wlp_user_status", "approved");
-      localStorage.setItem("wlp_user_email", "sponsor@wlp.org");
-      return;
-    }
-
-    throw new Error("Invalid credentials. Sponsor account not found in admissions database.");
-  };
-
   const [transparencyReports, setTransparencyReports] = useState<TransparencyReport[]>(INITIAL_TRANSPARENCY_REPORTS);
   const [foundationVideos, setFoundationVideos] = useState<FoundationVideo[]>(INITIAL_FOUNDATION_VIDEOS);
   const [sponsorDreams, setSponsorDreams] = useState<SponsorDream[]>([
@@ -633,86 +257,317 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status: "active",
     },
   ]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([
+    {
+      id: "log-1",
+      timestamp: "2026-08-01 14:00:00",
+      adminEmail: "admin@wlp.org",
+      action: "System Initialized",
+      details: "WLP Master Build & Zero-Trust Security Protocol active.",
+    },
+  ]);
+
+  // Firebase Auth & Live Cloud Firestore Subscriptions
+  useEffect(() => {
+    // 1. Firebase Auth listener
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const emailLower = currentUser.email?.toLowerCase() || "";
+        if (emailLower.includes("admin") || emailLower === "admin@wlp.org") {
+          setUserStatus("admin");
+          setCookie("wlp_role", "admin");
+          setMfaVerified(true);
+        } else {
+          setUserStatus("approved");
+          setCookie("wlp_role", "approved");
+        }
+      } else {
+        setUser(null);
+        setUserStatus("logged_out");
+        eraseCookie("wlp_role");
+      }
+      setLoading(false);
+    });
+
+    // 2. Firestore Live Collection Subscriptions
+    const unsubProfiles = onSnapshot(collection(db, "profiles"), (snap) => {
+      if (!snap.empty) setProfiles(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as YouthProfile[]);
+    });
+
+    const unsubBranding = onSnapshot(doc(db, "siteContent", "main"), (snap) => {
+      if (snap.exists()) setBranding(snap.data() as BrandingConfig);
+    });
+
+    const unsubLegal = onSnapshot(doc(db, "legal_security", "main"), (snap) => {
+      if (snap.exists()) setLegalSecurity(snap.data() as LegalSecurityConfig);
+    });
+
+    const unsubMission = onSnapshot(doc(db, "mission", "main"), (snap) => {
+      if (snap.exists()) setMissionVision(snap.data() as MissionVisionData);
+    });
+
+    const unsubFaqs = onSnapshot(collection(db, "faqs"), (snap) => {
+      if (!snap.empty) setFaqItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FaqItem[]);
+    });
+
+    const unsubTeam = onSnapshot(collection(db, "team"), (snap) => {
+      if (!snap.empty) setTeamMembers(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TeamMember[]);
+    });
+
+    const unsubVideos = onSnapshot(collection(db, "videos"), (snap) => {
+      if (!snap.empty) setFoundationVideos(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as FoundationVideo[]);
+    });
+
+    const unsubTransparency = onSnapshot(collection(db, "transparency"), (snap) => {
+      if (!snap.empty) setTransparencyReports(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as TransparencyReport[]);
+    });
+
+    const unsubSponsors = onSnapshot(collection(db, "pending_sponsors"), (snap) => {
+      if (!snap.empty) setPendingSponsors(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as PendingSponsor[]);
+    });
+
+    const unsubInquiries = onSnapshot(collection(db, "inquiries"), (snap) => {
+      if (!snap.empty) setInquiries(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as SponsorInquiry[]);
+    });
+
+    const unsubSupport = onSnapshot(collection(db, "support_inquiries"), (snap) => {
+      if (!snap.empty) setSupportInquiries(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as SupportInquiry[]);
+    });
+
+    return () => {
+      unsubscribeAuth();
+      unsubProfiles();
+      unsubBranding();
+      unsubLegal();
+      unsubMission();
+      unsubFaqs();
+      unsubTeam();
+      unsubVideos();
+      unsubTransparency();
+      unsubSponsors();
+      unsubInquiries();
+      unsubSupport();
+    };
+  }, []);
+
+  const logAuditAction = (action: string, details: string) => {
+    const entry: AuditLogEntry = {
+      id: "log-" + Date.now(),
+      timestamp: new Date().toISOString().replace("T", " ").split(".")[0],
+      adminEmail: user?.email || "admin@wlp.org",
+      action,
+      details,
+    };
+    setAuditLogs((prev) => [entry, ...prev]);
+    setSingleDocSafe("audit_logs", entry.id, entry);
+  };
+
+  const submitSupportInquiry = (name: string, email: string, subject: string, message: string, source: SupportInquiry["source"] = "Support Concierge") => {
+    const newInquiry: SupportInquiry = {
+      id: "sup-" + Date.now(),
+      name,
+      email,
+      subject,
+      message,
+      source,
+      status: "pending",
+      createdAt: new Date().toISOString().replace("T", " ").split(".")[0],
+    };
+    setSingleDocSafe("support_inquiries", newInquiry.id, newInquiry);
+  };
+
+  const resolveSupportInquiry = (id: string) => {
+    const target = supportInquiries.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("support_inquiries", id, { ...target, status: "resolved" });
+    }
+    logAuditAction("Support Inquiry Resolved", `Resolved inquiry ID: ${id}`);
+  };
+
+  const provisionSponsorManual = (email: string, name?: string, company?: string, category?: SponsorCategory, tier?: MembershipTier) => {
+    const tempPass = "WLP-" + Math.floor(1000 + Math.random() * 9000);
+    const now = new Date();
+    const formattedDate = `${now.toISOString().split("T")[0]} ${now.toTimeString().split(" ")[0]}`;
+
+    const newSponsor: PendingSponsor = {
+      id: "sp-" + Date.now(),
+      name: name || email.split("@")[0],
+      email,
+      company: company || "Corporate Sponsor",
+      linkedin: "https://linkedin.com",
+      status: "approved",
+      callStatus: "Vetted (Approved)",
+      sponsorCategory: category || "Child Sponsor",
+      membershipTier: tier || "Gold",
+      createdAt: formattedDate,
+      isProfileComplete: false,
+      assignedCredentials: {
+        username: email,
+        tempPass,
+        issuedAt: formattedDate,
+      },
+    };
+
+    setSingleDocSafe("pending_sponsors", newSponsor.id, newSponsor);
+    setSingleDocSafe("sponsors", newSponsor.id, newSponsor);
+    
+    // Create Firebase Auth account if possible
+    createUserWithEmailAndPassword(auth, email, tempPass).catch(() => {});
+
+    logAuditAction("Manual Sponsor Provisioned", `Created credentials for ${email}`);
+    return { username: email, tempPass };
+  };
+
+  const addProfile = (newProfile: YouthProfile) => {
+    setSingleDocSafe("profiles", newProfile.id, newProfile);
+    logAuditAction("Talent Added", `Added ${newProfile.name} (${newProfile.category})`);
+  };
+
+  const updateProfile = (updatedProfile: YouthProfile) => {
+    setSingleDocSafe("profiles", updatedProfile.id, updatedProfile);
+    logAuditAction("Talent Updated", `Updated ${updatedProfile.name}`);
+  };
+
+  const deleteProfile = (id: string) => {
+    deleteDocSafe("profiles", id);
+    logAuditAction("Talent Deleted", `Deleted talent ID: ${id}`);
+  };
+
+  const deleteSponsor = (id: string) => {
+    deleteDocSafe("pending_sponsors", id);
+    deleteDocSafe("sponsors", id);
+    logAuditAction("Sponsor Deleted", `Removed sponsor ID: ${id}`);
+  };
+
+  const updateSponsorPassword = (email: string, newPass: string) => {
+    const target = pendingSponsors.find((s) => s.email.toLowerCase() === email.toLowerCase());
+    if (target) {
+      setSingleDocSafe("pending_sponsors", target.id, {
+        ...target,
+        customPassword: newPass,
+        isTempPassRevoked: true,
+      });
+    }
+    logAuditAction("Sponsor Password Changed", `Updated password for ${email}`);
+  };
+
+  const login = async (email: string, pass: string) => {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    try {
+      const res = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
+      setUser(res.user);
+      if (normalizedEmail === "admin@wlp.org" || normalizedEmail.includes("admin")) {
+        setUserStatus("admin");
+        setCookie("wlp_role", "admin");
+        setMfaVerified(true);
+      } else {
+        setUserStatus("approved");
+        setCookie("wlp_role", "approved");
+      }
+      return;
+    } catch {
+      // Demo / fallback credentials handling
+      if (normalizedEmail === "admin@wlp.org" && pass === "admin123") {
+        setUser({ uid: "admin-uid", email: "admin@wlp.org" } as User);
+        setUserStatus("admin");
+        setCookie("wlp_role", "admin");
+        setMfaVerified(true);
+        return;
+      }
+
+      const match = pendingSponsors.find(
+        (s) => s.email.toLowerCase() === normalizedEmail || s.assignedCredentials?.username.toLowerCase() === normalizedEmail
+      );
+
+      if (match) {
+        if (match.status === "rejected") {
+          throw new Error("Access Revoked: Your sponsor account has been revoked or removed by Administrator.");
+        }
+        if (match.customPassword && pass !== match.customPassword) {
+          throw new Error("Invalid password.");
+        } else if (match.assignedCredentials?.tempPass && pass !== match.assignedCredentials.tempPass && pass !== "sponsor123") {
+          throw new Error("Invalid password. Please check your assigned credentials.");
+        }
+
+        setUser({ uid: match.id, email: match.email } as User);
+        setUserStatus("approved");
+        setCookie("wlp_role", "approved");
+        return;
+      }
+
+      if (normalizedEmail === "sponsor@wlp.org" && pass === "sponsor123") {
+        setUser({ uid: "sp-mock", email: "sponsor@wlp.org" } as User);
+        setUserStatus("approved");
+        setCookie("wlp_role", "approved");
+        return;
+      }
+
+      throw new Error("Invalid credentials. Sponsor account not found in admissions database.");
+    }
+  };
 
   const updateSponsorCategoryAndTier = (id: string, category: SponsorCategory, tier: MembershipTier) => {
-    const updated = pendingSponsors.map((s) => (s.id === id ? { ...s, sponsorCategory: category, membershipTier: tier } : s));
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, { ...target, sponsorCategory: category, membershipTier: tier });
     }
     logAuditAction("Sponsor Category & Tier Updated", `Assigned ${category} (${tier} Tier) to sponsor ID: ${id}`);
   };
 
   const addTransparencyReport = (report: TransparencyReport) => {
-    const updated = [report, ...transparencyReports];
-    setTransparencyReports(updated);
-    saveCmsData("wlp_transparency_reports", updated);
+    setSingleDocSafe("transparency", report.id, report);
     logAuditAction("Transparency Report Uploaded", `Published: ${report.title}`);
   };
 
   const deleteTransparencyReport = (id: string) => {
-    const updated = transparencyReports.filter((r) => r.id !== id);
-    setTransparencyReports(updated);
-    saveCmsData("wlp_transparency_reports", updated);
+    deleteDocSafe("transparency", id);
     logAuditAction("Transparency Report Removed", `Deleted report ID: ${id}`);
   };
 
   const addFoundationVideo = (video: FoundationVideo) => {
-    const updated = [video, ...foundationVideos];
-    setFoundationVideos(updated);
-    saveCmsData("wlp_foundation_videos", updated);
+    setSingleDocSafe("videos", video.id, video);
     logAuditAction("Foundation Video Published", `Published: ${video.title}`);
   };
 
   const deleteFoundationVideo = (id: string) => {
-    const updated = foundationVideos.filter((v) => v.id !== id);
-    setFoundationVideos(updated);
-    saveCmsData("wlp_foundation_videos", updated);
+    deleteDocSafe("videos", id);
     logAuditAction("Foundation Video Removed", `Deleted video ID: ${id}`);
   };
 
   const updateBranding = (newBranding: BrandingConfig) => {
-    setBranding(newBranding);
-    saveCmsData("wlp_branding", newBranding);
+    setSingleDocSafe("siteContent", "main", newBranding);
     logAuditAction("Branding & Hero Content Updated", "Updated hero headline, site title, and visual theme settings.");
   };
 
   const updateLegalSecurity = (newLegal: LegalSecurityConfig) => {
-    setLegalSecurity(newLegal);
-    saveCmsData("wlp_legal_security", newLegal);
+    setSingleDocSafe("legal_security", "main", newLegal);
     logAuditAction("Legal & Security Policy Updated", "Updated platform legal and compliance content.");
   };
 
   const updateMissionVision = (newMV: MissionVisionData) => {
-    setMissionVision(newMV);
-    saveCmsData("wlp_mission_vision", newMV);
+    setSingleDocSafe("mission", "main", newMV);
     logAuditAction("Mission & Vision Content Updated", "Updated foundation mission, vision, and core strategic pillars.");
   };
 
   const updateTeamMembers = (newMembers: TeamMember[]) => {
-    setTeamMembers(newMembers);
-    saveCmsData("wlp_team_members", newMembers);
+    newMembers.forEach((m) => setSingleDocSafe("team", m.id, m));
     logAuditAction("Team Directory Updated", "Updated executive leadership team members.");
   };
 
   const addFaqItem = (item: FaqItem) => {
-    const updated = [...faqItems, item];
-    setFaqItems(updated);
-    saveCmsData("wlp_faq", updated);
+    setSingleDocSafe("faqs", item.id, item);
     logAuditAction("FAQ Item Added", `Added question: ${item.question}`);
   };
 
   const updateFaqItem = (item: FaqItem) => {
-    const updated = faqItems.map((f) => (f.id === item.id ? item : f));
-    setFaqItems(updated);
-    saveCmsData("wlp_faq", updated);
+    setSingleDocSafe("faqs", item.id, item);
     logAuditAction("FAQ Item Updated", `Updated question ID: ${item.id}`);
   };
 
   const deleteFaqItem = (id: string) => {
-    const updated = faqItems.filter((f) => f.id !== id);
-    setFaqItems(updated);
-    saveCmsData("wlp_faq", updated);
+    deleteDocSafe("faqs", id);
     logAuditAction("FAQ Item Deleted", `Deleted question ID: ${id}`);
   };
 
@@ -732,11 +587,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status: "active",
     };
 
-    const updated = [newDream, ...sponsorDreams];
-    setSponsorDreams(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_sponsor_dreams", JSON.stringify(updated));
-    }
+    setSingleDocSafe("sponsor_dreams", newDream.id, newDream);
     logAuditAction("Sponsor Dream Adopted", `Adopted dream for ${targetTalent?.name || talentId}`);
   };
 
@@ -752,14 +603,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, pass);
       setUser(res.user);
-      setUserStatus("pending");
-      setCookie("wlp_role", "pending");
-    } catch {
-      const mockUser = { uid: "mock-uid-" + Date.now(), email } as User;
-      setUser(mockUser);
-      setUserStatus("pending");
-      setCookie("wlp_role", "pending");
-    }
+    } catch {}
 
     const now = new Date();
     const formattedDate = `${now.toISOString().split("T")[0]} ${now.toTimeString().split(" ")[0]}`;
@@ -778,11 +622,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isProfileComplete: false,
     };
 
-    const updated = [newSponsor, ...pendingSponsors];
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
-    }
+    setSingleDocSafe("pending_sponsors", newSponsor.id, newSponsor);
 
     if (targetTalentId) {
       adoptSponsorDream(targetTalentId, "Child Dream Adoption");
@@ -816,11 +656,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       interests: dreamInterest ? [dreamInterest, preferredTime] : ["Child Dream Sponsorship", preferredTime],
       isProfileComplete: false,
     };
-    const updated = [newSponsor, ...pendingSponsors];
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
-    }
+
+    setSingleDocSafe("pending_sponsors", newSponsor.id, newSponsor);
+    setSingleDocSafe("bookings", newSponsor.id, newSponsor);
 
     submitSupportInquiry(
       name,
@@ -834,125 +672,97 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
-    } catch {
-      // ignore
-    }
+    } catch {}
     setUser(null);
     setUserStatus("logged_out");
     setMfaVerified(false);
     eraseCookie("wlp_role");
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("wlp_user_status");
-      localStorage.removeItem("wlp_user_email");
-      localStorage.removeItem("wlp_mfa_verified");
-    }
   };
 
   const approveSponsor = (id: string) => {
-    const updated = pendingSponsors.map((s) => {
-      if (s.id === id) {
-        const credentials = s.assignedCredentials || {
-          username: s.email,
-          tempPass: "WLP-" + Math.floor(1000 + Math.random() * 9000),
-          issuedAt: new Date().toISOString().replace("T", " ").split(".")[0],
-        };
-        return {
-          ...s,
-          status: "approved" as const,
-          callStatus: "Vetted (Approved)" as const,
-          assignedCredentials: credentials,
-        };
-      }
-      return s;
-    });
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      const credentials = target.assignedCredentials || {
+        username: target.email,
+        tempPass: "WLP-" + Math.floor(1000 + Math.random() * 9000),
+        issuedAt: new Date().toISOString().replace("T", " ").split(".")[0],
+      };
+      setSingleDocSafe("pending_sponsors", id, {
+        ...target,
+        status: "approved" as const,
+        callStatus: "Vetted (Approved)" as const,
+        assignedCredentials: credentials,
+      });
     }
   };
 
   const rejectSponsor = (id: string) => {
-    const updated = pendingSponsors.map((s) => (s.id === id ? { ...s, status: "rejected" as const, callStatus: "Vetted (Rejected)" as const } : s));
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, {
+        ...target,
+        status: "rejected" as const,
+        callStatus: "Vetted (Rejected)" as const,
+      });
     }
   };
 
   const generateCredentials = (id: string) => {
     const tempPass = "WLP-" + Math.floor(1000 + Math.random() * 9000);
-    let username = "";
+    const target = pendingSponsors.find((s) => s.id === id);
+    const username = target?.email || "";
 
-    const updated = pendingSponsors.map((s) => {
-      if (s.id === id) {
-        username = s.email;
-        return {
-          ...s,
-          status: "approved" as const,
-          callStatus: "Vetted (Approved)" as const,
-          assignedCredentials: {
-            username: s.email,
-            tempPass,
-            issuedAt: new Date().toISOString().replace("T", " ").split(".")[0],
-          },
-        };
-      }
-      return s;
-    });
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, {
+        ...target,
+        status: "approved" as const,
+        callStatus: "Vetted (Approved)" as const,
+        assignedCredentials: {
+          username,
+          tempPass,
+          issuedAt: new Date().toISOString().replace("T", " ").split(".")[0],
+        },
+      });
     }
 
     return { username, tempPass };
   };
 
   const updateCallStatus = (id: string, status: PendingSponsor["callStatus"]) => {
-    const updated = pendingSponsors.map((s) => (s.id === id ? { ...s, callStatus: status } : s));
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, { ...target, callStatus: status });
     }
   };
 
   const updateSponsorProfile = (id: string, name: string, company: string, linkedin: string, interests: string[]) => {
-    const updated = pendingSponsors.map((s) => (s.id === id ? { ...s, name, company, linkedin, interests } : s));
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, { ...target, name, company, linkedin, interests });
     }
   };
 
-  const completeFirstTimeProfile = (id: string, name: string, company: string, linkedin: string, interests: string[], newPass?: string) => {
-    const updated = pendingSponsors.map((s) => (s.id === id ? { ...s, name, company, linkedin, interests, isProfileComplete: true } : s));
-    setPendingSponsors(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
+  const completeFirstTimeProfile = (id: string, name: string, company: string, linkedin: string, interests: string[]) => {
+    const target = pendingSponsors.find((s) => s.id === id);
+    if (target) {
+      setSingleDocSafe("pending_sponsors", id, { ...target, name, company, linkedin, interests, isProfileComplete: true });
     }
     logAuditAction("Sponsor First-Time Profile Completed", `Sponsor ${name} (${company}) completed profile setup.`);
   };
 
   const approveTalentAddition = (inquiryId: string) => {
     const inquiry = inquiries.find((i) => i.id === inquiryId);
-    const updatedInq = inquiries.map((inq) => (inq.id === inquiryId ? { ...inq, status: "connected" as const } : inq));
-    setInquiries(updatedInq);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_inquiries", JSON.stringify(updatedInq));
-    }
-
     if (inquiry) {
-      setProfiles((prev) =>
-        prev.map((p) => (p.id === inquiry.talentId ? { ...p, status: "sponsored" as const } : p))
-      );
+      setSingleDocSafe("inquiries", inquiryId, { ...inquiry, status: "connected" });
+      setSingleDocSafe("profiles", inquiry.talentId, { status: "sponsored" });
     }
     logAuditAction("Inquiry Linked to Talent", `Approved connection for inquiry ID: ${inquiryId}`);
   };
 
   const rejectTalentAddition = (inquiryId: string) => {
-    const updatedInq = inquiries.map((inq) => (inq.id === inquiryId ? { ...inq, status: "closed" as const } : inq));
-    setInquiries(updatedInq);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_inquiries", JSON.stringify(updatedInq));
+    const inquiry = inquiries.find((i) => i.id === inquiryId);
+    if (inquiry) {
+      setSingleDocSafe("inquiries", inquiryId, { ...inquiry, status: "closed" });
     }
     logAuditAction("Inquiry Declined", `Declined inquiry ID: ${inquiryId}`);
   };
@@ -960,7 +770,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyMfa = (code: string) => {
     if (code === "123456" || code.trim().length === 6) {
       setMfaVerified(true);
-      localStorage.setItem("wlp_mfa_verified", "true");
       return true;
     }
     return false;
@@ -979,11 +788,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status: "pending",
       createdAt: new Date().toISOString().replace("T", " ").split(".")[0],
     };
-    const updated = [newInquiry, ...inquiries];
-    setInquiries(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_inquiries", JSON.stringify(updated));
-    }
+    setSingleDocSafe("inquiries", newInquiry.id, newInquiry);
   };
 
   return (
@@ -1059,4 +864,3 @@ export function useAuth() {
   }
   return context;
 }
-

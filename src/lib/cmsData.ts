@@ -274,112 +274,102 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
 ];
 
 import { useState, useEffect } from "react";
+import { db } from "./firebase";
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+} from "firebase/firestore";
+import { INITIAL_YOUTH_PROFILES, INITIAL_TRANSPARENCY_REPORTS, INITIAL_FOUNDATION_VIDEOS } from "./data";
 
-export function useCmsData<T>(key: string, defaultValue: T): T {
-  const [value, setValue] = useState<T>(() => {
-    if (typeof window === "undefined") return defaultValue;
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw) return JSON.parse(raw) as T;
+export const DEFAULTS = {
+  siteContent: INITIAL_BRANDING,
+  profiles: INITIAL_YOUTH_PROFILES,
+  videos: INITIAL_FOUNDATION_VIDEOS,
+  faqs: INITIAL_FAQ_ITEMS,
+  mission: INITIAL_MISSION_VISION,
+  team: INITIAL_TEAM_MEMBERS,
+  transparency: INITIAL_TRANSPARENCY_REPORTS,
+  legal_security: INITIAL_LEGAL_SECURITY,
+};
 
-      const aliasKey =
-        key === "wlp_branding" ? "wlp_siteContent" :
-        key === "wlp_siteContent" ? "wlp_branding" :
-        key === "wlp_faq" ? "wlp_faqs" :
-        key === "wlp_faqs" ? "wlp_faq" :
-        key === "wlp_team" ? "wlp_team_members" :
-        key === "wlp_team_members" ? "wlp_team" :
-        key === "wlp_videos" ? "wlp_foundation_videos" :
-        key === "wlp_foundation_videos" ? "wlp_videos" :
-        key === "wlp_transparency" ? "wlp_transparency_reports" :
-        key === "wlp_transparency_reports" ? "wlp_transparency" : null;
-
-      if (aliasKey) {
-        const aliasRaw = localStorage.getItem(aliasKey);
-        if (aliasRaw) return JSON.parse(aliasRaw) as T;
-      }
-
-      return defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  });
+export function useFirestoreCollection<T>(name: string, defaults: T[]): T[] {
+  const [items, setItems] = useState<T[] | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const aliasKey =
-      key === "wlp_branding" ? "wlp_siteContent" :
-      key === "wlp_siteContent" ? "wlp_branding" :
-      key === "wlp_faq" ? "wlp_faqs" :
-      key === "wlp_faqs" ? "wlp_faq" :
-      key === "wlp_team" ? "wlp_team_members" :
-      key === "wlp_team_members" ? "wlp_team" :
-      key === "wlp_videos" ? "wlp_foundation_videos" :
-      key === "wlp_foundation_videos" ? "wlp_videos" :
-      key === "wlp_transparency" ? "wlp_transparency_reports" :
-      key === "wlp_transparency_reports" ? "wlp_transparency" : null;
-
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === key || (aliasKey && e.key === aliasKey)) {
-        try {
-          setValue(e.newValue ? JSON.parse(e.newValue) : defaultValue);
-        } catch {
-          setValue(defaultValue);
-        }
+    const unsub = onSnapshot(collection(db, name), (snap) => {
+      if (snap.empty) {
+        // First load & empty collection: seed with defaults
+        const seed = async () => {
+          try {
+            const batch = defaults.map((item, i) =>
+              setDoc(doc(db, name, (item as any).id || `${name}-${i}`), item as any)
+            );
+            await Promise.all(batch);
+          } catch {}
+          setItems(defaults);
+        };
+        seed();
+      } else {
+        setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as unknown as T[]);
       }
-    };
+    });
+    return () => unsub();
+  }, [name]);
 
-    const onCustom = (e: Event) => {
-      try {
-        const customEvent = e as CustomEvent;
-        if (
-          customEvent.detail &&
-          (customEvent.detail.key === key || (aliasKey && customEvent.detail.key === aliasKey))
-        ) {
-          setValue(JSON.parse(customEvent.detail.value));
-        }
-      } catch {}
-    };
+  return items ?? defaults;
+}
 
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("wlp-cms-update", onCustom);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("wlp-cms-update", onCustom);
-    };
-  }, [key, defaultValue]);
+export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T): T {
+  const [item, setItem] = useState<T>(defaultValue);
 
-  return value;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const unsub = onSnapshot(doc(db, name, docId), (snap) => {
+      if (!snap.exists()) {
+        setDoc(doc(db, name, docId), defaultValue as any).catch(() => {});
+        setItem(defaultValue);
+      } else {
+        setItem(snap.data() as T);
+      }
+    });
+    return () => unsub();
+  }, [name, docId]);
+
+  return item;
+}
+
+export async function addDocSafe(name: string, data: unknown) {
+  const ref = doc(collection(db, name));
+  const docData = { ...(data as any), id: ref.id, updatedAt: Date.now() };
+  await setDoc(ref, docData);
+  return ref.id;
+}
+
+export async function updateDocSafe(name: string, id: string, data: unknown) {
+  await setDoc(doc(db, name, id), { ...(data as any), updatedAt: Date.now() }, { merge: true });
+}
+
+export async function deleteDocSafe(name: string, id: string) {
+  await deleteDoc(doc(db, name, id));
+}
+
+export async function setSingleDocSafe(name: string, docId: string, data: unknown) {
+  await setDoc(doc(db, name, docId), { ...(data as any), updatedAt: Date.now() }, { merge: true });
+}
+
+// Deprecated alias helper to maintain smooth fallback
+export function useCmsData<T>(key: string, defaultValue: T): T {
+  const docName = key.replace("wlp_", "");
+  return useFirestoreDoc<T>("cms_content", docName, defaultValue);
 }
 
 export function saveCmsData<T>(key: string, value: T) {
-  if (typeof window !== "undefined") {
-    const stringified = JSON.stringify(value);
-    localStorage.setItem(key, stringified);
-
-    if (key === "wlp_branding") localStorage.setItem("wlp_siteContent", stringified);
-    if (key === "wlp_siteContent") localStorage.setItem("wlp_branding", stringified);
-    if (key === "wlp_faq") localStorage.setItem("wlp_faqs", stringified);
-    if (key === "wlp_faqs") localStorage.setItem("wlp_faq", stringified);
-    if (key === "wlp_team_members") localStorage.setItem("wlp_team", stringified);
-    if (key === "wlp_team") localStorage.setItem("wlp_team_members", stringified);
-    if (key === "wlp_foundation_videos") localStorage.setItem("wlp_videos", stringified);
-    if (key === "wlp_videos") localStorage.setItem("wlp_foundation_videos", stringified);
-    if (key === "wlp_transparency_reports") localStorage.setItem("wlp_transparency", stringified);
-    if (key === "wlp_transparency") localStorage.setItem("wlp_transparency_reports", stringified);
-
-    window.dispatchEvent(
-      new CustomEvent("wlp-cms-update", {
-        detail: { key, value: stringified },
-      })
-    );
-  }
+  const docName = key.replace("wlp_", "");
+  setSingleDocSafe("cms_content", docName, value);
 }
-
-export const DEFAULTS = {
-  siteContent: INITIAL_BRANDING,
-  faqs: INITIAL_FAQ_ITEMS,
-  mission: INITIAL_MISSION_VISION,
-  team: INITIAL_TEAM_MEMBERS,
-};
