@@ -82,8 +82,8 @@ export function Footer() {
             FAQ
           </Link>
           <span>&bull;</span>
-          <Link href="/register" className="hover:text-[#005C27] transition-colors">
-            Sponsor Registration
+          <Link href="/book-a-call" className="hover:text-[#005C27] transition-colors">
+            Book Orientation Call
           </Link>
           <span>&bull;</span>
           <Link href="/support" className="hover:text-[#005C27] transition-colors">

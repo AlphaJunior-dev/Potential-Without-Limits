@@ -209,10 +209,10 @@ export default function PortfolioDetailPage() {
               </button>
 
               <Link
-                href="/register"
+                href="/book-a-call"
                 className="w-full bg-[#051836] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 block cursor-pointer"
               >
-                <span>Register as Foundation Sponsor</span>
+                <span>Book Orientation Call</span>
               </Link>
             </div>
           </div>

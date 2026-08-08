@@ -120,14 +120,15 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-[#051836]/10 text-center text-xs font-inter text-[#051836]/70">
-          <span>Don&apos;t have a sponsor account? </span>
+        <div className="mt-8 pt-6 border-t border-[#051836]/10 text-center text-xs font-inter text-[#051836]/75 leading-relaxed">
+          New to PWLIF?{" "}
           <Link
-            href="/register"
+            href="/book-a-call"
             className="text-[#005C27] font-bold hover:underline"
           >
-            Apply &amp; Register Here
-          </Link>
+            Book an Orientation Call
+          </Link>{" "}
+          — sponsor access is provided after a brief call with our team.
         </div>
       </div>
     </div>

@@ -56,7 +56,7 @@ export default function AdminVettingPage() {
                 Sponsor Vetting &amp; Onboarding
               </h1>
               <p className="text-xs text-[#051836]/60">
-                Review incoming sponsor applications, verify categories and tiers, and approve access.
+                Review incoming orientation-call bookings, verify credentials, and provision sponsor accounts.
               </p>
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function AdminVettingPage() {
                               }}
                               className="bg-[#005C27] hover:bg-[#327B2F] text-white px-3.5 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Approve &amp; Create Account
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Provision Sponsor Account
                             </button>
                             <button
                               onClick={() => rejectSponsor(sponsor.id)}

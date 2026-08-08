@@ -80,10 +80,10 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/register"
+                href="/book-a-call"
                 className="bg-[#051836] text-white border border-[#051836] hover:bg-[#042554] px-8 py-4 rounded-2xl font-montserrat font-bold text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Become a Foundation Sponsor</span>
+                <span>Book Sponsor Orientation</span>
                 <ArrowRight className="w-4 h-4 text-[#F5AB00]" />
               </Link>
             </div>

@@ -132,7 +132,7 @@ interface AuthContextType {
   verifyMfa: (code: string) => boolean;
   setAdminRole: (role: "Super Admin" | "Vetting Officer" | "Curator") => void;
   sendInquiry: (talentId: string, talentName: string, message: string) => void;
-  bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string) => void;
+  bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string, category?: SponsorCategory, tier?: MembershipTier, dreamInterest?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -792,7 +792,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const bookVettingCall = (name: string, email: string, company: string, linkedin: string, preferredTime: string) => {
+  const bookVettingCall = (
+    name: string,
+    email: string,
+    company: string,
+    linkedin: string,
+    preferredTime: string,
+    category?: SponsorCategory,
+    tier?: MembershipTier,
+    dreamInterest?: string
+  ) => {
     const now = new Date();
     const formattedDate = `${now.toISOString().split("T")[0]} ${now.toTimeString().split(" ")[0]}`;
 
@@ -800,12 +809,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: "sp-" + Date.now(),
       name,
       email,
-      company: company || "Corporate Backer",
+      company: company || "Orientation Call Partner",
       linkedin: linkedin.startsWith("http") ? linkedin : `https://${linkedin}`,
+      sponsorCategory: category || "Child Sponsor",
+      membershipTier: tier || "Gold",
       status: "pending",
       callStatus: "Call Scheduled",
       createdAt: formattedDate,
-      interests: ["General Sponsorship", preferredTime],
+      interests: dreamInterest ? [dreamInterest, preferredTime] : ["Child Dream Sponsorship", preferredTime],
       isProfileComplete: false,
     };
     const updated = [newSponsor, ...pendingSponsors];
@@ -814,8 +825,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("wlp_pending_sponsors", JSON.stringify(updated));
     }
 
-    // Also route to Support Concierge & Priority Inquiries
-    submitSupportInquiry(name, email, `Vetting Call Requested (${preferredTime})`, `Organization: ${company || "N/A"}. LinkedIn: ${linkedin}. Preferred Time: ${preferredTime}`, "Priority Call Form");
+    submitSupportInquiry(
+      name,
+      email,
+      `Orientation Call Requested (${preferredTime})`,
+      `Organization: ${company || "N/A"}. Category: ${category || "Child Sponsor"}. Tier: ${tier || "Gold"}. LinkedIn: ${linkedin}. Dream Interest: ${dreamInterest || "General"}. Preferred Time: ${preferredTime}`,
+      "Priority Call Form"
+    );
   };
 
   const logout = async () => {

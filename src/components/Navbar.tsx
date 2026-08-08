@@ -135,11 +135,11 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
-                href="/register"
+                href="/book-a-call"
                 className="bg-[#005C27] text-white px-4 sm:px-5 py-2.5 rounded-xl font-inter font-bold text-xs sm:text-sm hover:bg-[#327B2F] transition shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-white" />
-                <span>Sponsor a Dream</span>
+                <span>Book Orientation Call</span>
               </Link>
               <Link
                 href="/login"
@@ -234,12 +234,12 @@ export function Navbar() {
             ) : (
               <div className="flex flex-col gap-2">
                 <Link
-                  href="/register"
+                  href="/book-a-call"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-full bg-[#005C27] text-white py-3 px-4 rounded-xl font-bold text-xs text-center shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Calendar className="w-4 h-4" />
-                  <span>Sponsor a Dream</span>
+                  <span>Book Orientation Call</span>
                 </Link>
                 <Link
                   href="/login"

@@ -19,6 +19,8 @@ import {
   Lock,
 } from "lucide-react";
 
+import { SponsorCategory, MembershipTier } from "@/lib/data";
+
 export default function BookACallPage() {
   const { bookVettingCall } = useAuth();
 
@@ -27,12 +29,15 @@ export default function BookACallPage() {
   const [company, setCompany] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [preferredTime, setPreferredTime] = useState("Tomorrow 10:00 AM EST");
+  const [category, setCategory] = useState<SponsorCategory>("Child Sponsor");
+  const [tier, setTier] = useState<MembershipTier>("Gold");
+  const [dreamInterest, setDreamInterest] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [activeView, setActiveView] = useState<"calendly" | "form">("calendly");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    bookVettingCall(name, email, company, linkedin, preferredTime);
+    bookVettingCall(name, email, company, linkedin, preferredTime, category, tier, dreamInterest);
     setSubmitted(true);
   };
 
@@ -285,6 +290,54 @@ export default function BookACallPage() {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                        Sponsorship Category *
+                      </label>
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as SponsorCategory)}
+                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                      >
+                        <option value="Child Sponsor">Child Sponsor (Direct Grant)</option>
+                        <option value="Program Sponsor">Program Sponsor (Lab &amp; Equipment)</option>
+                        <option value="Foundation Sponsor">Foundation Sponsor (Annual Partner)</option>
+                        <option value="Corporate Partner">Corporate Partner (CSR)</option>
+                        <option value="Strategic Partner">Strategic Partner (Global Alliance)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                        Membership Tier *
+                      </label>
+                      <select
+                        value={tier}
+                        onChange={(e) => setTier(e.target.value as MembershipTier)}
+                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                      >
+                        <option value="Platinum">Platinum Tier ($5,000+/mo)</option>
+                        <option value="Gold">Gold Tier ($1,500/mo)</option>
+                        <option value="Silver">Silver Tier ($500/mo)</option>
+                        <option value="Bronze">Bronze Tier ($150/mo)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      Organization/Name, email, and the child dream you&apos;re interested in (optional)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={dreamInterest}
+                      onChange={(e) => setDreamInterest(e.target.value)}
+                      placeholder="e.g. Hope for Tomorrow Foundation / Interested in supporting Dawit T. (Sports) or STEM grants..."
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                    />
                   </div>
 
                   <div>
