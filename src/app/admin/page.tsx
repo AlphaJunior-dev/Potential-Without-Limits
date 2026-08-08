@@ -73,6 +73,14 @@ export default function AdminDashboardPage() {
     deleteProfile,
     updateBranding,
     updateLegalSecurity,
+    missionVision,
+    updateMissionVision,
+    faqItems,
+    addFaqItem,
+    updateFaqItem,
+    deleteFaqItem,
+    teamMembers,
+    updateTeamMembers,
     transparencyReports,
     foundationVideos,
     addTransparencyReport,
@@ -160,15 +168,14 @@ export default function AdminDashboardPage() {
   const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
 
   // CMS State: Mission & Vision
-  const [missionText, setMissionText] = useState(INITIAL_MISSION_VISION.mission);
-  const [visionText, setVisionText] = useState(INITIAL_MISSION_VISION.vision);
-  const [foundersNoteText, setFoundersNoteText] = useState(INITIAL_MISSION_VISION.foundersNote);
-  const [foundersTitleText, setFoundersTitleText] = useState(INITIAL_MISSION_VISION.foundersTitle);
-  const [pillars, setPillars] = useState(INITIAL_MISSION_VISION.pillars);
+  const [missionText, setMissionText] = useState(missionVision?.mission || INITIAL_MISSION_VISION.mission);
+  const [visionText, setVisionText] = useState(missionVision?.vision || INITIAL_MISSION_VISION.vision);
+  const [foundersNoteText, setFoundersNoteText] = useState(missionVision?.foundersNote || INITIAL_MISSION_VISION.foundersNote);
+  const [foundersTitleText, setFoundersTitleText] = useState(missionVision?.foundersTitle || INITIAL_MISSION_VISION.foundersTitle);
+  const [pillars, setPillars] = useState(missionVision?.pillars || INITIAL_MISSION_VISION.pillars);
   const [cmsSavedNotice, setCmsSavedNotice] = useState(false);
 
   // CMS State: Team Members
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(INITIAL_TEAM_MEMBERS);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberName, setMemberName] = useState("");
   const [memberRole, setMemberRole] = useState("");
@@ -324,13 +331,18 @@ export default function AdminDashboardPage() {
   const handleSaveTeamMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingMemberId) {
-      setTeamMembers(teamMembers.map(m => m.id === editingMemberId ? {
-        ...m,
-        name: memberName,
-        role: memberRole,
-        bio: memberBio,
-        photoUrl: memberPhoto || m.photoUrl,
-      } : m));
+      const updated = teamMembers.map((m) =>
+        m.id === editingMemberId
+          ? {
+              ...m,
+              name: memberName,
+              role: memberRole,
+              bio: memberBio,
+              photoUrl: memberPhoto || m.photoUrl,
+            }
+          : m
+      );
+      updateTeamMembers(updated);
       triggerToast("✓ Member Updated", "Team member profile updated.");
       setEditingMemberId(null);
     } else {
@@ -339,10 +351,12 @@ export default function AdminDashboardPage() {
         name: memberName,
         role: memberRole,
         bio: memberBio,
-        photoUrl: memberPhoto || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+        photoUrl:
+          memberPhoto ||
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
         order: teamMembers.length + 1,
       };
-      setTeamMembers([...teamMembers, newMember]);
+      updateTeamMembers([...teamMembers, newMember]);
       triggerToast("✓ Member Added", "New leadership member added to roster.");
     }
     setMemberName("");
@@ -360,7 +374,8 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(m => m.id !== id));
+    const updated = teamMembers.filter((m) => m.id !== id);
+    updateTeamMembers(updated);
     triggerToast("✓ Member Removed", "Team member deleted from roster.");
   };
 

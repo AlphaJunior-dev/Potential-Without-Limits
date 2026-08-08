@@ -272,3 +272,114 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
     order: 4,
   },
 ];
+
+import { useState, useEffect } from "react";
+
+export function useCmsData<T>(key: string, defaultValue: T): T {
+  const [value, setValue] = useState<T>(() => {
+    if (typeof window === "undefined") return defaultValue;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) return JSON.parse(raw) as T;
+
+      const aliasKey =
+        key === "wlp_branding" ? "wlp_siteContent" :
+        key === "wlp_siteContent" ? "wlp_branding" :
+        key === "wlp_faq" ? "wlp_faqs" :
+        key === "wlp_faqs" ? "wlp_faq" :
+        key === "wlp_team" ? "wlp_team_members" :
+        key === "wlp_team_members" ? "wlp_team" :
+        key === "wlp_videos" ? "wlp_foundation_videos" :
+        key === "wlp_foundation_videos" ? "wlp_videos" :
+        key === "wlp_transparency" ? "wlp_transparency_reports" :
+        key === "wlp_transparency_reports" ? "wlp_transparency" : null;
+
+      if (aliasKey) {
+        const aliasRaw = localStorage.getItem(aliasKey);
+        if (aliasRaw) return JSON.parse(aliasRaw) as T;
+      }
+
+      return defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const aliasKey =
+      key === "wlp_branding" ? "wlp_siteContent" :
+      key === "wlp_siteContent" ? "wlp_branding" :
+      key === "wlp_faq" ? "wlp_faqs" :
+      key === "wlp_faqs" ? "wlp_faq" :
+      key === "wlp_team" ? "wlp_team_members" :
+      key === "wlp_team_members" ? "wlp_team" :
+      key === "wlp_videos" ? "wlp_foundation_videos" :
+      key === "wlp_foundation_videos" ? "wlp_videos" :
+      key === "wlp_transparency" ? "wlp_transparency_reports" :
+      key === "wlp_transparency_reports" ? "wlp_transparency" : null;
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === key || (aliasKey && e.key === aliasKey)) {
+        try {
+          setValue(e.newValue ? JSON.parse(e.newValue) : defaultValue);
+        } catch {
+          setValue(defaultValue);
+        }
+      }
+    };
+
+    const onCustom = (e: Event) => {
+      try {
+        const customEvent = e as CustomEvent;
+        if (
+          customEvent.detail &&
+          (customEvent.detail.key === key || (aliasKey && customEvent.detail.key === aliasKey))
+        ) {
+          setValue(JSON.parse(customEvent.detail.value));
+        }
+      } catch {}
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("wlp-cms-update", onCustom);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("wlp-cms-update", onCustom);
+    };
+  }, [key, defaultValue]);
+
+  return value;
+}
+
+export function saveCmsData<T>(key: string, value: T) {
+  if (typeof window !== "undefined") {
+    const stringified = JSON.stringify(value);
+    localStorage.setItem(key, stringified);
+
+    if (key === "wlp_branding") localStorage.setItem("wlp_siteContent", stringified);
+    if (key === "wlp_siteContent") localStorage.setItem("wlp_branding", stringified);
+    if (key === "wlp_faq") localStorage.setItem("wlp_faqs", stringified);
+    if (key === "wlp_faqs") localStorage.setItem("wlp_faq", stringified);
+    if (key === "wlp_team_members") localStorage.setItem("wlp_team", stringified);
+    if (key === "wlp_team") localStorage.setItem("wlp_team_members", stringified);
+    if (key === "wlp_foundation_videos") localStorage.setItem("wlp_videos", stringified);
+    if (key === "wlp_videos") localStorage.setItem("wlp_foundation_videos", stringified);
+    if (key === "wlp_transparency_reports") localStorage.setItem("wlp_transparency", stringified);
+    if (key === "wlp_transparency") localStorage.setItem("wlp_transparency_reports", stringified);
+
+    window.dispatchEvent(
+      new CustomEvent("wlp-cms-update", {
+        detail: { key, value: stringified },
+      })
+    );
+  }
+}
+
+export const DEFAULTS = {
+  siteContent: INITIAL_BRANDING,
+  faqs: INITIAL_FAQ_ITEMS,
+  mission: INITIAL_MISSION_VISION,
+  team: INITIAL_TEAM_MEMBERS,
+};

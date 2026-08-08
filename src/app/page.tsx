@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const { profiles, foundationVideos, transparencyReports } = useAuth();
+  const { profiles, foundationVideos, transparencyReports, branding } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -62,11 +62,11 @@ export default function HomePage() {
             </div>
 
             <h1 className="font-montserrat text-4xl sm:text-6xl font-black text-[#051836] leading-[1.08] tracking-tight">
-              Transforming Youth <span className="text-[#005C27]">Potential</span> Into Purpose.
+              {branding?.heroHeadline || "Transforming Youth Potential Into Purpose."}
             </h1>
 
             <p className="text-base sm:text-lg text-[#051836]/80 leading-relaxed font-normal">
-              A humanitarian foundation connecting sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship.
+              {branding?.heroSubheadline || "A humanitarian foundation connecting sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship."}
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -75,7 +75,7 @@ export default function HomePage() {
                 className="bg-[#005C27] text-white px-8 py-4 rounded-2xl font-montserrat font-extrabold text-sm hover:bg-[#327B2F] transition shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <Heart className="w-5 h-5 text-[#F5AB00] fill-[#F5AB00]" />
-                <span>Sponsor a Child&apos;s Dream</span>
+                <span>{branding?.heroCtaText || "Sponsor a Child's Dream"}</span>
                 <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
               </Link>
 
@@ -113,13 +113,24 @@ export default function HomePage() {
             className="lg:col-span-5 relative"
           >
             <div className="relative aspect-4/3 w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-[#051836]">
-              <Image
-                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80"
-                alt="PWLIF Youth Innovation Community"
-                fill
-                priority
-                className="object-cover"
-              />
+              {branding?.heroMediaType === "video" && branding?.heroVideoUrl ? (
+                <video
+                  src={branding.heroVideoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <Image
+                  src={branding?.heroImage || "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80"}
+                  alt="PWLIF Youth Innovation Community"
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              )}
 
               <div className="absolute inset-0 bg-gradient-to-t from-[#051836] via-[#051836]/30 to-transparent flex flex-col justify-end p-6 text-white">
                 <span className="text-xs font-mono font-bold text-[#F5AB00] uppercase tracking-wider mb-1 flex items-center gap-1">

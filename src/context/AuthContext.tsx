@@ -32,7 +32,8 @@ import {
   FaqItem,
   SupportInquiry,
   TeamMember,
-  MissionVisionData
+  MissionVisionData,
+  saveCmsData
 } from "@/lib/cmsData";
 
 export interface PendingSponsor {
@@ -117,6 +118,8 @@ interface AuthContextType {
   deleteProfile: (id: string) => void;
   updateBranding: (newBranding: BrandingConfig) => void;
   updateLegalSecurity: (newLegal: LegalSecurityConfig) => void;
+  updateMissionVision: (newMV: MissionVisionData) => void;
+  updateTeamMembers: (newMembers: TeamMember[]) => void;
   addFaqItem: (item: FaqItem) => void;
   updateFaqItem: (item: FaqItem) => void;
   deleteFaqItem: (id: string) => void;
@@ -420,49 +423,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuditLogs((prev) => [entry, ...prev]);
   };
 
-  const updateBranding = (newBranding: BrandingConfig) => {
-    setBranding(newBranding);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_branding", JSON.stringify(newBranding));
-    }
-    logAuditAction("Site Content Updated", `Header Title: ${newBranding.siteTitle}, Headline: ${newBranding.heroHeadline}`);
-  };
-
-  const updateLegalSecurity = (newLegal: LegalSecurityConfig) => {
-    setLegalSecurity(newLegal);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_legal_security", JSON.stringify(newLegal));
-    }
-    logAuditAction("Legal & Security CMS Updated", `Terms & Privacy policy modified.`);
-  };
-
-  const addFaqItem = (item: FaqItem) => {
-    const updated = [...faqItems, item];
-    setFaqItems(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_faq", JSON.stringify(updated));
-    }
-    logAuditAction("FAQ Added", `Added FAQ: ${item.question}`);
-  };
-
-  const updateFaqItem = (updatedItem: FaqItem) => {
-    const updated = faqItems.map((f) => (f.id === updatedItem.id ? updatedItem : f));
-    setFaqItems(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_faq", JSON.stringify(updated));
-    }
-    logAuditAction("FAQ Updated", `Updated FAQ ID: ${updatedItem.id}`);
-  };
-
-  const deleteFaqItem = (id: string) => {
-    const updated = faqItems.filter((f) => f.id !== id);
-    setFaqItems(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_faq", JSON.stringify(updated));
-    }
-    logAuditAction("FAQ Deleted", `Deleted FAQ ID: ${id}`);
-  };
-
   const submitSupportInquiry = (name: string, email: string, subject: string, message: string, source: SupportInquiry["source"] = "Support Concierge") => {
     const newInquiry: SupportInquiry = {
       id: "sup-" + Date.now(),
@@ -686,37 +646,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const addTransparencyReport = (report: TransparencyReport) => {
     const updated = [report, ...transparencyReports];
     setTransparencyReports(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_transparency_reports", JSON.stringify(updated));
-    }
+    saveCmsData("wlp_transparency_reports", updated);
     logAuditAction("Transparency Report Uploaded", `Published: ${report.title}`);
   };
 
   const deleteTransparencyReport = (id: string) => {
     const updated = transparencyReports.filter((r) => r.id !== id);
     setTransparencyReports(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_transparency_reports", JSON.stringify(updated));
-    }
+    saveCmsData("wlp_transparency_reports", updated);
     logAuditAction("Transparency Report Removed", `Deleted report ID: ${id}`);
   };
 
   const addFoundationVideo = (video: FoundationVideo) => {
     const updated = [video, ...foundationVideos];
     setFoundationVideos(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_foundation_videos", JSON.stringify(updated));
-    }
+    saveCmsData("wlp_foundation_videos", updated);
     logAuditAction("Foundation Video Published", `Published: ${video.title}`);
   };
 
   const deleteFoundationVideo = (id: string) => {
     const updated = foundationVideos.filter((v) => v.id !== id);
     setFoundationVideos(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wlp_foundation_videos", JSON.stringify(updated));
-    }
+    saveCmsData("wlp_foundation_videos", updated);
     logAuditAction("Foundation Video Removed", `Deleted video ID: ${id}`);
+  };
+
+  const updateBranding = (newBranding: BrandingConfig) => {
+    setBranding(newBranding);
+    saveCmsData("wlp_branding", newBranding);
+    logAuditAction("Branding & Hero Content Updated", "Updated hero headline, site title, and visual theme settings.");
+  };
+
+  const updateLegalSecurity = (newLegal: LegalSecurityConfig) => {
+    setLegalSecurity(newLegal);
+    saveCmsData("wlp_legal_security", newLegal);
+    logAuditAction("Legal & Security Policy Updated", "Updated platform legal and compliance content.");
+  };
+
+  const updateMissionVision = (newMV: MissionVisionData) => {
+    setMissionVision(newMV);
+    saveCmsData("wlp_mission_vision", newMV);
+    logAuditAction("Mission & Vision Content Updated", "Updated foundation mission, vision, and core strategic pillars.");
+  };
+
+  const updateTeamMembers = (newMembers: TeamMember[]) => {
+    setTeamMembers(newMembers);
+    saveCmsData("wlp_team_members", newMembers);
+    logAuditAction("Team Directory Updated", "Updated executive leadership team members.");
+  };
+
+  const addFaqItem = (item: FaqItem) => {
+    const updated = [...faqItems, item];
+    setFaqItems(updated);
+    saveCmsData("wlp_faq", updated);
+    logAuditAction("FAQ Item Added", `Added question: ${item.question}`);
+  };
+
+  const updateFaqItem = (item: FaqItem) => {
+    const updated = faqItems.map((f) => (f.id === item.id ? item : f));
+    setFaqItems(updated);
+    saveCmsData("wlp_faq", updated);
+    logAuditAction("FAQ Item Updated", `Updated question ID: ${item.id}`);
+  };
+
+  const deleteFaqItem = (id: string) => {
+    const updated = faqItems.filter((f) => f.id !== id);
+    setFaqItems(updated);
+    saveCmsData("wlp_faq", updated);
+    logAuditAction("FAQ Item Deleted", `Deleted question ID: ${id}`);
   };
 
   const adoptSponsorDream = (talentId: string, dreamTitle: string, grantAmount = "$5,000") => {
@@ -1030,6 +1027,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         deleteProfile,
         updateBranding,
         updateLegalSecurity,
+        updateMissionVision,
+        updateTeamMembers,
         addFaqItem,
         updateFaqItem,
         deleteFaqItem,
