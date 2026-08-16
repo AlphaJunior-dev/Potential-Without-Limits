@@ -332,7 +332,10 @@ export function useFirestoreCollection<T>(name: string, defaults: T[]): T[] {
         const seed = async () => {
           try {
             const batch = defaults.map((item, i) =>
-              setDoc(doc(db, name, (item as any).id || `${name}-${i}`), item as any)
+              setDoc(
+                doc(db, name, (item as { id?: string }).id || `${name}-${i}`),
+                item as Record<string, unknown>
+              )
             );
             await Promise.all(batch);
           } catch {}
@@ -357,7 +360,7 @@ export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T)
 
     const unsub = onSnapshot(doc(db, name, docId), (snap) => {
       if (!snap.exists()) {
-        setDoc(doc(db, name, docId), defaultValue as any).catch(() => {});
+        setDoc(doc(db, name, docId), defaultValue as Record<string, unknown>).catch(() => {});
         setItem(defaultValue);
       } else {
         setItem(snap.data() as T);
@@ -371,13 +374,13 @@ export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T)
 
 export async function addDocSafe(name: string, data: unknown) {
   const ref = doc(collection(db, name));
-  const docData = { ...(data as any), id: ref.id, updatedAt: Date.now() };
+  const docData = { ...(data as Record<string, unknown>), id: ref.id, updatedAt: Date.now() };
   await setDoc(ref, docData);
   return ref.id;
 }
 
 export async function updateDocSafe(name: string, id: string, data: unknown) {
-  await setDoc(doc(db, name, id), { ...(data as any), updatedAt: Date.now() }, { merge: true });
+  await setDoc(doc(db, name, id), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
 }
 
 export async function deleteDocSafe(name: string, id: string) {
@@ -385,7 +388,7 @@ export async function deleteDocSafe(name: string, id: string) {
 }
 
 export async function setSingleDocSafe(name: string, docId: string, data: unknown) {
-  await setDoc(doc(db, name, docId), { ...(data as any), updatedAt: Date.now() }, { merge: true });
+  await setDoc(doc(db, name, docId), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
 }
 
 // Deprecated alias helper to maintain smooth fallback

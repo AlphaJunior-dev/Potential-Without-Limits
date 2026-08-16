@@ -164,7 +164,7 @@ export default function AdminTalentPage() {
           </span>
           <select
             value={adminRole}
-            onChange={(e) => setAdminRole(e.target.value as any)}
+            onChange={(e) => setAdminRole(e.target.value as "Super Admin" | "Vetting Officer" | "Curator")}
             className="bg-[#F8FAFC] text-[#051836] text-xs font-bold py-1.5 px-3 rounded-md border border-[#051836]/15 focus:outline-none focus:border-[#005C27]"
           >
             <option value="Super Admin">Super Admin</option>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, PendingSponsor } from "@/context/AuthContext";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
 import { INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, TeamMember } from "@/lib/cmsData";
@@ -148,7 +148,7 @@ export default function AdminDashboardPage() {
 
   // Vetting Modal & Clipboard & Sponsor Inspector Modal
   const [credentialModalSponsor, setCredentialModalSponsor] = useState<{ name: string; username: string; tempPass: string } | null>(null);
-  const [selectedSponsorOverview, setSelectedSponsorOverview] = useState<any | null>(null);
+  const [selectedSponsorOverview, setSelectedSponsorOverview] = useState<PendingSponsor | null>(null);
   const [copiedNotice, setCopiedNotice] = useState(false);
 
   // Search & Filters
@@ -482,7 +482,7 @@ export default function AdminDashboardPage() {
             </span>
             <select
               value={adminRole}
-              onChange={(e) => setAdminRole(e.target.value as any)}
+              onChange={(e) => setAdminRole(e.target.value as "Super Admin" | "Vetting Officer" | "Curator")}
               className="w-full bg-[#FDFCF9] border border-[#051836]/15 text-[#051836] text-xs rounded-lg p-2 focus:outline-none focus:border-[#005C27]"
             >
               <option value="Super Admin">Super Admin (Full Access)</option>
@@ -835,7 +835,7 @@ export default function AdminDashboardPage() {
                         <td className="p-4 space-y-2">
                           <select
                             value={sponsor.callStatus}
-                            onChange={(e) => updateCallStatus(sponsor.id, e.target.value as any)}
+                            onChange={(e) => updateCallStatus(sponsor.id, e.target.value as PendingSponsor["callStatus"])}
                             className="bg-[#F8FAFC] border border-[#051836]/15 text-xs text-[#051836] rounded-lg p-1.5 focus:outline-none"
                           >
                             <option value="Not Scheduled">Not Scheduled</option>
@@ -1369,7 +1369,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-[#051836]/80 font-semibold mb-1">Founder's Statement / Letter</label>
+                <label className="block text-[#051836]/80 font-semibold mb-1">Founder&apos;s Statement / Letter</label>
                 <textarea
                   rows={4}
                   value={foundersNoteText}
@@ -1627,7 +1627,7 @@ export default function AdminDashboardPage() {
                       <label className="block text-[#051836]/80 font-semibold mb-1">Category</label>
                       <select
                         value={transparencyCategory}
-                        onChange={(e) => setTransparencyCategory(e.target.value as any)}
+                        onChange={(e) => setTransparencyCategory(e.target.value as "Financial Audit" | "Annual Impact Report" | "Program Stewardship")}
                         className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
                       >
                         <option value="Financial Audit">Financial Audit</option>
@@ -1769,7 +1769,7 @@ export default function AdminDashboardPage() {
                       <label className="block text-[#051836]/80 font-semibold mb-1">Category</label>
                       <select
                         value={videoCategory}
-                        onChange={(e) => setVideoCategory(e.target.value as any)}
+                        onChange={(e) => setVideoCategory(e.target.value as "Foundation Intro" | "Impact Story" | "Transformational Journey")}
                         className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
                       >
                         <option value="Foundation Intro">Foundation Intro</option>
@@ -2697,7 +2697,7 @@ export default function AdminDashboardPage() {
               </h4>
               <div className="space-y-2">
                 {(selectedSponsorOverview.sponsoredTalents && selectedSponsorOverview.sponsoredTalents.length > 0) ? (
-                  selectedSponsorOverview.sponsoredTalents.map((st: any, idx: number) => (
+                  selectedSponsorOverview.sponsoredTalents.map((st: NonNullable<PendingSponsor["sponsoredTalents"]>[number], idx: number) => (
                     <div key={idx} className="bg-[#FDFCF9] p-4 rounded-xl border border-[#051836]/10 flex items-center justify-between text-xs">
                       <div>
                         <span className="font-bold text-[#051836] text-sm block">{st.talentName}</span>

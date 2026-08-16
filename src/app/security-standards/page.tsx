@@ -50,7 +50,7 @@ export default function SecurityStandardsPage() {
                 <h2>2. Child Dignity &amp; Anti-Exploitation Policy</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                PWLIF strictly prohibits "poverty pornography" or sensationalized portrayals of vulnerable children. All profile narratives highlight the child&apos;s inherent potential, talents, academic ambitions, and resilience. Children are depicted with dignity, respect, and agency, focusing on constructive pathways toward self-reliance.
+                PWLIF strictly prohibits &ldquo;poverty pornography&rdquo; or sensationalized portrayals of vulnerable children. All profile narratives highlight the child&apos;s inherent potential, talents, academic ambitions, and resilience. Children are depicted with dignity, respect, and agency, focusing on constructive pathways toward self-reliance.
               </p>
             </div>
 

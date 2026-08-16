@@ -69,7 +69,7 @@ export default function AdminVettingPage() {
           </span>
           <select
             value={adminRole}
-            onChange={(e) => setAdminRole(e.target.value as any)}
+            onChange={(e) => setAdminRole(e.target.value as "Super Admin" | "Vetting Officer" | "Curator")}
             className="bg-[#F8FAFC] text-[#051836] text-xs font-bold py-1.5 px-3 rounded-md border border-[#051836]/15 focus:outline-none focus:border-[#005C27]"
           >
             <option value="Super Admin">Super Admin</option>
@@ -114,7 +114,7 @@ export default function AdminVettingPage() {
               <Filter className="w-4 h-4 text-[#051836]/40" />
               <select
                 value={vettingStatusFilter}
-                onChange={(e) => setVettingStatusFilter(e.target.value as any)}
+                onChange={(e) => setVettingStatusFilter(e.target.value as "all" | "pending" | "approved" | "rejected")}
                 className="bg-[#F8FAFC] border border-[#051836]/15 text-xs font-medium py-1.5 px-3 rounded-lg text-[#051836] focus:outline-none focus:border-[#005C27]"
               >
                 <option value="pending">Pending Approval ({pendingSponsors.filter(s => s.status === 'pending').length})</option>

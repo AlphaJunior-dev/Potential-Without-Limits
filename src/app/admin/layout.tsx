@@ -10,23 +10,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const { userStatus, loading } = useAuth();
-  const [authorized, setAuthorized] = useState(false);
+  const authorized = pathname === "/admin/login" || userStatus === "admin";
 
   useEffect(() => {
-    if (pathname === "/admin/login") {
-      setAuthorized(true);
-      return;
-    }
+    if (pathname === "/admin/login") return;
+    if (loading) return;
 
-    if (!loading) {
-      if (userStatus === "admin") {
-        setAuthorized(true);
+    if (userStatus !== "admin") {
+      if (userStatus === "pending") {
+        router.push("/pending");
       } else {
-        if (userStatus === "pending") {
-          router.push("/pending");
-        } else {
-          router.push("/admin/login");
-        }
+        router.push("/admin/login");
       }
     }
   }, [userStatus, loading, router, pathname]);
@@ -46,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!authorized && userStatus !== "admin") {
+  if (!authorized) {
     return (
       <div className="h-screen bg-[#FDFCF9] flex items-center justify-center p-4 font-inter">
         <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-md border border-[#051836]/10 text-center">
