@@ -375,20 +375,40 @@ export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T)
 export async function addDocSafe(name: string, data: unknown) {
   const ref = doc(collection(db, name));
   const docData = { ...(data as Record<string, unknown>), id: ref.id, updatedAt: Date.now() };
-  await setDoc(ref, docData);
+  try {
+    await setDoc(ref, docData);
+  } catch (err) {
+    console.error(`[Firestore] addDocSafe failed for collection "${name}":`, err);
+    throw err;
+  }
   return ref.id;
 }
 
 export async function updateDocSafe(name: string, id: string, data: unknown) {
-  await setDoc(doc(db, name, id), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
+  try {
+    await setDoc(doc(db, name, id), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] updateDocSafe failed for "${name}/${id}":`, err);
+    throw err;
+  }
 }
 
 export async function deleteDocSafe(name: string, id: string) {
-  await deleteDoc(doc(db, name, id));
+  try {
+    await deleteDoc(doc(db, name, id));
+  } catch (err) {
+    console.error(`[Firestore] deleteDocSafe failed for "${name}/${id}":`, err);
+    throw err;
+  }
 }
 
 export async function setSingleDocSafe(name: string, docId: string, data: unknown) {
-  await setDoc(doc(db, name, docId), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
+  try {
+    await setDoc(doc(db, name, docId), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
+  } catch (err) {
+    console.error(`[Firestore] setSingleDocSafe failed for "${name}/${docId}":`, err);
+    throw err;
+  }
 }
 
 // Deprecated alias helper to maintain smooth fallback

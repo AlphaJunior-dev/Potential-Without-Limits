@@ -189,9 +189,13 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleGenerateCredentialsClick = (id: string, name: string) => {
-    const creds = generateCredentials(id);
-    setCredentialModalSponsor({ name, username: creds.username, tempPass: creds.tempPass });
+  const handleGenerateCredentialsClick = async (id: string, name: string) => {
+    try {
+      const creds = await generateCredentials(id);
+      setCredentialModalSponsor({ name, username: creds.username, tempPass: creds.tempPass });
+    } catch (err) {
+      triggerToast("✗ Failed to Generate Credentials", err instanceof Error ? err.message : "Check your connection and try again.");
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -231,74 +235,78 @@ export default function AdminDashboardPage() {
   };
 
   // Save Talent CMS
-  const handleSaveTalent = (e: React.FormEvent) => {
+  const handleSaveTalent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) {
-      const existing = profiles.find((p) => p.id === editingId);
-      if (existing) {
-        updateProfile({
-          ...existing,
+    try {
+      if (editingId) {
+        const existing = profiles.find((p) => p.id === editingId);
+        if (existing) {
+          await updateProfile({
+            ...existing,
+            name: firstName,
+            age: parseInt(age) || existing.age,
+            category,
+            location,
+            bio,
+            coverPhoto: coverPhoto || existing.coverPhoto,
+            rawMediaUrl: rawMediaUrl || existing.rawMediaUrl,
+            galleryImages: uploadedImages.length > 0 ? uploadedImages : existing.galleryImages,
+            galleryVideos: uploadedVideos.length > 0 ? uploadedVideos : existing.galleryVideos,
+            dream: dream || existing.dream,
+            current_situation: currentSituation || existing.current_situation,
+            progress: progress || existing.progress,
+            current_needs: currentNeeds || existing.current_needs,
+            country_community: countryCommunity || existing.country_community,
+            consentRecord: {
+              parentalConsent: true,
+              mediaReleasePermission: mediaReleasePermission,
+              signedDate: existing.consentRecord?.signedDate || "2026-01-10",
+              guardianName: existing.consentRecord?.guardianName || "Parent/Guardian",
+            }
+          });
+        }
+        triggerToast("✓ Profile Updated", "Youth creator profile updated in database.");
+        setEditingId(null);
+      } else {
+        const newProfile: YouthProfile = {
+          id: "yp-" + Date.now(),
           name: firstName,
-          age: parseInt(age) || existing.age,
+          age: parseInt(age) || 18,
           category,
           location,
           bio,
-          coverPhoto: coverPhoto || existing.coverPhoto,
-          rawMediaUrl: rawMediaUrl || existing.rawMediaUrl,
-          galleryImages: uploadedImages.length > 0 ? uploadedImages : existing.galleryImages,
-          galleryVideos: uploadedVideos.length > 0 ? uploadedVideos : existing.galleryVideos,
-          dream: dream || existing.dream,
-          current_situation: currentSituation || existing.current_situation,
-          progress: progress || existing.progress,
-          current_needs: currentNeeds || existing.current_needs,
-          country_community: countryCommunity || existing.country_community,
+          coverPhoto: coverPhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
+          rawMediaUrl: rawMediaUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+          status: "active",
+          inquiriesCount: 0,
+          galleryImages: uploadedImages,
+          galleryVideos: uploadedVideos,
+          dream: dream || "Mastering technical skills and community innovation.",
+          current_situation: currentSituation || bio,
+          progress: progress || "Actively participating in local community youth labs.",
+          current_needs: currentNeeds || "Educational grant & laptop hardware",
+          country_community: countryCommunity || location,
           consentRecord: {
             parentalConsent: true,
             mediaReleasePermission: mediaReleasePermission,
-            signedDate: existing.consentRecord?.signedDate || "2026-01-10",
-            guardianName: existing.consentRecord?.guardianName || "Parent/Guardian",
+            signedDate: "2026-01-10",
+            guardianName: "Parent/Guardian",
           }
-        });
+        };
+        await addProfile(newProfile);
+        triggerToast("✓ Profile Created", "New youth creator added to directory.");
       }
-      triggerToast("✓ Profile Updated", "Youth creator profile updated in database.");
-      setEditingId(null);
-    } else {
-      const newProfile: YouthProfile = {
-        id: "yp-" + Date.now(),
-        name: firstName,
-        age: parseInt(age) || 18,
-        category,
-        location,
-        bio,
-        coverPhoto: coverPhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
-        rawMediaUrl: rawMediaUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        status: "active",
-        inquiriesCount: 0,
-        galleryImages: uploadedImages,
-        galleryVideos: uploadedVideos,
-        dream: dream || "Mastering technical skills and community innovation.",
-        current_situation: currentSituation || bio,
-        progress: progress || "Actively participating in local community youth labs.",
-        current_needs: currentNeeds || "Educational grant & laptop hardware",
-        country_community: countryCommunity || location,
-        consentRecord: {
-          parentalConsent: true,
-          mediaReleasePermission: mediaReleasePermission,
-          signedDate: "2026-01-10",
-          guardianName: "Parent/Guardian",
-        }
-      };
-      addProfile(newProfile);
-      triggerToast("✓ Profile Created", "New youth creator added to directory.");
+      setFirstName("");
+      setAge("");
+      setLocation("");
+      setBio("");
+      setCoverPhoto("");
+      setRawMediaUrl("");
+      setUploadedImages([]);
+      setUploadedVideos([]);
+    } catch (err) {
+      triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
     }
-    setFirstName("");
-    setAge("");
-    setLocation("");
-    setBio("");
-    setCoverPhoto("");
-    setRawMediaUrl("");
-    setUploadedImages([]);
-    setUploadedVideos([]);
   };
 
   const handleEditTalent = (p: YouthProfile) => {
@@ -314,55 +322,75 @@ export default function AdminDashboardPage() {
     setUploadedVideos(p.galleryVideos || []);
   };
 
-  const handleDeleteTalent = (id: string) => {
-    deleteProfile(id);
-    triggerToast("✓ Profile Removed", "Youth creator profile deleted.");
+  const handleDeleteTalent = async (id: string) => {
+    try {
+      await deleteProfile(id);
+      triggerToast("✓ Profile Removed", "Youth creator profile deleted.");
+    } catch (err) {
+      triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not delete profile. Check your connection and try again.");
+    }
   };
 
   // Save Mission & Vision CMS
-  const handleSaveMissionVision = (e: React.FormEvent) => {
+  const handleSaveMissionVision = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCmsSavedNotice(true);
-    triggerToast("✓ Mission & Vision Saved", "Public mission statement and pillars updated.");
-    setTimeout(() => setCmsSavedNotice(false), 3000);
+    try {
+      await updateMissionVision({
+        mission: missionText,
+        vision: visionText,
+        foundersNote: foundersNoteText,
+        foundersTitle: foundersTitleText,
+        pillars,
+        lastUpdated: new Date().toISOString().split("T")[0],
+      });
+      setCmsSavedNotice(true);
+      triggerToast("✓ Mission & Vision Saved", "Public mission statement and pillars updated.");
+      setTimeout(() => setCmsSavedNotice(false), 3000);
+    } catch (err) {
+      triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save Mission & Vision. Check your connection and try again.");
+    }
   };
 
   // Save Team Member CMS
-  const handleSaveTeamMember = (e: React.FormEvent) => {
+  const handleSaveTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingMemberId) {
-      const updated = teamMembers.map((m) =>
-        m.id === editingMemberId
-          ? {
-              ...m,
-              name: memberName,
-              role: memberRole,
-              bio: memberBio,
-              photoUrl: memberPhoto || m.photoUrl,
-            }
-          : m
-      );
-      updateTeamMembers(updated);
-      triggerToast("✓ Member Updated", "Team member profile updated.");
-      setEditingMemberId(null);
-    } else {
-      const newMember: TeamMember = {
-        id: "tm-" + Date.now(),
-        name: memberName,
-        role: memberRole,
-        bio: memberBio,
-        photoUrl:
-          memberPhoto ||
-          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-        order: teamMembers.length + 1,
-      };
-      updateTeamMembers([...teamMembers, newMember]);
-      triggerToast("✓ Member Added", "New leadership member added to roster.");
+    try {
+      if (editingMemberId) {
+        const updated = teamMembers.map((m) =>
+          m.id === editingMemberId
+            ? {
+                ...m,
+                name: memberName,
+                role: memberRole,
+                bio: memberBio,
+                photoUrl: memberPhoto || m.photoUrl,
+              }
+            : m
+        );
+        await updateTeamMembers(updated);
+        triggerToast("✓ Member Updated", "Team member profile updated.");
+        setEditingMemberId(null);
+      } else {
+        const newMember: TeamMember = {
+          id: "tm-" + Date.now(),
+          name: memberName,
+          role: memberRole,
+          bio: memberBio,
+          photoUrl:
+            memberPhoto ||
+            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+          order: teamMembers.length + 1,
+        };
+        await updateTeamMembers([...teamMembers, newMember]);
+        triggerToast("✓ Member Added", "New leadership member added to roster.");
+      }
+      setMemberName("");
+      setMemberRole("");
+      setMemberBio("");
+      setMemberPhoto("");
+    } catch (err) {
+      triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save team member. Check your connection and try again.");
     }
-    setMemberName("");
-    setMemberRole("");
-    setMemberBio("");
-    setMemberPhoto("");
   };
 
   const handleEditMember = (m: TeamMember) => {
@@ -373,10 +401,14 @@ export default function AdminDashboardPage() {
     setMemberPhoto(m.photoUrl);
   };
 
-  const handleDeleteMember = (id: string) => {
-    const updated = teamMembers.filter((m) => m.id !== id);
-    updateTeamMembers(updated);
-    triggerToast("✓ Member Removed", "Team member deleted from roster.");
+  const handleDeleteMember = async (id: string) => {
+    try {
+      const updated = teamMembers.filter((m) => m.id !== id);
+      await updateTeamMembers(updated);
+      triggerToast("✓ Member Removed", "Team member deleted from roster.");
+    } catch (err) {
+      triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not remove team member. Check your connection and try again.");
+    }
   };
 
   // MFA Gate
@@ -853,7 +885,14 @@ export default function AdminDashboardPage() {
                               </span>
                             ) : (
                               <button
-                                onClick={() => approveSponsor(sponsor.id)}
+                                onClick={async () => {
+                                  try {
+                                    await approveSponsor(sponsor.id);
+                                    triggerToast("✓ Sponsor Approved", `${sponsor.name} vetted and approved.`);
+                                  } catch (err) {
+                                    triggerToast("✗ Approval Failed", err instanceof Error ? err.message : "Check your connection and try again.");
+                                  }
+                                }}
                                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg transition text-[11px] flex items-center gap-1 cursor-pointer"
                               >
                                 <Check className="w-3 h-3" /> Approve Sponsor
@@ -1561,21 +1600,25 @@ export default function AdminDashboardPage() {
                 </h2>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
                     if (!transparencyTitle.trim()) return;
-                    addTransparencyReport({
-                      id: "tr-" + Date.now(),
-                      title: transparencyTitle,
-                      year: transparencyAuditDate ? transparencyAuditDate.split("-")[0] : "2026",
-                      auditDate: transparencyAuditDate,
-                      totalFunded: transparencyTotalFunded,
-                      childrenImpacted: Number(transparencyChildrenImpacted),
-                      category: transparencyCategory,
-                      reportPdfUrl: transparencyPdfUrl,
-                    });
-                    setTransparencyTitle("");
-                    triggerToast("✓ Audit Report Published", `Published ${transparencyTitle} to live site.`);
+                    try {
+                      await addTransparencyReport({
+                        id: "tr-" + Date.now(),
+                        title: transparencyTitle,
+                        year: transparencyAuditDate ? transparencyAuditDate.split("-")[0] : "2026",
+                        auditDate: transparencyAuditDate,
+                        totalFunded: transparencyTotalFunded,
+                        childrenImpacted: Number(transparencyChildrenImpacted),
+                        category: transparencyCategory,
+                        reportPdfUrl: transparencyPdfUrl,
+                      });
+                      triggerToast("✓ Audit Report Published", `Published ${transparencyTitle} to live site.`);
+                      setTransparencyTitle("");
+                    } catch (err) {
+                      triggerToast("✗ Publish Failed", err instanceof Error ? err.message : "Could not publish report. Check your connection and try again.");
+                    }
                   }}
                   className="space-y-4 text-xs font-inter"
                 >
@@ -1689,9 +1732,13 @@ export default function AdminDashboardPage() {
                           View PDF <ExternalLink className="w-3 h-3" />
                         </a>
                         <button
-                          onClick={() => {
-                            deleteTransparencyReport(report.id);
-                            triggerToast("✓ Report Deleted", `Removed report ${report.title}`);
+                          onClick={async () => {
+                            try {
+                              await deleteTransparencyReport(report.id);
+                              triggerToast("✓ Report Deleted", `Removed report ${report.title}`);
+                            } catch (err) {
+                              triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not delete report. Check your connection and try again.");
+                            }
                           }}
                           className="p-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg text-xs"
                         >
@@ -1725,20 +1772,24 @@ export default function AdminDashboardPage() {
                 </h2>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
                     if (!videoTitle.trim()) return;
-                    addFoundationVideo({
-                      id: "fv-" + Date.now(),
-                      title: videoTitle,
-                      videoUrl: videoUrl,
-                      thumbnail: videoThumbnail,
-                      duration: videoDuration,
-                      category: videoCategory,
-                      description: videoDescription,
-                    });
-                    setVideoTitle("");
-                    triggerToast("✓ Video Added", `Added ${videoTitle} to foundation video roster.`);
+                    try {
+                      await addFoundationVideo({
+                        id: "fv-" + Date.now(),
+                        title: videoTitle,
+                        videoUrl: videoUrl,
+                        thumbnail: videoThumbnail,
+                        duration: videoDuration,
+                        category: videoCategory,
+                        description: videoDescription,
+                      });
+                      triggerToast("✓ Video Added", `Added ${videoTitle} to foundation video roster.`);
+                      setVideoTitle("");
+                    } catch (err) {
+                      triggerToast("✗ Add Failed", err instanceof Error ? err.message : "Could not add video. Check your connection and try again.");
+                    }
                   }}
                   className="space-y-4 text-xs font-inter"
                 >
@@ -1833,9 +1884,13 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <button
-                        onClick={() => {
-                          deleteFoundationVideo(vid.id);
-                          triggerToast("✓ Video Removed", `Removed ${vid.title}`);
+                        onClick={async () => {
+                          try {
+                            await deleteFoundationVideo(vid.id);
+                            triggerToast("✓ Video Removed", `Removed ${vid.title}`);
+                          } catch (err) {
+                            triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not delete video. Check your connection and try again.");
+                          }
                         }}
                         className="p-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg text-xs"
                       >
@@ -1885,12 +1940,16 @@ export default function AdminDashboardPage() {
             </div>
 
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                updateBranding(brandingForm);
-                setBrandingNotice(true);
-                triggerToast("✓ Site Builder Settings Live", "Header logo, title, hero layout mode, and color palette updated.");
-                setTimeout(() => setBrandingNotice(false), 4000);
+                try {
+                  await updateBranding(brandingForm);
+                  setBrandingNotice(true);
+                  triggerToast("✓ Site Builder Settings Live", "Header logo, title, hero layout mode, and color palette updated.");
+                  setTimeout(() => setBrandingNotice(false), 4000);
+                } catch (err) {
+                  triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save branding settings. Check your connection and try again.");
+                }
               }}
               className="space-y-6 text-xs font-inter"
             >
@@ -2395,12 +2454,16 @@ export default function AdminDashboardPage() {
             </div>
 
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                updateLegalSecurity(legalForm);
-                setLegalNotice(true);
-                triggerToast("✓ Legal & Security Copy Saved", "Public copy for /terms, /privacy, and /security-standards updated.");
-                setTimeout(() => setLegalNotice(false), 3000);
+                try {
+                  await updateLegalSecurity(legalForm);
+                  setLegalNotice(true);
+                  triggerToast("✓ Legal & Security Copy Saved", "Public copy for /terms, /privacy, and /security-standards updated.");
+                  setTimeout(() => setLegalNotice(false), 3000);
+                } catch (err) {
+                  triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save legal & security copy. Check your connection and try again.");
+                }
               }}
               className="space-y-6 text-xs font-inter"
             >

@@ -110,34 +110,34 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<void>;
   register: (name: string, email: string, pass: string, linkedin: string, category?: SponsorCategory, tier?: MembershipTier, targetTalentId?: string) => Promise<void>;
   logout: () => Promise<void>;
-  approveSponsor: (id: string) => void;
-  rejectSponsor: (id: string) => void;
+  approveSponsor: (id: string) => Promise<void>;
+  rejectSponsor: (id: string) => Promise<void>;
   deleteSponsor: (id: string) => void;
   updateSponsorPassword: (email: string, newPass: string) => void;
   updateSponsorCategoryAndTier: (id: string, category: SponsorCategory, tier: MembershipTier) => void;
-  generateCredentials: (id: string) => { username: string; tempPass: string };
+  generateCredentials: (id: string) => Promise<{ username: string; tempPass: string }>;
   provisionSponsorManual: (email: string, name?: string, company?: string, category?: SponsorCategory, tier?: MembershipTier) => { username: string; tempPass: string };
-  updateCallStatus: (id: string, status: PendingSponsor["callStatus"]) => void;
+  updateCallStatus: (id: string, status: PendingSponsor["callStatus"]) => Promise<void>;
   updateSponsorProfile: (id: string, name: string, company: string, linkedin: string, interests: string[]) => void;
   completeFirstTimeProfile: (id: string, name: string, company: string, linkedin: string, interests: string[], newPass?: string) => void;
   approveTalentAddition: (inquiryId: string) => void;
   rejectTalentAddition: (inquiryId: string) => void;
-  addProfile: (newProfile: YouthProfile) => void;
-  updateProfile: (updatedProfile: YouthProfile) => void;
-  deleteProfile: (id: string) => void;
-  updateBranding: (newBranding: BrandingConfig) => void;
-  updateLegalSecurity: (newLegal: LegalSecurityConfig) => void;
-  updateMissionVision: (newMV: MissionVisionData) => void;
-  updateTeamMembers: (newMembers: TeamMember[]) => void;
-  addFaqItem: (item: FaqItem) => void;
-  updateFaqItem: (item: FaqItem) => void;
-  deleteFaqItem: (id: string) => void;
+  addProfile: (newProfile: YouthProfile) => Promise<void>;
+  updateProfile: (updatedProfile: YouthProfile) => Promise<void>;
+  deleteProfile: (id: string) => Promise<void>;
+  updateBranding: (newBranding: BrandingConfig) => Promise<void>;
+  updateLegalSecurity: (newLegal: LegalSecurityConfig) => Promise<void>;
+  updateMissionVision: (newMV: MissionVisionData) => Promise<void>;
+  updateTeamMembers: (newMembers: TeamMember[]) => Promise<void>;
+  addFaqItem: (item: FaqItem) => Promise<void>;
+  updateFaqItem: (item: FaqItem) => Promise<void>;
+  deleteFaqItem: (id: string) => Promise<void>;
   submitSupportInquiry: (name: string, email: string, subject: string, message: string, source?: SupportInquiry["source"]) => void;
   resolveSupportInquiry: (id: string) => void;
-  addTransparencyReport: (report: TransparencyReport) => void;
-  deleteTransparencyReport: (id: string) => void;
-  addFoundationVideo: (video: FoundationVideo) => void;
-  deleteFoundationVideo: (id: string) => void;
+  addTransparencyReport: (report: TransparencyReport) => Promise<void>;
+  deleteTransparencyReport: (id: string) => Promise<void>;
+  addFoundationVideo: (video: FoundationVideo) => Promise<void>;
+  deleteFoundationVideo: (id: string) => Promise<void>;
   adoptSponsorDream: (talentId: string, dreamTitle: string, grantAmount?: string) => void;
   logAuditAction: (action: string, details: string) => void;
   setUserStatus: (status: "logged_out" | "pending" | "admin" | "approved") => void;
@@ -454,18 +454,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { username: email, tempPass };
   };
 
-  const addProfile = (newProfile: YouthProfile) => {
-    setSingleDocSafe("profiles", newProfile.id, newProfile);
+  const addProfile = async (newProfile: YouthProfile) => {
+    await setSingleDocSafe("profiles", newProfile.id, newProfile);
     logAuditAction("Talent Added", `Added ${newProfile.name} (${newProfile.category})`);
   };
 
-  const updateProfile = (updatedProfile: YouthProfile) => {
-    setSingleDocSafe("profiles", updatedProfile.id, updatedProfile);
+  const updateProfile = async (updatedProfile: YouthProfile) => {
+    await setSingleDocSafe("profiles", updatedProfile.id, updatedProfile);
     logAuditAction("Talent Updated", `Updated ${updatedProfile.name}`);
   };
 
-  const deleteProfile = (id: string) => {
-    deleteDocSafe("profiles", id);
+  const deleteProfile = async (id: string) => {
+    await deleteDocSafe("profiles", id);
     logAuditAction("Talent Deleted", `Deleted talent ID: ${id}`);
   };
 
@@ -551,58 +551,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logAuditAction("Sponsor Category & Tier Updated", `Assigned ${category} (${tier} Tier) to sponsor ID: ${id}`);
   };
 
-  const addTransparencyReport = (report: TransparencyReport) => {
-    setSingleDocSafe("transparency", report.id, report);
+  const addTransparencyReport = async (report: TransparencyReport) => {
+    await setSingleDocSafe("transparency", report.id, report);
     logAuditAction("Transparency Report Uploaded", `Published: ${report.title}`);
   };
 
-  const deleteTransparencyReport = (id: string) => {
-    deleteDocSafe("transparency", id);
+  const deleteTransparencyReport = async (id: string) => {
+    await deleteDocSafe("transparency", id);
     logAuditAction("Transparency Report Removed", `Deleted report ID: ${id}`);
   };
 
-  const addFoundationVideo = (video: FoundationVideo) => {
-    setSingleDocSafe("videos", video.id, video);
+  const addFoundationVideo = async (video: FoundationVideo) => {
+    await setSingleDocSafe("videos", video.id, video);
     logAuditAction("Foundation Video Published", `Published: ${video.title}`);
   };
 
-  const deleteFoundationVideo = (id: string) => {
-    deleteDocSafe("videos", id);
+  const deleteFoundationVideo = async (id: string) => {
+    await deleteDocSafe("videos", id);
     logAuditAction("Foundation Video Removed", `Deleted video ID: ${id}`);
   };
 
-  const updateBranding = (newBranding: BrandingConfig) => {
-    setSingleDocSafe("siteContent", "main", newBranding);
+  const updateBranding = async (newBranding: BrandingConfig) => {
+    await setSingleDocSafe("siteContent", "main", newBranding);
     logAuditAction("Branding & Hero Content Updated", "Updated hero headline, site title, and visual theme settings.");
   };
 
-  const updateLegalSecurity = (newLegal: LegalSecurityConfig) => {
-    setSingleDocSafe("legal_security", "main", newLegal);
+  const updateLegalSecurity = async (newLegal: LegalSecurityConfig) => {
+    await setSingleDocSafe("legal_security", "main", newLegal);
     logAuditAction("Legal & Security Policy Updated", "Updated platform legal and compliance content.");
   };
 
-  const updateMissionVision = (newMV: MissionVisionData) => {
-    setSingleDocSafe("mission", "main", newMV);
+  const updateMissionVision = async (newMV: MissionVisionData) => {
+    await setSingleDocSafe("mission", "main", newMV);
     logAuditAction("Mission & Vision Content Updated", "Updated foundation mission, vision, and core strategic pillars.");
   };
 
-  const updateTeamMembers = (newMembers: TeamMember[]) => {
-    newMembers.forEach((m) => setSingleDocSafe("team", m.id, m));
+  const updateTeamMembers = async (newMembers: TeamMember[]) => {
+    await Promise.all(newMembers.map((m) => setSingleDocSafe("team", m.id, m)));
     logAuditAction("Team Directory Updated", "Updated executive leadership team members.");
   };
 
-  const addFaqItem = (item: FaqItem) => {
-    setSingleDocSafe("faqs", item.id, item);
+  const addFaqItem = async (item: FaqItem) => {
+    await setSingleDocSafe("faqs", item.id, item);
     logAuditAction("FAQ Item Added", `Added question: ${item.question}`);
   };
 
-  const updateFaqItem = (item: FaqItem) => {
-    setSingleDocSafe("faqs", item.id, item);
+  const updateFaqItem = async (item: FaqItem) => {
+    await setSingleDocSafe("faqs", item.id, item);
     logAuditAction("FAQ Item Updated", `Updated question ID: ${item.id}`);
   };
 
-  const deleteFaqItem = (id: string) => {
-    deleteDocSafe("faqs", id);
+  const deleteFaqItem = async (id: string) => {
+    await deleteDocSafe("faqs", id);
     logAuditAction("FAQ Item Deleted", `Deleted question ID: ${id}`);
   };
 
@@ -714,7 +714,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     eraseCookie("wlp_role");
   };
 
-  const approveSponsor = (id: string) => {
+  const approveSponsor = async (id: string) => {
     const target = pendingSponsors.find((s) => s.id === id);
     if (target) {
       const credentials = target.assignedCredentials || {
@@ -722,7 +722,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tempPass: "WLP-" + Math.floor(1000 + Math.random() * 9000),
         issuedAt: new Date().toISOString().replace("T", " ").split(".")[0],
       };
-      setSingleDocSafe("pending_sponsors", id, {
+      await setSingleDocSafe("pending_sponsors", id, {
         ...target,
         status: "approved" as const,
         callStatus: "Vetted (Approved)" as const,
@@ -731,10 +731,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const rejectSponsor = (id: string) => {
+  const rejectSponsor = async (id: string) => {
     const target = pendingSponsors.find((s) => s.id === id);
     if (target) {
-      setSingleDocSafe("pending_sponsors", id, {
+      await setSingleDocSafe("pending_sponsors", id, {
         ...target,
         status: "rejected" as const,
         callStatus: "Vetted (Rejected)" as const,
@@ -742,13 +742,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const generateCredentials = (id: string) => {
+  const generateCredentials = async (id: string) => {
     const tempPass = "WLP-" + Math.floor(1000 + Math.random() * 9000);
     const target = pendingSponsors.find((s) => s.id === id);
     const username = target?.email || "";
 
     if (target) {
-      setSingleDocSafe("pending_sponsors", id, {
+      await setSingleDocSafe("pending_sponsors", id, {
         ...target,
         status: "approved" as const,
         callStatus: "Vetted (Approved)" as const,
@@ -763,10 +763,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { username, tempPass };
   };
 
-  const updateCallStatus = (id: string, status: PendingSponsor["callStatus"]) => {
+  const updateCallStatus = async (id: string, status: PendingSponsor["callStatus"]) => {
     const target = pendingSponsors.find((s) => s.id === id);
     if (target) {
-      setSingleDocSafe("pending_sponsors", id, { ...target, callStatus: status });
+      await setSingleDocSafe("pending_sponsors", id, { ...target, callStatus: status });
     }
   };
 

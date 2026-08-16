@@ -181,16 +181,26 @@ export default function AdminVettingPage() {
                         {sponsor.status === "pending" ? (
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => {
-                                approveSponsor(sponsor.id);
-                                setLogs([{ id: "vlog-" + Date.now(), msg: `${sponsor.name} approved`, time: new Date().toLocaleTimeString() }, ...logs]);
+                              onClick={async () => {
+                                try {
+                                  await approveSponsor(sponsor.id);
+                                  setLogs([{ id: "vlog-" + Date.now(), msg: `${sponsor.name} approved`, time: new Date().toLocaleTimeString() }, ...logs]);
+                                } catch {
+                                  setLogs([{ id: "vlog-" + Date.now(), msg: `Failed to approve ${sponsor.name} — check connection`, time: new Date().toLocaleTimeString() }, ...logs]);
+                                }
                               }}
                               className="bg-[#005C27] hover:bg-[#327B2F] text-white px-3.5 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" /> Provision Sponsor Account
                             </button>
                             <button
-                              onClick={() => rejectSponsor(sponsor.id)}
+                              onClick={async () => {
+                                try {
+                                  await rejectSponsor(sponsor.id);
+                                } catch {
+                                  setLogs([{ id: "vlog-" + Date.now(), msg: `Failed to reject ${sponsor.name} — check connection`, time: new Date().toLocaleTimeString() }, ...logs]);
+                                }
+                              }}
                               className="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer border border-red-200"
                             >
                               <XCircle className="w-3.5 h-3.5" /> Reject
