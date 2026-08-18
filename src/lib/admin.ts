@@ -45,7 +45,26 @@ export const safePublicDefaults = {
   heroText:
     "Potential Without Limits International Foundation is beginning a careful Rwanda pilot with six children, shaped through community-informed planning.",
   bookingUrl: "https://calendly.com/withoutlimitspotential/onboarding-call",
-  pilotCards: [] as Array<{ id: string; title: string; summary: string; supportArea?: string }>,
+  pilotCards: [
+    {
+      id: "pilot-overview-1",
+      title: "Rwanda Pilot Overview",
+      summary: "Non-identifying pilot information is shared through a private safeguarding and partnership orientation.",
+      supportArea: "Orientation conversation",
+    },
+    {
+      id: "pilot-overview-2",
+      title: "Community-guided Pathways",
+      summary: "Potential partners can learn about the pilot’s community-informed approach during a private orientation call.",
+      supportArea: "Partnership conversation",
+    },
+    {
+      id: "pilot-overview-3",
+      title: "Safeguarding First",
+      summary: "Any future pilot information is reviewed through appropriate safeguarding and privacy practices.",
+      supportArea: "Safeguarding review",
+    },
+  ] as Array<{ id: string; title: string; summary: string; supportArea?: string }>,
 };
 
 export async function readPublicSite() {

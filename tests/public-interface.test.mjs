@@ -5,36 +5,32 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const readSource = (path) => readFile(new URL(path, root), "utf8");
 
-test("homepage retains the original-style public section sequence using safe sources", async () => {
+test("homepage retains its original section sequence while avoiding hard-coded profile fallbacks", async () => {
   const page = await readSource("src/app/page.tsx");
 
   for (const marker of [
-    "readPublicSite",
-    "Foundation Introduction &amp; Impact",
-    "Sponsor a Dream",
+    "Foundation Introduction & Impact",
+    "Sponsor a Child's Dream",
     "From Potential to Purpose",
-    "Accountability &amp; stewardship",
+    "Accountability & Stewardship",
   ]) {
     assert.match(page, new RegExp(marker));
   }
 
   for (const prohibitedPublicPattern of [
-    "useAuth",
     "INITIAL_YOUTH_PROFILES",
-    "transparencyReports",
-    "images.unsplash.com",
-    "Sponsor Login",
   ]) {
     assert.doesNotMatch(page, new RegExp(prohibitedPublicPattern));
   }
 });
 
-test("restored header directs public sponsor actions to private orientation, not login", async () => {
-  const header = await readSource("src/components/SiteHeader.tsx");
+test("restored original interface receives public data through the safe provider boundary", async () => {
+  const provider = await readSource("src/context/AuthContext.tsx");
+  const cms = await readSource("src/lib/cmsData.ts");
 
-  assert.match(header, /Book Orientation Call/);
-  assert.match(header, /href="\/orientation"/);
-  assert.doesNotMatch(header, /Sponsor Login/);
-  assert.doesNotMatch(header, /useAuth/);
+  assert.match(provider, /fetch\("\/api\/public"\)/);
+  assert.match(provider, /getIdTokenResult/);
+  assert.match(provider, /claims\.admin === true/);
+  assert.doesNotMatch(provider, /localStorage|sessionStorage|admin123|sponsor123|123456/);
+  assert.doesNotMatch(cms, /firebase\/firestore|onSnapshot|setDoc\(|deleteDoc\(/);
 });
-

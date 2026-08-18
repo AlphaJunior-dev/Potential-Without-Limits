@@ -298,126 +298,19 @@ export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
   },
 ];
 
-import { useState, useEffect } from "react";
-import { db } from "./firebase";
-import {
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-} from "firebase/firestore";
-import { INITIAL_YOUTH_PROFILES, INITIAL_TRANSPARENCY_REPORTS, INITIAL_FOUNDATION_VIDEOS } from "./data";
+/**
+ * The original client-side Firestore helpers were deliberately removed. Public
+ * and administrator data must now come through server-enforced API routes.
+ * These narrow compatibility stubs prevent accidental reintroduction of a
+ * browser database write path while preserving imports in legacy components.
+ */
+export const DEFAULTS = { siteContent: INITIAL_BRANDING, faqs: INITIAL_FAQ_ITEMS, mission: INITIAL_MISSION_VISION, team: INITIAL_TEAM_MEMBERS, legal_security: INITIAL_LEGAL_SECURITY };
 
-export const DEFAULTS = {
-  siteContent: INITIAL_BRANDING,
-  profiles: INITIAL_YOUTH_PROFILES,
-  videos: INITIAL_FOUNDATION_VIDEOS,
-  faqs: INITIAL_FAQ_ITEMS,
-  mission: INITIAL_MISSION_VISION,
-  team: INITIAL_TEAM_MEMBERS,
-  transparency: INITIAL_TRANSPARENCY_REPORTS,
-  legal_security: INITIAL_LEGAL_SECURITY,
-};
-
-export function useFirestoreCollection<T>(name: string, defaults: T[]): T[] {
-  const [items, setItems] = useState<T[] | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const unsub = onSnapshot(collection(db, name), (snap) => {
-      if (snap.empty) {
-        // First load & empty collection: seed with defaults
-        const seed = async () => {
-          try {
-            const batch = defaults.map((item, i) =>
-              setDoc(
-                doc(db, name, (item as { id?: string }).id || `${name}-${i}`),
-                item as Record<string, unknown>
-              )
-            );
-            await Promise.all(batch);
-          } catch {}
-          setItems(defaults);
-        };
-        seed();
-      } else {
-        setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as unknown as T[]);
-      }
-    });
-    return () => unsub();
-  }, [name]);
-
-  return items ?? defaults;
-}
-
-export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T): T {
-  const [item, setItem] = useState<T>(defaultValue);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const unsub = onSnapshot(doc(db, name, docId), (snap) => {
-      if (!snap.exists()) {
-        setDoc(doc(db, name, docId), defaultValue as Record<string, unknown>).catch(() => {});
-        setItem(defaultValue);
-      } else {
-        setItem(snap.data() as T);
-      }
-    });
-    return () => unsub();
-  }, [name, docId]);
-
-  return item;
-}
-
-export async function addDocSafe(name: string, data: unknown) {
-  const ref = doc(collection(db, name));
-  const docData = { ...(data as Record<string, unknown>), id: ref.id, updatedAt: Date.now() };
-  try {
-    await setDoc(ref, docData);
-  } catch (err) {
-    console.error(`[Firestore] addDocSafe failed for collection "${name}":`, err);
-    throw err;
-  }
-  return ref.id;
-}
-
-export async function updateDocSafe(name: string, id: string, data: unknown) {
-  try {
-    await setDoc(doc(db, name, id), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
-  } catch (err) {
-    console.error(`[Firestore] updateDocSafe failed for "${name}/${id}":`, err);
-    throw err;
-  }
-}
-
-export async function deleteDocSafe(name: string, id: string) {
-  try {
-    await deleteDoc(doc(db, name, id));
-  } catch (err) {
-    console.error(`[Firestore] deleteDocSafe failed for "${name}/${id}":`, err);
-    throw err;
-  }
-}
-
-export async function setSingleDocSafe(name: string, docId: string, data: unknown) {
-  try {
-    await setDoc(doc(db, name, docId), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
-  } catch (err) {
-    console.error(`[Firestore] setSingleDocSafe failed for "${name}/${docId}":`, err);
-    throw err;
-  }
-}
-
-// Deprecated alias helper to maintain smooth fallback
-export function useCmsData<T>(key: string, defaultValue: T): T {
-  const docName = key.replace("wlp_", "");
-  return useFirestoreDoc<T>("cms_content", docName, defaultValue);
-}
-
-export function saveCmsData<T>(key: string, value: T) {
-  const docName = key.replace("wlp_", "");
-  setSingleDocSafe("cms_content", docName, value);
-}
+export function useFirestoreCollection<T>(_name: string, defaults: T[]): T[] { return defaults; }
+export function useFirestoreDoc<T>(_name: string, _docId: string, defaultValue: T): T { return defaultValue; }
+export async function addDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function updateDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function deleteDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function setSingleDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export function useCmsData<T>(_key: string, defaultValue: T): T { return defaultValue; }
+export function saveCmsData(): never { throw new Error("Client database writes are disabled."); }
