@@ -1,31 +1,36 @@
-import Link from "next/link";
-import { WlpLogo } from "@/components/WlpLogo";
+"use client";
 
-const links = [
+/* eslint-disable @next/next/no-img-element -- Reuses the existing project logo file. */
+import { useState } from "react";
+import Link from "next/link";
+
+const publicLinks = [
   ["Sponsor a Dream", "/orientation"],
   ["Mission & Vision", "/mission-vision"],
-  ["Our Pilot", "/our-pilot"],
+  ["Meet the Team", "/partnership"],
+  ["Security & Consent", "/privacy"],
   ["FAQ", "/faq"],
 ] as const;
 
-/** A hook-free public header that keeps the familiar navigation usable on every viewport. */
 export function SiteHeader() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-[#051836]/10 bg-[#FDFCF9]/95 shadow-[0_1px_10px_rgba(5,24,54,.03)] backdrop-blur-xl">
-      <div className="mx-auto flex min-h-18 max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:px-8">
-        <Link href="/" className="shrink-0" aria-label="Potential Without Limits International Foundation home">
-          <WlpLogo className="h-11 w-auto sm:h-12" />
+    <header className="sticky top-0 z-50 border-b border-[#051836]/10 bg-[#FDFCF9]/95 py-1 font-inter shadow-sm backdrop-blur-md">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" aria-label="Potential Without Limits International Foundation" className="flex items-center gap-3 transition-opacity hover:opacity-95">
+          <img src="/pwlif-logo.png" alt="Potential Without Limits International Foundation Logo" className="h-14 w-auto object-contain sm:h-16" />
         </Link>
-        <nav className="order-3 flex w-full items-center justify-center gap-4 overflow-x-auto pb-1 text-[11px] font-semibold text-[#051836]/75 sm:gap-6 lg:order-2 lg:w-auto lg:flex-1 lg:pb-0" aria-label="Public navigation">
-          {links.map(([label, href]) => <Link key={href} href={href} className="whitespace-nowrap transition hover:text-[#005C27]">{label}</Link>)}
+        <nav className="hidden items-center gap-6 text-xs font-semibold text-[#051836]/80 lg:flex" aria-label="Primary navigation">
+          {publicLinks.map(([label, href]) => <Link key={label} href={href} className="transition hover:text-[#005C27]">{label}</Link>)}
         </nav>
-        <div className="order-2 flex shrink-0 items-center gap-2 lg:order-3">
-          <Link href="/orientation" className="inline-flex items-center gap-2 rounded-xl bg-[#005C27] px-3.5 py-2.5 text-[11px] font-extrabold text-white shadow-[0_8px_18px_rgba(0,92,39,.16)] transition hover:bg-[#004b20] sm:px-4">
-            <span aria-hidden="true">▣</span><span className="hidden sm:inline">Book Orientation Call</span><span className="sm:hidden">Orientation</span>
-          </Link>
-          <Link href="/our-pilot" className="rounded-xl bg-[#051836] px-3.5 py-2.5 text-[11px] font-bold text-white transition hover:bg-[#042554] sm:px-4">Our Pilot</Link>
-        </div>
+        <nav aria-label="Orientation actions" className="hidden items-center gap-3 sm:flex">
+          <Link href="/orientation" className="flex items-center gap-1.5 rounded-xl bg-[#005C27] px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-[#327B2F] sm:px-5 sm:text-sm"><span aria-hidden="true">▣</span><span>Book Orientation Call</span></Link>
+          <Link href="/our-pilot" className="rounded-xl border border-[#051836] bg-[#051836] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#042554] sm:px-5 sm:text-sm">Our Pilot</Link>
+        </nav>
+        <button onClick={() => setIsMobileMenuOpen((open) => !open)} aria-label="Toggle navigation menu" aria-expanded={isMobileMenuOpen} className="rounded-xl p-2 text-[#051836] transition hover:bg-[#051836]/10 lg:hidden"><span className="text-2xl leading-none" aria-hidden="true">{isMobileMenuOpen ? "×" : "☰"}</span></button>
       </div>
+      {isMobileMenuOpen && <div className="fixed inset-x-0 top-[5.25rem] border-b border-[#051836]/10 bg-[#FDFCF9]/98 p-6 shadow-2xl backdrop-blur-2xl lg:hidden"><nav className="flex flex-col text-sm font-semibold text-[#051836]" aria-label="Mobile navigation">{publicLinks.map(([label, href]) => <Link key={label} href={href} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between border-b border-[#051836]/10 py-3 transition hover:text-[#005C27]"><span>{label}</span><span aria-hidden="true">→</span></Link>)}</nav><div className="mt-5 grid gap-2"><Link href="/orientation" onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl bg-[#005C27] px-4 py-3 text-center text-xs font-bold text-white">Book Orientation Call</Link><Link href="/our-pilot" onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl bg-[#051836] px-4 py-3 text-center text-xs font-semibold text-white">Our Pilot</Link></div></div>}
     </header>
   );
 }
