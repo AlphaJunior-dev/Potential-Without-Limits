@@ -43,25 +43,25 @@ export async function requireAdministrator(request: NextRequest) {
 export const safePublicDefaults = {
   heroTitle: "Potential grows when communities lead.",
   heroText:
-    "Potential Without Limits International Foundation is beginning a careful Rwanda pilot with six children, shaped through community-informed planning.",
+    "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.",
   bookingUrl: "https://calendly.com/withoutlimitspotential/onboarding-call",
   pilotCards: [
     {
-      id: "pilot-overview-1",
-      title: "Rwanda Pilot Overview",
-      summary: "Non-identifying pilot information is shared through a private safeguarding and partnership orientation.",
+      id: "sponsor-talent-overview",
+      title: "Sponsor Talent Overview",
+      summary: "Discover the foundation's Sponsor Talent pathway through a private safeguarding and partnership orientation.",
       supportArea: "Orientation conversation",
     },
     {
-      id: "pilot-overview-2",
-      title: "Community-guided Pathways",
-      summary: "Potential partners can learn about the pilot’s community-informed approach during a private orientation call.",
+      id: "community-guided-support",
+      title: "Community-guided Support",
+      summary: "Potential partners can learn about community-informed Sponsor Talent opportunities during a private orientation call.",
       supportArea: "Partnership conversation",
     },
     {
-      id: "pilot-overview-3",
+      id: "safeguarding-first",
       title: "Safeguarding First",
-      summary: "Any future pilot information is reviewed through appropriate safeguarding and privacy practices.",
+      summary: "Sponsor Talent information is reviewed through appropriate safeguarding and privacy practices.",
       supportArea: "Safeguarding review",
     },
   ] as Array<{ id: string; title: string; summary: string; supportArea?: string }>,
@@ -75,19 +75,22 @@ export async function readPublicSite() {
       db.collection("pilot_overview_cards").where("status", "==", "published").orderBy("displayOrder", "asc").get(),
     ]);
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
+    const sponsorTalentWording = (value: string) => value.replace(/Rwanda\s+pilot|Rwanda/gi, "Sponsor Talent");
+    const publishedCards = cardsSnapshot.docs.map((document) => {
+      const card = document.data();
+      return {
+        id: document.id,
+        title: sponsorTalentWording(String(card.title ?? "Sponsor Talent Overview")),
+        summary: sponsorTalentWording(String(card.summary ?? "")),
+        supportArea: typeof card.supportArea === "string" ? sponsorTalentWording(card.supportArea) : undefined,
+      };
+    });
+
     return {
-      heroTitle: typeof values?.heroTitle === "string" ? values.heroTitle : safePublicDefaults.heroTitle,
-      heroText: typeof values?.heroText === "string" ? values.heroText : safePublicDefaults.heroText,
+      heroTitle: typeof values?.heroTitle === "string" ? sponsorTalentWording(values.heroTitle) : safePublicDefaults.heroTitle,
+      heroText: typeof values?.heroText === "string" ? sponsorTalentWording(values.heroText) : safePublicDefaults.heroText,
       bookingUrl: typeof values?.bookingUrl === "string" ? values.bookingUrl : safePublicDefaults.bookingUrl,
-      pilotCards: cardsSnapshot.docs.map((document) => {
-        const card = document.data();
-        return {
-          id: document.id,
-          title: String(card.title ?? "Pilot overview"),
-          summary: String(card.summary ?? ""),
-          supportArea: typeof card.supportArea === "string" ? card.supportArea : undefined,
-        };
-      }),
+      pilotCards: publishedCards.length ? publishedCards : safePublicDefaults.pilotCards,
     };
   } catch {
     return safePublicDefaults;

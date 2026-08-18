@@ -26,11 +26,11 @@ export function Footer() {
             </div>
             <div>
               <h4 className="font-montserrat text-sm font-bold text-[#051836] uppercase tracking-wider flex items-center gap-2">
-                <span>Child Protection &amp; Parental Consent Shield</span>
-                <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] px-2 py-0.5 rounded-full font-semibold border border-[#005C27]/20">100% Vetted</span>
+                <span>Privacy &amp; Information Safeguards</span>
+                <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] px-2 py-0.5 rounded-full font-semibold border border-[#005C27]/20">Privacy First</span>
               </h4>
               <p className="text-xs text-[#051836]/70 mt-1 max-w-3xl leading-relaxed">
-                Potential Without Limits International Foundation operates under strict international child safety protocols. Every youth profile is published with verified parental/guardian consent records and strict privacy protections.
+                Potential Without Limits International Foundation uses a privacy-first public-information approach. Individual details are discussed only through appropriate private orientation conversations.
               </p>
             </div>
           </div>

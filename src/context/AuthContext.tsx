@@ -43,19 +43,19 @@ const safeBranding: BrandingConfig = {
   primaryColor: "#051836", secondaryColor: "#005C27", backgroundColor: "#FDFCF9", cardBackgroundColor: "#FFFFFF", textColor: "#051836", headerFont: "Montserrat", bodyFont: "Inter",
   heroMediaType: "image", heroImage: "/pwlif-logo.png", heroBadgeText: "Potential Without Limits International Foundation (PWLIF)",
   heroHeadline: "Potential grows when communities lead.",
-  heroSubheadline: "Potential Without Limits International Foundation is beginning a careful Rwanda pilot shaped through community-informed planning.",
-  heroCtaText: "Explore the Rwanda Pilot", heroSecondaryCtaText: "Book Sponsor Orientation",
-  heroCardLocation: "Rwanda pilot", heroCardTitle: "Community-guided potential", heroCardDescription: "Partnership conversations begin with an orientation call and safeguarding review.",
+  heroSubheadline: "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.",
+  heroCtaText: "Explore Sponsor Talent", heroSecondaryCtaText: "Book Sponsor Orientation",
+  heroCardLocation: "Sponsor Talent", heroCardTitle: "Community-guided potential", heroCardDescription: "Partnership conversations begin with an orientation call and safeguarding review.",
   videoSectionBadge: "Foundation Introduction", videoSectionTitle: "Foundation Introduction & Impact", videoSectionSubtitle: "An introduction video will be shared when it is ready.",
-  sponsorSectionBadge: "Pilot Overview", sponsorSectionTitle: "Sponsor a Dream", sponsorSectionSubtitle: "Explore non-identifying pilot information and begin with an orientation conversation.",
-  pathwaySectionBadge: "Our Pathway", pathwaySectionTitle: "From Potential to Purpose", pathwaySectionSubtitle: "A careful, community-guided pathway for the Rwanda pilot.",
+  sponsorSectionBadge: "Sponsor Talent", sponsorSectionTitle: "Sponsor Talent", sponsorSectionSubtitle: "Explore non-identifying Sponsor Talent information and begin with an orientation conversation.",
+  pathwaySectionBadge: "Our Pathway", pathwaySectionTitle: "From Potential to Purpose", pathwaySectionSubtitle: "A careful, community-guided pathway for Sponsor Talent opportunities.",
   transparencySectionBadge: "Partnership", transparencySectionTitle: "Accountability & stewardship", transparencySectionSubtitle: "Detailed information is shared through appropriate private partnership conversations.",
-  statsMetrics: [{ value: "Pilot", label: "Rwanda" }, { value: "Guided", label: "by community" }, { value: "Private", label: "orientation" }],
+  statsMetrics: [{ value: "Sponsor", label: "Talent" }, { value: "Guided", label: "by community" }, { value: "Private", label: "orientation" }],
   pathSteps: [{ stepNumber: "01", title: "Listen", description: "Begin with community-informed planning." }, { stepNumber: "02", title: "Prepare", description: "Review safeguarding and partnership needs." }, { stepNumber: "03", title: "Connect", description: "Hold a private orientation conversation." }, { stepNumber: "04", title: "Support", description: "Coordinate carefully with local partners." }],
 };
 
 const safeMission: MissionVisionData = {
-  mission: "PWLIF is preparing a community-informed Rwanda pilot focused on careful partnership, learning, and youth potential.",
+  mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
   vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
   foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
   foundersTitle: "Potential Without Limits International Foundation", pillars: [], lastUpdated: "",
@@ -75,6 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profiles, setProfiles] = useState<YouthProfile[]>([]);
   const [branding, setBranding] = useState<BrandingConfig>(safeBranding);
   const [missionVision, setMissionVision] = useState<MissionVisionData>(safeMission);
+  const [faqItems, setFaqItems] = useState<FlexibleRecord[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [adminRole, setAdminRole] = useState<AdminRole>("Super Admin");
 
   useEffect(() => {
@@ -82,6 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data?.branding) setBranding(data.branding);
       if (data?.missionVision) setMissionVision(data.missionVision);
       if (Array.isArray(data?.profiles)) setProfiles(data.profiles);
+      if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
+      if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
     }).catch(() => undefined);
 
     return onAuthStateChanged(auth, async (currentUser) => {
@@ -104,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextType>(() => ({
     user, userStatus, loading, profiles, branding, missionVision, legalSecurity: safeLegal, adminRole, mfaVerified: userStatus === "admin",
-    pendingSponsors: [], inquiries: [], supportInquiries: [], faqItems: [], teamMembers: [], auditLogs: [], transparencyReports: [], foundationVideos: [], sponsorDreams: [],
+    pendingSponsors: [], inquiries: [], supportInquiries: [], faqItems, teamMembers, auditLogs: [], transparencyReports: [], foundationVideos: [], sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
     bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string, category?: string, tier?: string, dreamInterest?: string) => {
@@ -115,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
     register: noClientAuthority, approveSponsor: noClientAuthority, rejectSponsor: noClientAuthority, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials: noClientAuthority, provisionSponsorManual: noClientAuthority, updateCallStatus: noClientAuthority, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: noClientAuthority, updateProfile: noClientAuthority, deleteProfile: noClientAuthority, updateBranding: noClientAuthority, updateLegalSecurity: noClientAuthority, updateMissionVision: noClientAuthority, updateTeamMembers: noClientAuthority, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: noClientAuthority, deleteFoundationVideo: noClientAuthority, adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
-  }), [adminRole, branding, loading, missionVision, profiles, user, userStatus]);
+  }), [adminRole, branding, faqItems, loading, missionVision, profiles, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

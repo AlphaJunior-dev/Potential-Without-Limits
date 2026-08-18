@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { 
   ShieldCheck, 
@@ -23,20 +23,19 @@ import {
 export default function PortfolioDetailPage() {
   const params = useParams();
   const id = params?.id as string;
-  const { userStatus, sendInquiry, profiles, adoptSponsorDream } = useAuth();
+  const { profiles } = useAuth();
+  const router = useRouter();
   
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [showSponsorModal, setShowSponsorModal] = useState(false);
 
-  const profile = profiles.find((p) => p.id === id);
-  const isAuthorized = userStatus === "approved" || userStatus === "admin";
-
+  const profile = profiles.find((p) => p.id === id) ?? profiles[0];
   if (!profile) {
     return (
       <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] bg-foundation-pattern flex items-center justify-center px-4">
         <div className="bg-white p-8 rounded-3xl border border-[#051836]/10 shadow-xl text-center space-y-4 max-w-md">
-          <h1 className="font-montserrat text-2xl font-black">Pilot information is shared through orientation.</h1>
+          <h1 className="font-montserrat text-2xl font-black">Sponsor Talent information is shared through orientation.</h1>
           <Link href="/book-a-call" className="inline-flex bg-[#005C27] text-white font-bold px-5 py-3 rounded-xl text-xs">Book Orientation Call</Link>
         </div>
       </div>
@@ -48,14 +47,10 @@ export default function PortfolioDetailPage() {
   const handleSendInquiry = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
-    sendInquiry(profile.id, profile.name, message);
-    adoptSponsorDream(profile.id, message);
     setSent(true);
     setTimeout(() => {
-      setShowSponsorModal(false);
-      setSent(false);
-      setMessage("");
-    }, 2000);
+      router.push("/book-a-call");
+    }, 700);
   };
 
   return (
@@ -72,7 +67,7 @@ export default function PortfolioDetailPage() {
           </Link>
 
           <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5" /> Guardian Consent Verified
+            <ShieldCheck className="w-3.5 h-3.5" /> Privacy-First Information
           </span>
         </div>
       </div>
@@ -94,12 +89,12 @@ export default function PortfolioDetailPage() {
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-[#005C27] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  Status: Active Dream
+                  Status: Sponsor Talent
                 </span>
               </div>
 
               <h1 className="font-montserrat text-3xl font-black text-[#051836]">
-                {profile.name}&apos;s Humanitarian Story &amp; Dream
+                Sponsor Talent Overview
               </h1>
 
               {/* Parental / Guardian Media Release Check */}
@@ -107,10 +102,10 @@ export default function PortfolioDetailPage() {
                 <div className="p-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
                   <Lock className="w-10 h-10 text-amber-600 mx-auto" />
                   <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                    Photo &amp; Video Media Restricted
+                    Photo &amp; Video Media Unavailable
                   </h3>
                   <p className="text-xs text-[#051836]/80 max-w-md mx-auto leading-relaxed">
-                    Per the parent/guardian consent record, media release permissions for this child profile are restricted for privacy. Educational grant sponsorship remains fully active.
+                    Public media is unavailable to protect privacy. Additional Sponsor Talent context is shared through a private orientation conversation.
                   </p>
                 </div>
               ) : (
@@ -124,7 +119,7 @@ export default function PortfolioDetailPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
                     <span className="text-xs font-mono text-[#F5AB00] font-bold uppercase tracking-wider mb-1">
-                      Direct Child Sponsorship Profile
+                      Sponsor Talent Overview
                     </span>
                     <h3 className="font-montserrat font-bold text-xl text-white">
                       &quot;{profile.dream}&quot;
@@ -138,7 +133,7 @@ export default function PortfolioDetailPage() {
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#051836]/10 shadow-xl space-y-6">
               <div>
                 <h2 className="font-montserrat font-bold text-xl text-[#051836] mb-2">
-                  Child Situation &amp; Background
+                  Sponsor Talent Overview
                 </h2>
                 <p className="text-sm text-[#051836]/80 leading-relaxed">
                   {profile.current_situation || profile.bio}
@@ -148,7 +143,7 @@ export default function PortfolioDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#051836]/10">
                 <div className="p-4 rounded-2xl bg-[#FDFCF9] border border-[#051836]/10 space-y-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-                    Current Progress Milestone
+                    Current Opportunity
                   </span>
                   <p className="text-xs text-[#051836]/90 font-medium">
                     {profile.progress || "Actively participating in local community youth labs."}
@@ -157,7 +152,7 @@ export default function PortfolioDetailPage() {
 
                 <div className="p-4 rounded-2xl bg-[#005C27]/5 border border-[#005C27]/20 space-y-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-                    Specific Grant &amp; Equipment Needs
+                    Support Focus
                   </span>
                   <p className="text-xs text-[#051836]/90 font-bold">
                     {profile.current_needs}
@@ -170,7 +165,7 @@ export default function PortfolioDetailPage() {
                   Core Skills &amp; Talents
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {(profile.skills || ["Technology", "Community Innovation"]).map((skill: string) => (
+                  {(Array.isArray(profile.skills) && profile.skills.length ? profile.skills : ["Sponsor Talent"]).map((skill: string) => (
                     <span
                       key={skill}
                       className="bg-[#051836] text-white text-xs font-bold px-3 py-1.5 rounded-xl"
@@ -192,7 +187,7 @@ export default function PortfolioDetailPage() {
                 </div>
                 <div>
                   <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                    {profile.name}, {profile.age}
+                    {profile.name}
                   </h3>
                   <span className="text-xs text-[#051836]/60 font-medium">
                     📍 {profile.country_community || profile.location}
@@ -202,10 +197,10 @@ export default function PortfolioDetailPage() {
 
               <div className="p-4 rounded-2xl bg-[#005C27]/10 border border-[#005C27]/30 text-xs space-y-2">
                 <span className="font-bold text-[#005C27] block uppercase tracking-wider text-[11px]">
-                  Parental Consent Summary
+                  Privacy Summary
                 </span>
                 <p className="text-[#051836]/80 text-[11px] leading-relaxed">
-                  Verified guardian consent on file. 100% of sponsorship grants go directly to audited equipment or tuition for {profile.name}.
+                  Public information is limited to non-identifying Sponsor Talent context. Further details are discussed privately during orientation.
                 </p>
               </div>
 
@@ -214,7 +209,7 @@ export default function PortfolioDetailPage() {
                 className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-black py-4 px-6 rounded-2xl shadow-xl hover:scale-[1.02] transition flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 <Heart className="w-5 h-5 text-[#F5AB00] fill-[#F5AB00]" />
-                <span>Sponsor {profile.name}&apos;s Dream</span>
+                <span>Discuss Sponsor Talent</span>
               </button>
 
               <Link
@@ -228,39 +223,39 @@ export default function PortfolioDetailPage() {
         </div>
       </div>
 
-      {/* Sponsor Dream Adoption Modal */}
+          {/* Sponsor Talent Orientation Modal */}
       {showSponsorModal && (
         <div className="fixed inset-0 z-50 bg-[#051836]/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white max-w-lg w-full p-8 rounded-3xl shadow-2xl border border-[#051836]/10 relative font-inter space-y-6">
             <div>
               <h3 className="font-montserrat font-bold text-xl text-[#051836] mb-1">
-                Sponsor {profile.name}&apos;s Dream
+                Discuss Sponsor Talent
               </h3>
               <p className="text-xs text-[#051836]/70">
-                Target Grant Need: <strong>{profile.current_needs}</strong>
+                Support focus: <strong>{profile.current_needs}</strong>
               </p>
             </div>
 
             {sent ? (
               <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center text-xs text-emerald-800 space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <p className="font-bold text-base text-[#051836]">Dream Sponsorship Dispatched!</p>
+                <p className="font-bold text-base text-[#051836]">Orientation interest received</p>
                 <p>
-                  Your dream adoption commitment has been logged and assigned in your Sponsor VIP Dashboard.
+                  Your interest has been noted. Please continue with a private orientation conversation before any next step.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSendInquiry} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
-                    Sponsorship Message &amp; Grant Notes
+                    Orientation Message
                   </label>
                   <textarea
                     rows={4}
                     required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={`Describe your sponsorship commitment or equipment funding for ${profile.name}...`}
+                    placeholder="Tell us how you would like to explore Sponsor Talent support..."
                     className="w-full p-3 bg-white border border-[#051836]/20 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
                   />
                 </div>
@@ -278,7 +273,7 @@ export default function PortfolioDetailPage() {
                     className="bg-[#005C27] hover:bg-[#327B2F] text-white px-6 py-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 shadow-md cursor-pointer"
                   >
                     <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" />
-                    <span>Confirm Dream Sponsorship</span>
+                    <span>Continue to Orientation</span>
                   </button>
                 </div>
               </form>

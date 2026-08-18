@@ -65,7 +65,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base sm:text-lg text-[#051836]/80 leading-relaxed font-normal">
-              {branding?.heroSubheadline || "A humanitarian foundation connecting sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship."}
+              {branding?.heroSubheadline || "A privacy-first foundation that introduces sponsors to talent development conversations through a guided private orientation."}
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -74,7 +74,7 @@ export default function HomePage() {
                 className="bg-[#005C27] text-white px-8 py-4 rounded-2xl font-montserrat font-extrabold text-sm hover:bg-[#327B2F] transition shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <Heart className="w-5 h-5 text-[#F5AB00] fill-[#F5AB00]" />
-                <span>{branding?.heroCtaText || "Sponsor a Child's Dream"}</span>
+                <span>{branding?.heroCtaText || "Explore Sponsor Talent"}</span>
                 <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
               </Link>
 
@@ -90,9 +90,9 @@ export default function HomePage() {
             {/* Impact Metric Chips */}
             <div className="pt-6 grid grid-cols-3 gap-4 border-t border-[#051836]/10 text-xs">
               {(branding?.statsMetrics && branding.statsMetrics.length > 0 ? branding.statsMetrics : [
-                { value: "340+", label: "Youth Sponsored" },
-                { value: "24", label: "Global Communities" },
-                { value: "100%", label: "Direct Grant Audit" },
+                { value: "Private", label: "Orientation-first" },
+                { value: "Guided", label: "Partner process" },
+                { value: "Respectful", label: "Information sharing" },
               ]).slice(0, 3).map((metric, idx) => (
                 <div key={idx}>
                   <span className={`font-black text-2xl block ${idx === 0 ? "text-[#005C27]" : idx === 1 ? "text-[#051836]" : "text-[#F5AB00]"}`}>
@@ -133,13 +133,13 @@ export default function HomePage() {
 
               <div className="absolute inset-0 bg-gradient-to-t from-[#051836] via-[#051836]/30 to-transparent flex flex-col justify-end p-6 text-white">
                 <span className="text-xs font-mono font-bold text-[#F5AB00] uppercase tracking-wider mb-1 flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5" /> {branding?.heroCardLocation || "Mathare Youth Tech Lab • Nairobi, Kenya"}
+                  <Globe className="w-3.5 h-3.5" /> {branding?.heroCardLocation || "Sponsor Talent pathway"}
                 </span>
                 <h3 className="font-montserrat font-bold text-xl text-white">
-                  {branding?.heroCardTitle || "Engineering Hope & Assistive Tech"}
+                  {branding?.heroCardTitle || "A private introduction"}
                 </h3>
                 <p className="text-xs text-white/80 mt-1 line-clamp-2">
-                  {branding?.heroCardDescription || "Direct sponsorship equipped Sarah with high-precision soldering gear to build Swahili AI screen readers for 50 blind students."}
+                  {branding?.heroCardDescription || "Learn how the foundation approaches talent development, privacy, and sponsor orientation."}
                 </p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function HomePage() {
             {branding?.videoSectionTitle || "Foundation Introduction & Impact"}
           </h2>
           <p className="text-xs sm:text-sm text-[#051836]/70 leading-relaxed">
-            {branding?.videoSectionSubtitle || "Watch how our direct child sponsorship model bridges resources with unseen talent around the world."}
+            {branding?.videoSectionSubtitle || "Learn how Sponsor Talent conversations are introduced through a careful, privacy-first orientation."}
           </p>
         </div>
 
@@ -207,13 +207,13 @@ export default function HomePage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between, gap-6">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-[#005C27] flex items-center gap-1.5">
-              <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" /> {branding?.sponsorSectionBadge || "Direct Child Sponsorship"}
+              <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" /> {branding?.sponsorSectionBadge || "Sponsor Talent"}
             </span>
             <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-[#051836]">
-              {branding?.sponsorSectionTitle || "Sponsor a Child's Dream"}
+              {branding?.sponsorSectionTitle || "Explore Sponsor Talent"}
             </h2>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl">
-              {branding?.sponsorSectionSubtitle || "Each child profile features an active dream, current situation, and specific equipment or tuition needs."}
+              {branding?.sponsorSectionSubtitle || "Begin with a private orientation to understand the foundation's Sponsor Talent pathway."}
             </p>
           </div>
 
@@ -306,7 +306,7 @@ export default function HomePage() {
               {branding?.pathwaySectionTitle || "From Potential to Purpose"}
             </h2>
             <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-              {branding?.pathwaySectionSubtitle || "Our structured 4-phase journey transforms talent through direct equipment grants and parental consent verification."}
+              {branding?.pathwaySectionSubtitle || "Our four-part approach guides private, responsible Sponsor Talent conversations from introduction to partnership."}
             </p>
           </div>
 
@@ -314,23 +314,23 @@ export default function HomePage() {
             {(branding?.pathSteps && branding.pathSteps.length > 0 ? branding.pathSteps : [
               {
                 stepNumber: "STEP 01",
-                title: "Identification & Consent",
-                description: "Local community leaders identify unseen talent; parental consent and guardian safety verification logged.",
+                title: "Orientation",
+                description: "Sponsors begin with a private conversation about the foundation's approach and current priorities.",
               },
               {
                 stepNumber: "STEP 02",
-                title: "Direct Dream Adoption",
-                description: "Foundation sponsors adopt specific child dreams, allocating targeted equipment or tuition grants.",
+                title: "Understanding",
+                description: "The foundation shares appropriate, non-identifying Sponsor Talent context through the right channels.",
               },
               {
                 stepNumber: "STEP 03",
-                title: "Equipment & Lab Deployment",
-                description: "100% audited hardware, musical instruments, or lab components delivered to the youth innovator.",
+                title: "Partnership",
+                description: "Potential partners explore a responsible way to support the foundation's work.",
               },
               {
                 stepNumber: "STEP 04",
-                title: "Community Purpose",
-                description: "The child deploys their solution or art to lift their school, village, or local conservatory.",
+                title: "Purpose",
+                description: "The foundation keeps conversations grounded in dignity, privacy, and long-term opportunity.",
               },
             ]).map((p, idx) => (
               <div key={idx} className="bg-[#042554] p-6 rounded-3xl border border-white/10 space-y-3 relative">
@@ -359,7 +359,7 @@ export default function HomePage() {
             {branding?.transparencySectionTitle || "Institutional Transparency"}
           </h2>
           <p className="text-xs sm:text-sm text-[#051836]/70 leading-relaxed">
-            {branding?.transparencySectionSubtitle || "PWLIF publishes independent financial audits and annual grant distribution reports for public inspection."}
+            {branding?.transparencySectionSubtitle || "Learn about the foundation's values, partnership approach, and private orientation process."}
           </p>
         </div>
 

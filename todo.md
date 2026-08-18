@@ -13,3 +13,10 @@
 - [x] Restore the original live route components, Navbar, layout shell, and visual styling without changing their render structure or class-level presentation.
 - [x] Replace only the original browser-side authentication, database authority, hard-coded credential, and form-submission paths with server-enforced equivalents.
 - [x] Verify no direct Firestore client write, mock credential, weak MFA, or unauthenticated private-data path remains after restoration.
+- [x] Audit the deployed preview route by route for empty states, broken interactions, and server/data dependency errors.
+- [x] Repair confirmed functional gaps without changing the restored page layouts, styling, navigation, or visual component structure.
+- [ ] Revalidate the updated preview before any production-merge decision.
+- [x] Populate the existing Meet the Team and FAQ visual components with safe, non-fabricated published content rather than blank states.
+- [x] Replace public Rwanda-pilot and child-specific language with Sponsor Talent wording while preserving every existing layout and style.
+- [ ] Keep Vercel preview access protected while confirming the production route will remain public after a deliberate merge.
+- [x] Preserve the existing Sponsor Talent detail-page two-column shell for legacy public links by serving a non-identifying generic record rather than a collapsed orientation-only fallback.

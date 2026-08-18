@@ -46,7 +46,7 @@ export default function FaqPage() {
             Frequently Asked Questions
           </h1>
           <p className="font-inter text-base text-[#051836]/70 max-w-2xl mx-auto leading-relaxed">
-            Everything you need to know about PWLIF&apos;s parental consent protocols, child dream sponsorship categories, and financial grant stewardship.
+            Everything you need to know about PWLIF&apos;s privacy-first Sponsor Talent process, orientation pathway, and community partnership approach.
           </p>
 
           {/* Category Filter Pills */}
@@ -100,7 +100,7 @@ export default function FaqPage() {
                         Category: {item.category}
                       </span>
                       <span className="flex items-center gap-1">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#005C27]" /> PWLIF Protocol Verified
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#005C27]" /> PWLIF Guidance
                       </span>
                     </div>
                   </div>
