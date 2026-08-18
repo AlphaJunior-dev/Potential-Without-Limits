@@ -2,10 +2,9 @@ import "server-only";
 
 import { NextRequest } from "next/server";
 
-// Firebase Admin v14 provides both ESM and CommonJS entrypoints. Next's server
-// compiler selected the ESM entrypoint before externalizing the package for
-// Vercel, after which Node tried to load it with require(). Use the explicit
-// CommonJS resolution path for this Node-only module instead.
+// Firebase Admin is pinned to the CommonJS-compatible v13 line because the v14
+// ESM dependency chain fails when Vercel externalizes the package for Next.js.
+// Keep these Node-only imports as explicit CommonJS resolution paths.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { cert, getApps, initializeApp } = require("firebase-admin/app") as typeof import("firebase-admin/app");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
