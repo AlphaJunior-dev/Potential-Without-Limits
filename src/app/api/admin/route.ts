@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb, requireAdministrator } from "@/lib/admin";
+import { adminDb, requireAdministrator, sanitizePublicBranding } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
@@ -43,6 +43,26 @@ export async function PATCH(request: NextRequest) {
         updatedAt: FieldValue.serverTimestamp(),
         updatedBy: administrator.uid,
       }, { merge: true });
+    } else if (body.action === "updateBranding") {
+      const branding = sanitizePublicBranding(body.branding);
+      if (!Object.keys(branding).length) return NextResponse.json({ error: "No supported branding values were supplied." }, { status: 400 });
+
+      const update: Record<string, unknown> = {
+        branding,
+        updatedAt: FieldValue.serverTimestamp(),
+        updatedBy: administrator.uid,
+      };
+      if (branding.heroHeadline) update.heroTitle = branding.heroHeadline;
+      if (branding.heroSubheadline) update.heroText = branding.heroSubheadline;
+      await db.collection("public_site_content").doc("main").set(update, { merge: true });
+      await db.collection("audit_log").add({
+        action: "updateBranding",
+        entityType: "site_content",
+        entityId: "main",
+        performedBy: administrator.uid,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return NextResponse.json({ ok: true, branding });
     } else if (body.action === "updateApplicationStatus" && typeof body.applicationId === "string") {
       const allowed = ["new", "contacted", "call_scheduled", "approved", "declined"];
       if (!allowed.includes(body.status)) return NextResponse.json({ error: "Invalid status." }, { status: 400 });

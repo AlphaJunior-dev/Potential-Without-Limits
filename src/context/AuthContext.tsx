@@ -106,6 +106,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     throw new Error("This account is not approved for the requested portal.");
   };
 
+  const updateBranding = async (nextBranding: BrandingConfig) => {
+    if (!user || userStatus !== "admin") throw new Error("Administrator access is required to update public content.");
+    const token = await user.getIdToken(true);
+    const response = await fetch("/api/admin", {
+      method: "PATCH",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: "updateBranding", branding: nextBranding }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof result?.error === "string" ? result.error : "Could not save branding settings.");
+    if (result?.branding && typeof result.branding === "object") {
+      setBranding((current) => ({ ...current, ...result.branding }));
+    }
+  };
+
   const value = useMemo<AuthContextType>(() => ({
     user, userStatus, loading, profiles, branding, missionVision, legalSecurity: safeLegal, adminRole, mfaVerified: userStatus === "admin",
     pendingSponsors: [], inquiries: [], supportInquiries: [], faqItems, teamMembers, auditLogs: [], transparencyReports: [], foundationVideos: [], sponsorDreams: [],
@@ -118,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor: noClientAuthority, rejectSponsor: noClientAuthority, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials: noClientAuthority, provisionSponsorManual: noClientAuthority, updateCallStatus: noClientAuthority, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: noClientAuthority, updateProfile: noClientAuthority, deleteProfile: noClientAuthority, updateBranding: noClientAuthority, updateLegalSecurity: noClientAuthority, updateMissionVision: noClientAuthority, updateTeamMembers: noClientAuthority, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: noClientAuthority, deleteFoundationVideo: noClientAuthority, adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+    register: noClientAuthority, approveSponsor: noClientAuthority, rejectSponsor: noClientAuthority, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials: noClientAuthority, provisionSponsorManual: noClientAuthority, updateCallStatus: noClientAuthority, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: noClientAuthority, updateProfile: noClientAuthority, deleteProfile: noClientAuthority, updateBranding, updateLegalSecurity: noClientAuthority, updateMissionVision: noClientAuthority, updateTeamMembers: noClientAuthority, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: noClientAuthority, deleteFoundationVideo: noClientAuthority, adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
   }), [adminRole, branding, faqItems, loading, missionVision, profiles, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

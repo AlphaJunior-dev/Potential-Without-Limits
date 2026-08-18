@@ -67,6 +67,79 @@ export const safePublicDefaults = {
   ] as Array<{ id: string; title: string; summary: string; supportArea?: string }>,
 };
 
+const publicBrandingTextLimits: Record<string, number> = {
+  siteTitle: 140,
+  heroBadgeText: 160,
+  heroHeadline: 160,
+  heroSubheadline: 700,
+  heroCtaText: 80,
+  heroSecondaryCtaText: 80,
+  heroCardLocation: 100,
+  heroCardTitle: 160,
+  heroCardDescription: 260,
+  videoSectionBadge: 100,
+  videoSectionTitle: 160,
+  videoSectionSubtitle: 360,
+  sponsorSectionBadge: 100,
+  sponsorSectionTitle: 160,
+  sponsorSectionSubtitle: 360,
+  pathwaySectionBadge: 100,
+  pathwaySectionTitle: 160,
+  pathwaySectionSubtitle: 360,
+  transparencySectionBadge: 100,
+  transparencySectionTitle: 160,
+  transparencySectionSubtitle: 360,
+};
+
+const publicBrandingColorFields = ["primaryColor", "secondaryColor", "backgroundColor", "cardBackgroundColor", "textColor"];
+const approvedHeaderFonts = new Set(["Montserrat", "Inter", "Playfair Display", "Roboto", "Outfit"]);
+const approvedBodyFonts = new Set(["Inter", "Montserrat", "Roboto", "Outfit"]);
+
+function sponsorTalentWording(value: string) {
+  return value.replace(/Rwanda\s+pilot|Rwanda/gi, "Sponsor Talent");
+}
+
+function safeAssetUrl(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim().slice(0, 1_500);
+  if (!trimmed || trimmed.startsWith("data:") || trimmed.startsWith("//")) return undefined;
+  if (trimmed.startsWith("/")) return trimmed;
+  try {
+    const url = new URL(trimmed);
+    return url.protocol === "https:" ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function sanitizePublicBranding(input: unknown) {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const branding: Record<string, string> = {};
+
+  for (const [field, limit] of Object.entries(publicBrandingTextLimits)) {
+    const value = source[field];
+    if (typeof value === "string" && value.trim()) branding[field] = sponsorTalentWording(value.trim()).slice(0, limit);
+  }
+
+  for (const field of publicBrandingColorFields) {
+    const value = source[field];
+    if (typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim())) branding[field] = value.trim();
+  }
+
+  if (typeof source.headerFont === "string" && approvedHeaderFonts.has(source.headerFont)) branding.headerFont = source.headerFont;
+  if (typeof source.bodyFont === "string" && approvedBodyFonts.has(source.bodyFont)) branding.bodyFont = source.bodyFont;
+  if (source.heroMediaType === "image" || source.heroMediaType === "video" || source.heroMediaType === "none") branding.heroMediaType = source.heroMediaType;
+
+  const heroImage = safeAssetUrl(source.heroImage);
+  const heroVideoUrl = safeAssetUrl(source.heroVideoUrl);
+  const logoUrl = safeAssetUrl(source.logoUrl);
+  if (heroImage) branding.heroImage = heroImage;
+  if (heroVideoUrl) branding.heroVideoUrl = heroVideoUrl;
+  if (logoUrl) branding.logoUrl = logoUrl;
+
+  return branding;
+}
+
 export async function readPublicSite() {
   try {
     const db = adminDb();
@@ -75,7 +148,7 @@ export async function readPublicSite() {
       db.collection("pilot_overview_cards").where("status", "==", "published").orderBy("displayOrder", "asc").get(),
     ]);
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
-    const sponsorTalentWording = (value: string) => value.replace(/Rwanda\s+pilot|Rwanda/gi, "Sponsor Talent");
+    const branding = sanitizePublicBranding(values?.branding);
     const publishedCards = cardsSnapshot.docs.map((document) => {
       const card = document.data();
       return {
@@ -87,12 +160,13 @@ export async function readPublicSite() {
     });
 
     return {
-      heroTitle: typeof values?.heroTitle === "string" ? sponsorTalentWording(values.heroTitle) : safePublicDefaults.heroTitle,
-      heroText: typeof values?.heroText === "string" ? sponsorTalentWording(values.heroText) : safePublicDefaults.heroText,
+      heroTitle: typeof values?.heroTitle === "string" ? sponsorTalentWording(values.heroTitle) : branding.heroHeadline || safePublicDefaults.heroTitle,
+      heroText: typeof values?.heroText === "string" ? sponsorTalentWording(values.heroText) : branding.heroSubheadline || safePublicDefaults.heroText,
       bookingUrl: typeof values?.bookingUrl === "string" ? values.bookingUrl : safePublicDefaults.bookingUrl,
       pilotCards: publishedCards.length ? publishedCards : safePublicDefaults.pilotCards,
+      branding,
     };
   } catch {
-    return safePublicDefaults;
+    return { ...safePublicDefaults, branding: {} };
   }
 }

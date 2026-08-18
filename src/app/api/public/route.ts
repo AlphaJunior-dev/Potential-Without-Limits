@@ -22,7 +22,7 @@ const fallbackTeamMembers = [
 export async function GET() {
   const site = await readPublicSite();
   return NextResponse.json({
-    branding: { ...baseBranding, heroHeadline: site.heroTitle, heroSubheadline: site.heroText },
+    branding: { ...baseBranding, ...site.branding, heroHeadline: site.heroTitle, heroSubheadline: site.heroText },
     missionVision: { mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.", vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.", foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.", foundersTitle: "Potential Without Limits International Foundation", pillars: [], lastUpdated: "" },
     profiles: site.pilotCards.map((card) => ({ id: card.id, name: card.title, age: 0, category: card.supportArea || "Sponsor Talent", location: "Sponsor Talent", country_community: "Sponsor Talent", bio: card.summary, coverPhoto: "/pwlif-logo.png", status: "active", skills: [], dream: card.summary, current_situation: "Information is shared through appropriate private conversations.", progress: "", current_needs: card.supportArea || "Orientation conversation", consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" } })),
     faqItems: fallbackFaqItems,

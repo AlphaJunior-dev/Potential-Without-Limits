@@ -57,3 +57,21 @@ test("existing Team and FAQ shells receive safe published content and public wor
     assert.doesNotMatch(source, /Rwanda pilot/i);
   }
 });
+
+test("branding changes use a fresh Firebase ID token, a protected route, and an allowlisted public-data merge", async () => {
+  const [provider, adminRoute, publicRoute, adminLibrary] = await Promise.all([
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/lib/admin.ts"),
+  ]);
+
+  assert.match(provider, /user\.getIdToken\(true\)/);
+  assert.match(provider, /authorization: `Bearer \$\{token\}`/);
+  assert.match(provider, /action: "updateBranding"/);
+  assert.match(adminRoute, /body\.action === "updateBranding"/);
+  assert.match(adminRoute, /sanitizePublicBranding/);
+  assert.match(publicRoute, /\.\.\.site\.branding/);
+  assert.match(adminLibrary, /function safeAssetUrl/);
+  assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
+});

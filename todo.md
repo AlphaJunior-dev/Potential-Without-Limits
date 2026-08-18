@@ -20,3 +20,7 @@
 - [x] Replace public Rwanda-pilot and child-specific language with Sponsor Talent wording while preserving every existing layout and style.
 - [ ] Keep Vercel preview access protected while confirming the production route will remain public after a deliberate merge.
 - [x] Preserve the existing Sponsor Talent detail-page two-column shell for legacy public links by serving a non-identifying generic record rather than a collapsed orientation-only fallback.
+- [x] Identify or create the real Firebase Authentication account that will administer the existing protected portal.
+- [x] Assign and verify the Firebase custom claim `admin: true` without exposing any service-account credential.
+- [ ] Confirm the secured Admin Portal can update approved public content before any production merge.
+- [x] Repair the Admin Portal branding-save control so it calls the authenticated server update route without altering the existing interface.
