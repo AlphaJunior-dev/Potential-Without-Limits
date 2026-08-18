@@ -75,17 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profiles, setProfiles] = useState<YouthProfile[]>([]);
   const [branding, setBranding] = useState<BrandingConfig>(safeBranding);
   const [missionVision, setMissionVision] = useState<MissionVisionData>(safeMission);
+  const [legalSecurity, setLegalSecurity] = useState<LegalSecurityConfig>(safeLegal);
   const [faqItems, setFaqItems] = useState<FlexibleRecord[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [foundationVideos, setFoundationVideos] = useState<FlexibleRecord[]>([]);
   const [adminRole, setAdminRole] = useState<AdminRole>("Super Admin");
 
   useEffect(() => {
     void fetch("/api/public").then((response) => response.ok ? response.json() : null).then((data) => {
       if (data?.branding) setBranding(data.branding);
       if (data?.missionVision) setMissionVision(data.missionVision);
+      if (data?.legalSecurity) setLegalSecurity(data.legalSecurity);
       if (Array.isArray(data?.profiles)) setProfiles(data.profiles);
       if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
       if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
+      if (Array.isArray(data?.foundationVideos)) setFoundationVideos(data.foundationVideos);
     }).catch(() => undefined);
 
     return onAuthStateChanged(auth, async (currentUser) => {
@@ -121,9 +125,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updatePublicContent = async (action: string, body: Record<string, unknown>) => {
+    if (!user || userStatus !== "admin") throw new Error("Administrator access is required to update public content.");
+    const token = await user.getIdToken(true);
+    const response = await fetch("/api/admin", {
+      method: "PATCH",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action, ...body }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof result?.error === "string" ? result.error : "Could not save public content.");
+    return result as FlexibleRecord;
+  };
+
+  const updateMissionVision = async (nextMissionVision: MissionVisionData) => {
+    const result = await updatePublicContent("updateMissionVision", { missionVision: nextMissionVision });
+    if (result.missionVision && typeof result.missionVision === "object") setMissionVision(result.missionVision as MissionVisionData);
+  };
+
+  const updateTeamMembers = async (nextTeamMembers: TeamMember[]) => {
+    const result = await updatePublicContent("updateTeamMembers", { teamMembers: nextTeamMembers });
+    if (Array.isArray(result.teamMembers)) setTeamMembers(result.teamMembers as TeamMember[]);
+  };
+
+  const updateLegalSecurity = async (nextLegalSecurity: LegalSecurityConfig) => {
+    const result = await updatePublicContent("updateLegalSecurity", { legalSecurity: nextLegalSecurity });
+    if (result.legalSecurity && typeof result.legalSecurity === "object") setLegalSecurity(result.legalSecurity as LegalSecurityConfig);
+  };
+
+  const updateFoundationVideos = async (nextFoundationVideos: FlexibleRecord[]) => {
+    const result = await updatePublicContent("updateFoundationVideos", { foundationVideos: nextFoundationVideos });
+    if (Array.isArray(result.foundationVideos)) setFoundationVideos(result.foundationVideos as FlexibleRecord[]);
+  };
+
   const value = useMemo<AuthContextType>(() => ({
-    user, userStatus, loading, profiles, branding, missionVision, legalSecurity: safeLegal, adminRole, mfaVerified: userStatus === "admin",
-    pendingSponsors: [], inquiries: [], supportInquiries: [], faqItems, teamMembers, auditLogs: [], transparencyReports: [], foundationVideos: [], sponsorDreams: [],
+    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin",
+    pendingSponsors: [], inquiries: [], supportInquiries: [], faqItems, teamMembers, auditLogs: [], transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
     bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string, category?: string, tier?: string, dreamInterest?: string) => {
@@ -133,8 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor: noClientAuthority, rejectSponsor: noClientAuthority, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials: noClientAuthority, provisionSponsorManual: noClientAuthority, updateCallStatus: noClientAuthority, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: noClientAuthority, updateProfile: noClientAuthority, deleteProfile: noClientAuthority, updateBranding, updateLegalSecurity: noClientAuthority, updateMissionVision: noClientAuthority, updateTeamMembers: noClientAuthority, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: noClientAuthority, deleteFoundationVideo: noClientAuthority, adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
-  }), [adminRole, branding, faqItems, loading, missionVision, profiles, teamMembers, user, userStatus]);
+    register: noClientAuthority, approveSponsor: noClientAuthority, rejectSponsor: noClientAuthority, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials: noClientAuthority, provisionSponsorManual: noClientAuthority, updateCallStatus: noClientAuthority, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: noClientAuthority, updateProfile: noClientAuthority, deleteProfile: noClientAuthority, updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+  }), [adminRole, branding, faqItems, foundationVideos, legalSecurity, loading, missionVision, profiles, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

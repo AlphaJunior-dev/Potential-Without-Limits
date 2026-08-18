@@ -24,3 +24,7 @@
 - [x] Assign and verify the Firebase custom claim `admin: true` without exposing any service-account credential.
 - [ ] Confirm the secured Admin Portal can update approved public content before any production merge.
 - [x] Repair the Admin Portal branding-save control so it calls the authenticated server update route without altering the existing interface.
+- [x] Trace and resolve why the Vercel preview still serves the old disabled branding-save response after commit `2fff677`.
+- [x] Inventory each remaining Admin Portal action and retain only approved public-content workflows for server-enforced repair.
+- [x] Connect Mission & Vision, Meet the Team, legal, and video metadata controls to authenticated server routes without altering the portal interface; the current portal has no FAQ CMS form and Sponsor Talent records remain privacy-restricted.
+- [x] Preserve Sponsor Vetting, credential generation, talent-directory records, transparency reports, and audit controls as disabled until a dedicated privacy-reviewed workflow is approved.

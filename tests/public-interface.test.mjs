@@ -75,3 +75,25 @@ test("branding changes use a fresh Firebase ID token, a protected route, and an 
   assert.match(adminLibrary, /function safeAssetUrl/);
   assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
 });
+
+test("approved public CMS actions use the protected route and the public reader returns their safe payloads", async () => {
+  const [provider, adminRoute, publicRoute, adminLibrary, missionPage] = await Promise.all([
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/mission-vision/page.tsx"),
+  ]);
+
+  for (const action of ["updateMissionVision", "updateTeamMembers", "updateLegalSecurity", "updateFoundationVideos"]) {
+    assert.match(provider, new RegExp(action));
+    assert.match(adminRoute, new RegExp(`body\\.action === "${action}"`));
+  }
+  assert.match(adminLibrary, /sanitizePublicMissionVision/);
+  assert.match(adminLibrary, /sanitizePublicTeam/);
+  assert.match(adminLibrary, /sanitizePublicLegal/);
+  assert.match(adminLibrary, /sanitizePublicVideos/);
+  assert.match(publicRoute, /foundationVideos: site\.foundationVideos/);
+  assert.match(missionPage, /missionVision\.mission/);
+  assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
+});

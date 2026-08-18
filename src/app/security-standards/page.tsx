@@ -3,8 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Lock, Heart, CheckCircle2, Users, FileCheck, Eye } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SecurityStandardsPage() {
+  const { legalSecurity } = useAuth();
   return (
     <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -39,7 +41,7 @@ export default function SecurityStandardsPage() {
                 <h2>1. 100% Informed Parental &amp; Guardian Consent</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                Before any child or youth dreamer is featured on the PWLIF platform, our foundation officers conduct in-person community visits to secure written, informed consent from parents or legal guardians. Consent forms cover photograph/video publishing, academic progress sharing, and talent showcase permissions. Guardians retain the right to modify or withdraw media consent at any time.
+                {legalSecurity.securityStandardsContent}
               </p>
             </div>
 

@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb, requireAdministrator, sanitizePublicBranding } from "@/lib/admin";
+import { adminDb, requireAdministrator, sanitizePublicBranding, sanitizePublicLegal, sanitizePublicMissionVision, sanitizePublicTeam, sanitizePublicVideos } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
@@ -63,6 +63,28 @@ export async function PATCH(request: NextRequest) {
         createdAt: FieldValue.serverTimestamp(),
       });
       return NextResponse.json({ ok: true, branding });
+    } else if (body.action === "updateMissionVision") {
+      const missionVision = sanitizePublicMissionVision(body.missionVision);
+      if (!missionVision.mission || !missionVision.vision) return NextResponse.json({ error: "Mission and vision are required." }, { status: 400 });
+      await db.collection("public_site_content").doc("main").set({ missionVision, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await db.collection("audit_log").add({ action: "updateMissionVision", entityType: "site_content", entityId: "main", performedBy: administrator.uid, createdAt: FieldValue.serverTimestamp() });
+      return NextResponse.json({ ok: true, missionVision });
+    } else if (body.action === "updateTeamMembers") {
+      const teamMembers = sanitizePublicTeam(body.teamMembers);
+      await db.collection("public_site_content").doc("main").set({ teamMembers, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await db.collection("audit_log").add({ action: "updateTeamMembers", entityType: "site_content", entityId: "main", performedBy: administrator.uid, createdAt: FieldValue.serverTimestamp() });
+      return NextResponse.json({ ok: true, teamMembers });
+    } else if (body.action === "updateLegalSecurity") {
+      const legalSecurity = sanitizePublicLegal(body.legalSecurity);
+      if (!legalSecurity.termsContent || !legalSecurity.privacyContent || !legalSecurity.securityStandardsContent) return NextResponse.json({ error: "Terms, privacy, and security standards are required." }, { status: 400 });
+      await db.collection("public_site_content").doc("main").set({ legalSecurity, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await db.collection("audit_log").add({ action: "updateLegalSecurity", entityType: "site_content", entityId: "main", performedBy: administrator.uid, createdAt: FieldValue.serverTimestamp() });
+      return NextResponse.json({ ok: true, legalSecurity });
+    } else if (body.action === "updateFoundationVideos") {
+      const foundationVideos = sanitizePublicVideos(body.foundationVideos);
+      await db.collection("public_site_content").doc("main").set({ foundationVideos, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await db.collection("audit_log").add({ action: "updateFoundationVideos", entityType: "site_content", entityId: "main", performedBy: administrator.uid, createdAt: FieldValue.serverTimestamp() });
+      return NextResponse.json({ ok: true, foundationVideos });
     } else if (body.action === "updateApplicationStatus" && typeof body.applicationId === "string") {
       const allowed = ["new", "contacted", "call_scheduled", "approved", "declined"];
       if (!allowed.includes(body.status)) return NextResponse.json({ error: "Invalid status." }, { status: 400 });

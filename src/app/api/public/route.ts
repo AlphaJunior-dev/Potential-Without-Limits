@@ -19,13 +19,31 @@ const fallbackTeamMembers = [
   { id: "leadership-information", name: "Leadership Information", role: "Published as confirmed", bio: "PWLIF publishes individual leadership details only after they have been confirmed for public release. Partnership and advisory enquiries can be directed through the foundation's orientation process.", photoUrl: "/pwlif-logo.png", order: 1 },
 ];
 
+const fallbackMissionVision = {
+  mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
+  vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
+  foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
+  foundersTitle: "Potential Without Limits International Foundation",
+  pillars: [],
+  lastUpdated: "",
+};
+
+const fallbackLegalSecurity = {
+  termsContent: "Use of this website is subject to responsible, respectful engagement with the foundation and its safeguarding practices.",
+  privacyContent: "Public pages do not publish identifying participant information. The foundation handles orientation requests with appropriate privacy and safeguarding practices.",
+  securityStandardsContent: "Safeguarding, privacy, and responsible partnership guide the foundation's public information and orientation process.",
+  lastUpdated: "",
+};
+
 export async function GET() {
   const site = await readPublicSite();
   return NextResponse.json({
     branding: { ...baseBranding, ...site.branding, heroHeadline: site.heroTitle, heroSubheadline: site.heroText },
-    missionVision: { mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.", vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.", foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.", foundersTitle: "Potential Without Limits International Foundation", pillars: [], lastUpdated: "" },
+    missionVision: { ...fallbackMissionVision, ...site.missionVision },
     profiles: site.pilotCards.map((card) => ({ id: card.id, name: card.title, age: 0, category: card.supportArea || "Sponsor Talent", location: "Sponsor Talent", country_community: "Sponsor Talent", bio: card.summary, coverPhoto: "/pwlif-logo.png", status: "active", skills: [], dream: card.summary, current_situation: "Information is shared through appropriate private conversations.", progress: "", current_needs: card.supportArea || "Orientation conversation", consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" } })),
     faqItems: fallbackFaqItems,
-    teamMembers: fallbackTeamMembers,
+    teamMembers: site.teamMembers.length ? site.teamMembers : fallbackTeamMembers,
+    legalSecurity: { ...fallbackLegalSecurity, ...site.legalSecurity },
+    foundationVideos: site.foundationVideos,
   });
 }

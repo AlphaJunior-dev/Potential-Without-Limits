@@ -4,8 +4,10 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Target, Compass, ShieldCheck, Heart, Sparkles, Award } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MissionVisionPage() {
+  const { missionVision } = useAuth();
   const values = [
     { name: "Hope", desc: "Instilling optimism and belief in a brighter future for every child." },
     { name: "Integrity", desc: "Upholding the highest moral and ethical standards in all actions." },
@@ -65,7 +67,7 @@ export default function MissionVisionPage() {
               </h2>
 
               <p className="text-sm sm:text-base text-[#051836]/80 leading-relaxed font-medium">
-                &quot;To identify, nurture, and empower vulnerable children and young people — including orphans, street children, and youth from conflict-affected and marginalized communities — by providing access to education, skills development, mentorship, and resources that unlock their full potential.&quot;
+                &quot;{missionVision.mission}&quot;
               </p>
             </div>
 
@@ -95,7 +97,7 @@ export default function MissionVisionPage() {
               </h2>
 
               <p className="text-sm sm:text-base text-[#051836]/80 leading-relaxed font-medium">
-                &quot;A world where every child and young person, regardless of background or circumstance, has the opportunity to discover and develop their unique potential and contribute meaningfully to society.&quot;
+                &quot;{missionVision.vision}&quot;
               </p>
             </div>
 
@@ -124,16 +126,16 @@ export default function MissionVisionPage() {
                 A Message from the Founder &amp; President
               </span>
               <h3 className="font-montserrat font-bold text-xl text-[#051836]">
-                Rafiki Emmanuel
+                {missionVision.foundersTitle}
               </h3>
               <p className="text-xs text-[#051836]/60">
-                Founder &amp; President, Potential Without Limits International Foundation (PWLIF)
+                Foundation message
               </p>
             </div>
           </div>
 
           <div className="prose prose-sm text-[#051836]/80 space-y-4 leading-relaxed font-serif italic border-t border-[#051836]/10 pt-6 text-sm sm:text-base">
-            &quot;Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. No child should be defined by poverty, homelessness, conflict, or limited opportunities. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success. Together with our supporters, volunteers, and partners, we are building a future where potential truly has no limits.&quot;
+            &quot;{missionVision.foundersNote}&quot;
           </div>
         </div>
 

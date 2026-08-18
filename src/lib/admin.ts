@@ -112,6 +112,87 @@ function safeAssetUrl(value: unknown) {
   }
 }
 
+function safePublicText(value: unknown, maxLength: number) {
+  if (typeof value !== "string") return undefined;
+  const text = sponsorTalentWording(value.trim()).slice(0, maxLength);
+  return text || undefined;
+}
+
+export function sanitizePublicMissionVision(input: unknown) {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const pillars = Array.isArray(source.pillars)
+    ? source.pillars.slice(0, 8).map((pillar) => {
+      const item = pillar && typeof pillar === "object" ? pillar as Record<string, unknown> : {};
+      const title = safePublicText(item.title, 100);
+      const description = safePublicText(item.description, 420);
+      return title && description ? { title, description } : null;
+    }).filter((pillar): pillar is { title: string; description: string } => Boolean(pillar))
+    : [];
+
+  return {
+    mission: safePublicText(source.mission, 1_500),
+    vision: safePublicText(source.vision, 1_500),
+    foundersNote: safePublicText(source.foundersNote, 2_000),
+    foundersTitle: safePublicText(source.foundersTitle, 180),
+    pillars,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+  };
+}
+
+export function sanitizePublicTeam(input: unknown) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 12).map((member, index) => {
+    const item = member && typeof member === "object" ? member as Record<string, unknown> : {};
+    const name = safePublicText(item.name, 120);
+    const role = safePublicText(item.role, 160);
+    const bio = safePublicText(item.bio, 1_200);
+    if (!name || !role || !bio) return null;
+    const photoUrl = safeAssetUrl(item.photoUrl) || "/pwlif-logo.png";
+    const linkedinUrl = safeAssetUrl(item.linkedinUrl);
+    return {
+      id: safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || `team-${index + 1}`,
+      name,
+      role,
+      bio,
+      photoUrl,
+      ...(linkedinUrl ? { linkedinUrl } : {}),
+      order: Math.max(1, Math.min(99, Number.isFinite(item.order) ? Math.trunc(item.order as number) : index + 1)),
+    };
+  }).filter((member): member is NonNullable<typeof member> => Boolean(member));
+}
+
+export function sanitizePublicLegal(input: unknown) {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  return {
+    termsContent: safePublicText(source.termsContent, 20_000),
+    privacyContent: safePublicText(source.privacyContent, 20_000),
+    securityStandardsContent: safePublicText(source.securityStandardsContent, 20_000),
+    lastUpdated: new Date().toISOString().slice(0, 10),
+  };
+}
+
+export function sanitizePublicVideos(input: unknown) {
+  if (!Array.isArray(input)) return [];
+  const categories = new Set(["Foundation Intro", "Impact Story", "Transformational Journey"]);
+  return input.slice(0, 6).map((video, index) => {
+    const item = video && typeof video === "object" ? video as Record<string, unknown> : {};
+    const title = safePublicText(item.title, 160);
+    const videoUrl = safeAssetUrl(item.videoUrl);
+    if (!title || !videoUrl) return null;
+    const thumbnail = safeAssetUrl(item.thumbnail) || "/pwlif-logo.png";
+    const category = typeof item.category === "string" && categories.has(item.category) ? item.category : "Foundation Intro";
+    return {
+      id: safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || `video-${index + 1}`,
+      title,
+      videoUrl,
+      thumbnail,
+      duration: safePublicText(item.duration, 20) || "",
+      category,
+      description: safePublicText(item.description, 1_000) || "",
+    };
+  }).filter((video): video is NonNullable<typeof video> => Boolean(video));
+}
+
 export function sanitizePublicBranding(input: unknown) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
   const branding: Record<string, string> = {};
@@ -165,8 +246,12 @@ export async function readPublicSite() {
       bookingUrl: typeof values?.bookingUrl === "string" ? values.bookingUrl : safePublicDefaults.bookingUrl,
       pilotCards: publishedCards.length ? publishedCards : safePublicDefaults.pilotCards,
       branding,
+      missionVision: sanitizePublicMissionVision(values?.missionVision),
+      teamMembers: sanitizePublicTeam(values?.teamMembers),
+      legalSecurity: sanitizePublicLegal(values?.legalSecurity),
+      foundationVideos: sanitizePublicVideos(values?.foundationVideos),
     };
   } catch {
-    return { ...safePublicDefaults, branding: {} };
+    return { ...safePublicDefaults, branding: {}, missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [] };
   }
 }
