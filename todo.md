@@ -38,4 +38,5 @@
 - [ ] Gate the Sponsor Dashboard by sponsor-specific server authorization so each approved sponsor can access only their assigned content.
 - [ ] Add a read-only server-generated operational audit log for sensitive approvals and content changes.
 - [ ] Keep finance and transparency workflows out of the operational rebuild scope unless explicitly re-approved by the foundation.
-- [ ] Trigger a fresh `repair/pwlif-secure-rebuild` preview after the passwordless invitation variable change and verify it uses the correct source commit.
+- [x] Trigger a fresh `repair/pwlif-secure-rebuild` preview after the passwordless invitation variable change and verify it uses the correct source commit.
+- [ ] Verify and correct the Preview `FIREBASE_EMAIL_LINK_CONTINUE_URL` value, then retest one passwordless sponsor invitation without affecting production.
