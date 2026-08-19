@@ -25,7 +25,7 @@ export default function SecurityStandardsPage() {
             </div>
             <div>
               <h1 className="font-montserrat font-bold text-2xl sm:text-3xl text-[#051836]">
-                Child Protection &amp; Safeguarding Standards
+                Safeguarding &amp; Privacy Standards
               </h1>
               <p className="text-xs text-[#051836]/60 mt-1">
                 Potential Without Limits International Foundation (PWLIF) • Ethical Governance &amp; Privacy Protocol
@@ -34,58 +34,58 @@ export default function SecurityStandardsPage() {
           </div>
 
           <div className="space-y-6 text-sm text-[#051836]/85 leading-relaxed font-inter">
-            {/* Section 1: Informed Consent */}
+            {/* Section 1: Controlled publication */}
             <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 space-y-3">
               <div className="flex items-center gap-2 text-[#005C27] font-montserrat font-bold text-base">
                 <FileCheck className="w-5 h-5" />
-                <h2>1. 100% Informed Parental &amp; Guardian Consent</h2>
+                <h2>1. Controlled Publication</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
                 {legalSecurity.securityStandardsContent}
               </p>
             </div>
 
-            {/* Section 2: Child Dignity & Anti-Exploitation */}
+            {/* Section 2: Respectful representation */}
             <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 space-y-3">
               <div className="flex items-center gap-2 text-[#005C27] font-montserrat font-bold text-base">
                 <Eye className="w-5 h-5" />
-                <h2>2. Child Dignity &amp; Anti-Exploitation Policy</h2>
+                <h2>2. Respectful Representation</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                PWLIF strictly prohibits &ldquo;poverty pornography&rdquo; or sensationalized portrayals of vulnerable children. All profile narratives highlight the child&apos;s inherent potential, talents, academic ambitions, and resilience. Children are depicted with dignity, respect, and agency, focusing on constructive pathways toward self-reliance.
+                PWLIF does not publish sensationalized or unnecessary personal information. Sponsor Talent information is shared only when it is appropriate, respectful, and explicitly enabled through the field-level publication controls.
               </p>
             </div>
 
-            {/* Section 3: Privacy & Zero Unmonitored Contact */}
+            {/* Section 3: Privacy and controlled contact */}
             <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 space-y-3">
               <div className="flex items-center gap-2 text-[#005C27] font-montserrat font-bold text-base">
                 <Lock className="w-5 h-5" />
                 <h2>3. Zero Direct Unmonitored Contact</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                To prevent grooming, exploitation, or privacy violations, sponsors are never permitted direct unmonitored communication with sponsored youth. All messages, grant proposals, and progress updates are routed through authorized PWLIF safeguarding officers. Last names, physical street addresses, and exact school locations are redacted from public view.
+                The public site does not expose direct contact channels, private addresses, or unnecessary identifying details. Sponsor access is considered only after an orientation call, manual approval, and a secure email-link invitation.
               </p>
             </div>
 
-            {/* Section 4: Inclusive Safeguarding */}
+            {/* Section 4: Data minimisation */}
             <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 space-y-3">
               <div className="flex items-center gap-2 text-[#005C27] font-montserrat font-bold text-base">
                 <Users className="w-5 h-5" />
-                <h2>4. Active Inclusion of Marginalized &amp; Vulnerable Youth</h2>
+                <h2>4. Data Minimisation</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                PWLIF actively enforces inclusive selection criteria to ensure equal access for young girls, children living with disabilities, refugees, displaced youth, and marginalized rural communities across East Africa, starting in Ethiopia. Special accommodation grants provide adaptive learning tools, assistive technology, and psychosocial counseling.
+                PWLIF limits public information to the minimum appropriate Sponsor Talent details. Individual record visibility can be reviewed, edited, or withdrawn by authorised administrators at any time.
               </p>
             </div>
 
-            {/* Section 5: Financial Stewardship & Auditability */}
+            {/* Section 5: Appropriate information scope */}
             <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 space-y-3">
               <div className="flex items-center gap-2 text-[#005C27] font-montserrat font-bold text-base">
                 <CheckCircle2 className="w-5 h-5" />
-                <h2>5. Financial Transparency &amp; Grant Auditing</h2>
+                <h2>5. Appropriate Information Scope</h2>
               </div>
               <p className="text-xs text-[#051836]/80 leading-relaxed">
-                100% of direct sponsorship grants are disbursed through verified educational institutions, equipment suppliers, or community learning centers with itemized receipt tracking. Independent annual financial audits ensure full stewardship transparency for sponsors and partner foundations.
+                Financial contributions, tax receipts, and transparency reports are not provided through this website or sponsor portal. Appropriate partnership information is discussed through private, review-based conversations.
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function SecurityStandardsPage() {
           <div className="pt-6 border-t border-[#051836]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-[#051836]/60">
             <span className="flex items-center gap-1.5 font-bold text-[#005C27]">
               <ShieldCheck className="w-4 h-4 text-[#005C27]" />
-              Verified Safeguarding Framework • PWLIF Ethics Board
+              Safeguarding &amp; Privacy Framework • PWLIF
             </span>
             <Link href="/book-a-call" className="text-[#005C27] font-bold hover:underline">
               Schedule Sponsor Orientation Call →

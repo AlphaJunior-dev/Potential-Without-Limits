@@ -29,7 +29,7 @@ export default function SupportPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) return;
-    submitSupportInquiry(name, email, subject || "Sponsorship Inquiry / Donation Question", message, "Support Concierge");
+    submitSupportInquiry(name, email, subject || "Sponsor Talent or orientation inquiry", message, "Support Concierge");
     setSubmitted(true);
   };
 
@@ -55,7 +55,7 @@ export default function SupportPage() {
             PWLIF Support Concierge
           </h1>
           <p className="font-inter text-base text-[#051836]/70 max-w-2xl mx-auto leading-relaxed">
-            Have questions regarding sponsorship categories, child dream adoption, parental consent standards, or donation stewardship? Send a message directly to our foundation office.
+            Have questions about Sponsor Talent, the orientation process, or appropriate partnership conversations? Send a message to the foundation office.
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export default function SupportPage() {
                 Inquiry Dispatched to Foundation Office!
               </h3>
               <p className="text-sm text-[#051836]/70 max-w-md mx-auto leading-relaxed">
-                Thank you, <strong>{name}</strong>. Your message has been received by our Foundation Concierge desk. A representative will contact you at <strong>{email}</strong> within 24 hours.
+                Thank you, <strong>{name}</strong>. Your message request has been submitted for review. If a follow-up is appropriate, the foundation office may contact you at <strong>{email}</strong>.
               </p>
               <div className="pt-4 flex justify-center gap-4">
                 <Link
@@ -99,17 +99,17 @@ export default function SupportPage() {
                   <div className="mt-6 space-y-3 text-xs text-[#051836]/80">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-[#005C27]" />
-                      <span>Child Safety Safeguarded</span>
+                      <span>Safeguarding-aware process</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-[#005C27]" />
-                      <span>24-Hour Office Turnaround</span>
+                      <span>Review-based follow-up</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white border border-[#051836]/10 text-[11px] text-[#051836]/80 space-y-1">
-                  <p>📅 <strong>Need orientation?</strong> You can also schedule a live orientation call directly.</p>
+                  <p><strong>Need orientation?</strong> You can schedule a private orientation call directly.</p>
                   <Link href="/book-a-call" className="text-[#005C27] font-bold hover:underline block pt-1">
                     Contact Foundation Office →
                   </Link>
@@ -166,7 +166,7 @@ export default function SupportPage() {
                       type="text"
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
-                      placeholder="e.g. Sponsorship Inquiry / Donation Question"
+                      placeholder="e.g. Sponsor Talent or orientation inquiry"
                       className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                     />
                   </div>

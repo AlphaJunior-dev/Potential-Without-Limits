@@ -3,8 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
-import { useAuth } from "@/context/AuthContext";
-import { WlpLogo, WlpLogoMark } from "@/components/WlpLogo";
 import {
   Calendar,
   Clock,
@@ -22,23 +20,51 @@ import {
 import { SponsorCategory, MembershipTier } from "@/lib/data";
 
 export default function BookACallPage() {
-  const { bookVettingCall } = useAuth();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
+  const [roleTitle, setRoleTitle] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [preferredTime, setPreferredTime] = useState("Tomorrow 10:00 AM EST");
   const [category, setCategory] = useState<SponsorCategory>("Child Sponsor");
   const [tier, setTier] = useState<MembershipTier>("Gold");
-  const [dreamInterest, setDreamInterest] = useState("");
+  const [orgDescription, setOrgDescription] = useState("");
+  const [supportIntent, setSupportIntent] = useState("");
+  const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [activeView, setActiveView] = useState<"calendly" | "form">("calendly");
+  const [bookingUrl, setBookingUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    bookVettingCall(name, email, company, linkedin, preferredTime, category, tier, dreamInterest);
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const response = await fetch("/api/orientation", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          fullName: name,
+          email,
+          organization: company,
+          roleTitle,
+          websiteOrLinkedIn: linkedin,
+          orgDescription,
+          supportIntent: `${category}; ${tier}. ${supportIntent}`,
+          preferredContactWindow: preferredTime,
+          consent,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(typeof result?.error === "string" ? result.error : "We could not save your request right now. Please try again shortly.");
+      setBookingUrl(typeof result?.bookingUrl === "string" ? result.bookingUrl : "");
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We could not save your request right now. Please try again shortly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -63,7 +89,7 @@ export default function BookACallPage() {
             Schedule a Sponsor Orientation
           </h1>
           <p className="font-inter text-base text-[#051836]/70 max-w-2xl mx-auto leading-relaxed">
-            Potential Without Limits International Foundation (PWLIF) connects passionate sponsors with young innovators under strict child safety protocols. Schedule a brief 15-minute orientation call with our foundation team to learn about child dream adoption and sponsorship tiers.
+            Potential Without Limits International Foundation (PWLIF) connects prospective sponsors with carefully published Sponsor Talent information. Submit an orientation request, then schedule a private conversation with our foundation team.
           </p>
 
         </div>
@@ -90,7 +116,7 @@ export default function BookACallPage() {
               2. Orientation &amp; Vetting
             </h4>
             <p className="text-xs text-[#051836]/70 leading-relaxed">
-              Our foundation officers align on your sponsorship preferences and child dream adoption.
+              Our foundation officers discuss your organization, interests, and responsible partnership approach.
             </p>
           </div>
 
@@ -99,10 +125,10 @@ export default function BookACallPage() {
               03
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
-              3. Activated Sponsor Hub
+              3. Passwordless Sponsor Access
             </h4>
             <p className="text-xs text-[#051836]/70 leading-relaxed">
-              Upon approval, your sponsor credentials are activated for private dashboard access.
+              After approval, PWLIF sends a secure email-link invitation for private dashboard access.
             </p>
           </div>
         </div>
@@ -118,18 +144,16 @@ export default function BookACallPage() {
                   Orientation Session Requested!
                 </h3>
                 <p className="text-sm text-[#051836]/70 max-w-md mx-auto leading-relaxed">
-                  Thank you, <strong>{name}</strong>. Our foundation team has reserved your time slot (
-                  <span className="font-semibold text-[#005C27]">{preferredTime}</span>). A calendar invitation and confirmation email have been sent to <strong>{email}</strong>.
+                  Thank you, <strong>{name}</strong>. Your orientation request was saved. Please use the booking calendar below to choose a suitable time.
                 </p>
-                <div className="pt-4 flex justify-center gap-4">
-                  <Link
-                    href="/"
-                    className="bg-[#005C27] hover:bg-[#327B2F] text-white px-6 py-3 rounded-xl text-xs font-extrabold transition inline-flex items-center gap-2 shadow-md"
-                  >
-                    <span>Return to Foundation Homepage</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-white" />
-                  </Link>
-                </div>
+                {bookingUrl ? (
+                  <div className="pt-4 min-h-[700px] text-left">
+                    <div className="calendly-inline-widget" data-url={bookingUrl} style={{ minWidth: "320px", height: "700px" }} />
+                    <Script src="https://assets.calendly.com/assets/external/widget.js" strategy="afterInteractive" />
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#051836]/60">The booking calendar is not available yet. The PWLIF team will follow up using the contact details you provided.</p>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-inter text-xs text-[#051836]">
@@ -142,7 +166,7 @@ export default function BookACallPage() {
                     </div>
                     <h3 className="font-montserrat text-xl font-bold">15-Min Foundation Session</h3>
                     <p className="text-xs text-[#051836]/70 mt-2 leading-relaxed">
-                      Meet with a PWLIF foundation officer to discuss sponsorship categories, child dream adoption, and transparent financial stewardship.
+                      Meet with a PWLIF foundation officer to discuss Sponsor Talent interests, safeguarding, and potential partnership approaches.
                     </p>
 
                     <div className="mt-6 space-y-3 text-xs text-[#051836]/80">
@@ -152,17 +176,17 @@ export default function BookACallPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-[#005C27]" />
-                        <span>100% Parent Consent Verification</span>
+                        <span>Safeguarding-informed discussion</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Lock className="w-4 h-4 text-[#005C27]" />
-                        <span>Immediate Credential Activation</span>
+                        <span>Invitation sent only after approval</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-4 rounded-xl bg-white border border-[#051836]/10 text-[11px] text-[#051836]/80 space-y-1">
-                    <p>⚡ <strong>Live Calendly Widget:</strong> Switch tabs above to use the inline calendar.</p>
+                    <p><strong>Booking calendar:</strong> It will appear after you submit the orientation request.</p>
                   </div>
                 </div>
 
@@ -204,6 +228,20 @@ export default function BookACallPage() {
                         className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      Your Role / Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={roleTitle}
+                      onChange={(e) => setRoleTitle(e.target.value)}
+                      placeholder="e.g. Partnerships Director"
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -252,11 +290,11 @@ export default function BookACallPage() {
                         onChange={(e) => setCategory(e.target.value as SponsorCategory)}
                         className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
                       >
-                        <option value="Child Sponsor">Child Sponsor (Direct Grant)</option>
-                        <option value="Program Sponsor">Program Sponsor (Lab &amp; Equipment)</option>
-                        <option value="Foundation Sponsor">Foundation Sponsor (Annual Partner)</option>
-                        <option value="Corporate Partner">Corporate Partner (CSR)</option>
-                        <option value="Strategic Partner">Strategic Partner (Global Alliance)</option>
+                        <option value="Child Sponsor">Sponsor Talent Partner</option>
+                        <option value="Program Sponsor">Programme Partner</option>
+                        <option value="Foundation Sponsor">Foundation Partner</option>
+                        <option value="Corporate Partner">Corporate Partner</option>
+                        <option value="Strategic Partner">Strategic Partner</option>
                       </select>
                     </div>
 
@@ -269,23 +307,38 @@ export default function BookACallPage() {
                         onChange={(e) => setTier(e.target.value as MembershipTier)}
                         className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
                       >
-                        <option value="Platinum">Platinum Tier ($5,000+/mo)</option>
-                        <option value="Gold">Gold Tier ($1,500/mo)</option>
-                        <option value="Silver">Silver Tier ($500/mo)</option>
-                        <option value="Bronze">Bronze Tier ($150/mo)</option>
+                        <option value="Platinum">Platinum</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Silver">Silver</option>
+                        <option value="Bronze">Bronze</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                      Organization/Name, email, and the child dream you&apos;re interested in (optional)
+                      Tell us about your organization
                     </label>
                     <textarea
                       rows={2}
-                      value={dreamInterest}
-                      onChange={(e) => setDreamInterest(e.target.value)}
-                      placeholder="e.g. Hope for Tomorrow Foundation / Interested in supporting Dawit T. (Sports) or STEM grants..."
+                      required
+                      value={orgDescription}
+                      onChange={(e) => setOrgDescription(e.target.value)}
+                      placeholder="Briefly describe your organization and its work."
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      Partnership Interest
+                    </label>
+                    <textarea
+                      rows={2}
+                      required
+                      value={supportIntent}
+                      onChange={(e) => setSupportIntent(e.target.value)}
+                      placeholder="Tell us what you hope to discuss during an orientation call."
                       className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
                     />
                   </div>
@@ -308,11 +361,17 @@ export default function BookACallPage() {
                   </div>
 
                   <div className="pt-2">
+                    <label className="mb-3 flex items-start gap-2 text-[11px] text-[#051836]/70 cursor-pointer">
+                      <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-[#005C27]" />
+                      <span>I confirm that the information provided is accurate and that PWLIF may use it to review this orientation request.</span>
+                    </label>
+                    {submitError && <p className="mb-3 text-xs text-red-700">{submitError}</p>}
                     <button
                       type="submit"
+                      disabled={submitting}
                       className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
                     >
-                      <span>Confirm &amp; Schedule Orientation Call</span>
+                      <span>{submitting ? "Saving Request..." : "Save Request &amp; Continue to Booking"}</span>
                       <ArrowRight className="w-4 h-4 text-white" />
                     </button>
                   </div>
@@ -324,4 +383,3 @@ export default function BookACallPage() {
     </div>
   );
 }
-

@@ -50,7 +50,7 @@ export default function PendingPage() {
 
           {/* Body Description */}
           <p className="font-inter text-[#051836]/70 leading-relaxed mb-6 text-xs md:text-sm">
-            To uphold our 100% Child Protection &amp; Parental Consent Shield, all new sponsor accounts undergo verification. Your credentials will be activated as soon as our foundation officers confirm your profile details.
+            To uphold careful safeguarding and partnership review, sponsor access is granted only after an orientation call and manual approval. If approved, PWLIF will send a secure passwordless sign-in invitation to your email address.
           </p>
 
           {/* Review In Progress Pill */}

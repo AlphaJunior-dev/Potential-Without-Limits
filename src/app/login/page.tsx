@@ -1,19 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { WlpLogo } from "@/components/WlpLogo";
-import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { isSignInWithEmailLink, signInWithEmailLink, signOut } from "firebase/auth";
+import { Mail, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, pendingSponsors } = useAuth();
+  const { userStatus } = useAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isEmailLink, setIsEmailLink] = useState(false);
+
+  useEffect(() => {
+    if (userStatus === "approved") router.replace("/sponsor/dashboard");
+    if (userStatus === "admin") router.replace("/admin");
+  }, [router, userStatus]);
+
+  useEffect(() => {
+    setIsEmailLink(isSignInWithEmailLink(auth, window.location.href));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,28 +31,21 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      await login(email, password);
-      
-      // Check user role/status
-      if (email.toLowerCase().includes("admin")) {
-        router.push("/admin");
+      if (!isSignInWithEmailLink(auth, window.location.href)) {
+        throw new Error("Use the secure sign-in link sent to your approved sponsor email address.");
+      }
+
+      const credential = await signInWithEmailLink(auth, email.trim().toLowerCase(), window.location.href);
+      const token = await credential.user.getIdTokenResult(true);
+      if (token.claims.sponsor === true) {
+        router.replace("/sponsor/dashboard");
         return;
       }
 
-      const match = pendingSponsors.find((s) => s.email.toLowerCase() === email.toLowerCase());
-      if (match) {
-        if (match.status === "approved") {
-          router.push("/");
-        } else if (match.status === "pending") {
-          router.push("/pending");
-        } else {
-          setError("Your sponsor application was rejected. Please contact support.");
-        }
-      } else {
-        router.push("/pending");
-      }
+      await signOut(auth);
+      throw new Error("This email address is not approved for sponsor access. Please contact PWLIF after your orientation call.");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to sign in. Please check your credentials.";
+      const message = err instanceof Error ? err.message : "Could not complete secure sign-in. Please use the invitation link sent to your approved email address.";
       setError(message);
     } finally {
       setSubmitting(false);
@@ -61,10 +64,10 @@ export default function LoginPage() {
             />
           </Link>
           <h1 className="font-montserrat text-2xl font-black text-[#051836]">
-            Sponsor Sign In
+            Sponsor Access
           </h1>
           <p className="font-inter text-xs text-[#051836]/70 mt-1">
-            Access your verified PWLIF sponsor hub
+            Access your approved PWLIF sponsor hub through a secure email link
           </p>
         </div>
 
@@ -93,32 +96,21 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-[#051836] uppercase tracking-wider mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] text-[#051836] placeholder:text-[#051836]/40 border border-[#051836]/15 rounded-xl text-sm font-medium focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
-              />
-            </div>
-          </div>
-
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !isEmailLink}
             className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-extrabold py-3.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 font-inter mt-2 disabled:opacity-50 cursor-pointer text-xs"
           >
-            <span>{submitting ? "Signing In..." : "Sign In to Sponsor Hub"}</span>
+            <span>{submitting ? "Completing Access..." : "Complete Secure Sign-In"}</span>
             <ArrowRight className="w-4 h-4 text-white" />
           </button>
         </form>
+
+        {!isEmailLink && (
+          <p className="mt-3 text-center text-[11px] text-[#051836]/60 font-inter">
+            Open the invitation link sent to your approved email address, then enter that same address here to complete sign-in.
+          </p>
+        )}
 
         <div className="mt-8 pt-6 border-t border-[#051836]/10 text-center text-xs font-inter text-[#051836]/75 leading-relaxed">
           New to PWLIF?{" "}

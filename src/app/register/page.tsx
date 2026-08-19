@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Calendar, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center bg-[#FDFCF9] px-4 py-16 bg-foundation-pattern">
       <div className="bg-white max-w-lg w-full p-8 sm:p-10 rounded-3xl shadow-2xl border border-[#051836]/10 text-center space-y-6">
@@ -28,12 +25,12 @@ export default function RegisterPage() {
         </h1>
 
         <p className="font-inter text-sm text-[#051836]/75 leading-relaxed max-w-md mx-auto">
-          Sponsor access is granted after a short orientation call with our team. Book yours below to discuss child dream adoption and foundation stewardship.
+          Sponsor access is considered only after an orientation call and manual approval. If approved, PWLIF sends a secure passwordless invitation by email.
         </p>
 
         <div className="p-4 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 text-xs text-[#051836]/70 flex items-center justify-center gap-2">
           <ShieldCheck className="w-4 h-4 text-[#005C27] shrink-0" />
-          <span>100% Parent Consent &amp; Vetting Safeguards Enforced</span>
+          <span>Manual approval and safeguarding review required</span>
         </div>
 
         <div className="pt-2">
@@ -47,7 +44,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="pt-2 border-t border-[#051836]/10 text-xs text-[#051836]/60">
-          Already have an activated sponsor account?{" "}
+          Already received a sponsor invitation?{" "}
           <Link href="/login" className="text-[#005C27] font-bold hover:underline">
             Sign In Here
           </Link>

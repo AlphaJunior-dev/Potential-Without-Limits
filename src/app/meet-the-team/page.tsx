@@ -43,29 +43,39 @@ export default function MeetTheTeamPage() {
               className="bg-white rounded-3xl overflow-hidden border border-[#051836]/10 shadow-xl hover:shadow-2xl hover:border-[#005C27]/40 transition-all flex flex-col justify-between group"
             >
               <div>
-                <div className="relative aspect-square w-full bg-[#F8FAFC] overflow-hidden">
-                  <Image
-                    src={member.photoUrl}
-                    alt={member.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                </div>
+                {member.visibility?.showPhoto !== false ? (
+                  <div className="relative aspect-square w-full bg-[#F8FAFC] overflow-hidden">
+                    <Image
+                      src={member.photoUrl}
+                      alt={member.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full bg-[#005C27]/5 flex items-center justify-center text-[#005C27]/45">
+                    <ShieldCheck className="w-12 h-12" aria-label="Leadership profile" />
+                  </div>
+                )}
 
                 <div className="p-6 space-y-3">
                   <div>
                     <h3 className="font-montserrat font-bold text-lg text-[#051836]">
                       {member.name}
                     </h3>
-                    <p className="text-xs font-bold text-[#005C27] mt-0.5 uppercase tracking-wider">
-                      {member.role}
-                    </p>
+                    {member.role && (
+                      <p className="text-xs font-bold text-[#005C27] mt-0.5 uppercase tracking-wider">
+                        {member.role}
+                      </p>
+                    )}
                   </div>
 
-                  <p className="text-xs text-[#051836]/70 leading-relaxed line-clamp-5">
-                    {member.bio}
-                  </p>
+                  {member.bio && (
+                    <p className="text-xs text-[#051836]/70 leading-relaxed line-clamp-5">
+                      {member.bio}
+                    </p>
+                  )}
                 </div>
               </div>
 

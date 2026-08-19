@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Play,
   Award,
-  FileText,
   Heart,
   Globe,
   CheckCircle2,
@@ -22,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const { profiles, foundationVideos, transparencyReports, branding } = useAuth();
+  const { profiles, foundationVideos, branding } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -349,61 +348,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. TRANSPARENCY & FINANCIAL STEWARDSHIP SECTION */}
+      {/* 5. PARTNERSHIP & STEWARDSHIP SECTION */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-10">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-[#005C27]">
-            {branding?.transparencySectionBadge || "Accountability & Stewardship"}
+            {branding?.transparencySectionBadge || "Partnership"}
           </span>
           <h2 className="font-montserrat text-3xl sm:text-4xl font-black text-[#051836]">
-            {branding?.transparencySectionTitle || "Institutional Transparency"}
+            {branding?.transparencySectionTitle || "Accountability & Stewardship"}
           </h2>
           <p className="text-xs sm:text-sm text-[#051836]/70 leading-relaxed">
             {branding?.transparencySectionSubtitle || "Learn about the foundation's values, partnership approach, and private orientation process."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {transparencyReports.map((report) => (
-            <div
-              key={report.id}
-              className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20">
-                    {report.category}
-                  </span>
-                  <span className="text-xs font-mono font-bold text-[#051836]/60">
-                    Audit Date: {report.auditDate}
-                  </span>
-                </div>
-                <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                  {report.title}
-                </h3>
-                <div className="flex items-center gap-6 text-xs text-[#051836]/80 pt-2 border-t border-[#051836]/10">
-                  <div>
-                    <span className="text-[10px] text-[#051836]/50 block uppercase">Total Grant Funds</span>
-                    <span className="font-mono font-bold text-base text-[#005C27]">{report.totalFunded}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#051836]/50 block uppercase">Children Impacted</span>
-                    <span className="font-mono font-bold text-base text-[#051836]">{report.childrenImpacted} Youth</span>
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href={report.reportPdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-[#051836] hover:bg-[#042554] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md cursor-pointer"
-              >
-                <FileText className="w-4 h-4 text-[#F5AB00]" />
-                <span>Inspect Financial Report (PDF)</span>
-              </a>
-            </div>
-          ))}
+        <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 text-center max-w-2xl mx-auto">
+          <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20">PRIVATE PARTNERSHIP PROCESS</span>
+          <h3 className="font-montserrat font-bold text-lg text-[#051836]">Financial reporting and online donations are not available here.</h3>
+          <p className="text-xs text-[#051836]/70 leading-relaxed">PWLIF shares appropriate partnership information through private orientation conversations rather than public reports or online payment workflows.</p>
+          <Link href="/book-a-call" className="inline-flex bg-[#051836] hover:bg-[#042554] text-white font-bold py-3 px-4 rounded-xl text-xs transition items-center justify-center gap-2 shadow-md cursor-pointer">
+            <span>Request Sponsor Orientation</span>
+            <ArrowRight className="w-4 h-4 text-[#F5AB00]" />
+          </Link>
         </div>
 
         {/* Foundation Engagement Hub Cards */}
@@ -417,7 +383,7 @@ export default function HomePage() {
                 Mission &amp; Vision
               </h3>
               <p className="text-xs text-[#051836]/70 leading-relaxed">
-                Review our core humanitarian mission, strategic pillars, and vision for youth innovation across Africa.
+                Review PWLIF’s mission, guiding principles, and approach to careful community-informed partnership.
               </p>
             </div>
             <Link
@@ -432,13 +398,13 @@ export default function HomePage() {
           <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
-                Youth Mentorship
+                Community Contribution
               </span>
               <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                Volunteer &amp; Become a Mentor
+                Explore Community Contribution
               </h3>
               <p className="text-xs text-[#051836]/70 leading-relaxed">
-                Share your expertise as an educator, technical mentor, or community volunteer at our Talent Development Centres.
+                Ask about appropriate ways to contribute expertise through a private orientation conversation.
               </p>
             </div>
             <Link
@@ -453,20 +419,20 @@ export default function HomePage() {
           <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-lg space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <span className="bg-[#005C27]/10 text-[#005C27] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#005C27]/20 uppercase">
-                Financial Support
+                Partnership Support
               </span>
               <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                Ways to Donate &amp; Partner
+                Partnership &amp; Support
               </h3>
               <p className="text-xs text-[#051836]/70 leading-relaxed">
-                Explore one-time contributions, monthly giving, corporate CSR matching, and community lab sponsorships.
+                Online financial contributions are not available. Learn how partnership conversations are handled instead.
               </p>
             </div>
             <Link
               href="/donate"
               className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-bold py-3 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md"
             >
-              <span>Support Our Programs</span>
+              <span>Explore Partnership</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </Link>
           </div>

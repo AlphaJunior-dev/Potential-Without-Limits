@@ -17,8 +17,6 @@ import {
   Trash2, 
   Check, 
   X, 
-  Key, 
-  Copy, 
   CheckCircle2, 
   ArrowLeft,
   Calendar,
@@ -120,11 +118,12 @@ export default function AdminDashboardPage() {
   >("vetting");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Manual Sponsor Provisioning State
+  // Manual Post-Call Sponsor Invitation State
   const [manualEmail, setManualEmail] = useState("");
   const [manualName, setManualName] = useState("");
   const [manualCompany, setManualCompany] = useState("");
-  const [provisionedModal, setProvisionedModal] = useState<{ username: string; tempPass: string } | null>(null);
+  const [manualPostCallConfirmed, setManualPostCallConfirmed] = useState(false);
+  const [provisionedModal, setProvisionedModal] = useState<{ email: string; invitationStatus: string } | null>(null);
 
   // Global Toast System State
   const [toastNotice, setToastNotice] = useState<{ title: string; message: string } | null>(null);
@@ -146,10 +145,9 @@ export default function AdminDashboardPage() {
   const [mfaCode, setMfaCode] = useState("");
   const [mfaError, setMfaError] = useState(false);
 
-  // Vetting Modal & Clipboard & Sponsor Inspector Modal
-  const [credentialModalSponsor, setCredentialModalSponsor] = useState<{ name: string; username: string; tempPass: string } | null>(null);
+  // Invitation Status Modal & Sponsor Inspector Modal
+  const [credentialModalSponsor, setCredentialModalSponsor] = useState<{ name: string; email: string; invitationStatus: string } | null>(null);
   const [selectedSponsorOverview, setSelectedSponsorOverview] = useState<PendingSponsor | null>(null);
-  const [copiedNotice, setCopiedNotice] = useState(false);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -166,6 +164,7 @@ export default function AdminDashboardPage() {
   const [rawMediaUrl, setRawMediaUrl] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
+  const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
 
   // CMS State: Mission & Vision
   const [missionText, setMissionText] = useState(missionVision?.mission || INITIAL_MISSION_VISION.mission);
@@ -181,6 +180,7 @@ export default function AdminDashboardPage() {
   const [memberRole, setMemberRole] = useState("");
   const [memberBio, setMemberBio] = useState("");
   const [memberPhoto, setMemberPhoto] = useState("");
+  const [memberVisibility, setMemberVisibility] = useState({ isPublic: false, showPhoto: false, showRole: false, showBio: false, showLink: false });
 
   const handleMfaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,19 +189,13 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleGenerateCredentialsClick = async (id: string, name: string) => {
+  const handleSendInvitationClick = async (id: string, name: string) => {
     try {
-      const creds = await generateCredentials(id);
-      setCredentialModalSponsor({ name, username: creds.username, tempPass: creds.tempPass });
+      const invitation = await generateCredentials(id);
+      setCredentialModalSponsor({ name, email: invitation.email, invitationStatus: invitation.invitationStatus });
     } catch (err) {
-      triggerToast("✗ Failed to Generate Credentials", err instanceof Error ? err.message : "Check your connection and try again.");
+      triggerToast("✗ Invitation Not Sent", err instanceof Error ? err.message : "Check the sponsor approval and invitation configuration, then try again.");
     }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedNotice(true);
-    setTimeout(() => setCopiedNotice(false), 2500);
   };
 
   // Local Picture Upload Handler (Unlimited)
@@ -252,6 +246,7 @@ export default function AdminDashboardPage() {
             rawMediaUrl: rawMediaUrl || existing.rawMediaUrl,
             galleryImages: uploadedImages.length > 0 ? uploadedImages : existing.galleryImages,
             galleryVideos: uploadedVideos.length > 0 ? uploadedVideos : existing.galleryVideos,
+            publicVisibility: talentVisibility,
             dream: dream || existing.dream,
             current_situation: currentSituation || existing.current_situation,
             progress: progress || existing.progress,
@@ -281,6 +276,7 @@ export default function AdminDashboardPage() {
           inquiriesCount: 0,
           galleryImages: uploadedImages,
           galleryVideos: uploadedVideos,
+          publicVisibility: talentVisibility,
           dream: dream || "Mastering technical skills and community innovation.",
           current_situation: currentSituation || bio,
           progress: progress || "Actively participating in local community youth labs.",
@@ -304,6 +300,7 @@ export default function AdminDashboardPage() {
       setRawMediaUrl("");
       setUploadedImages([]);
       setUploadedVideos([]);
+      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
     }
@@ -320,6 +317,7 @@ export default function AdminDashboardPage() {
     setRawMediaUrl(p.rawMediaUrl || "");
     setUploadedImages(p.galleryImages || []);
     setUploadedVideos(p.galleryVideos || []);
+    setTalentVisibility(p.publicVisibility || { profileVisible: p.featuredOnHomepage === true, photoVisible: p.featuredOnHomepage === true, mediaVisible: p.featuredOnHomepage === true, summaryVisible: p.featuredOnHomepage === true });
   };
 
   const handleDeleteTalent = async (id: string) => {
@@ -364,6 +362,7 @@ export default function AdminDashboardPage() {
                 role: memberRole,
                 bio: memberBio,
                 photoUrl: memberPhoto || m.photoUrl,
+                visibility: memberVisibility,
               }
             : m
         );
@@ -376,9 +375,8 @@ export default function AdminDashboardPage() {
           name: memberName,
           role: memberRole,
           bio: memberBio,
-          photoUrl:
-            memberPhoto ||
-            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+          photoUrl: memberPhoto,
+          visibility: memberVisibility,
           order: teamMembers.length + 1,
         };
         await updateTeamMembers([...teamMembers, newMember]);
@@ -388,6 +386,7 @@ export default function AdminDashboardPage() {
       setMemberRole("");
       setMemberBio("");
       setMemberPhoto("");
+      setMemberVisibility({ isPublic: false, showPhoto: false, showRole: false, showBio: false, showLink: false });
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save team member. Check your connection and try again.");
     }
@@ -399,6 +398,7 @@ export default function AdminDashboardPage() {
     setMemberRole(m.role);
     setMemberBio(m.bio);
     setMemberPhoto(m.photoUrl);
+    setMemberVisibility(m.visibility || { isPublic: true, showPhoto: true, showRole: true, showBio: true, showLink: true });
   };
 
   const handleDeleteMember = async (id: string) => {
@@ -759,18 +759,23 @@ export default function AdminDashboardPage() {
                   <UserPlus className="w-4 h-4 text-[#005C27]" />
                   Approve Foundation Sponsor
                 </h3>
-                <span className="text-[10px] text-[#051836]/50 font-mono">Generates Firebase Auth Credentials</span>
+                <span className="text-[10px] text-[#051836]/50 font-mono">Send post-call sponsor invitation</span>
               </div>
 
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  if (!manualEmail.trim()) return;
-                  const creds = provisionSponsorManual(manualEmail, manualName, manualCompany);
-                  setProvisionedModal(creds);
-                  setManualEmail("");
-                  setManualName("");
-                  setManualCompany("");
+                  if (!manualEmail.trim() || !manualName.trim() || !manualPostCallConfirmed) return;
+                  try {
+                    const invitation = await provisionSponsorManual(manualEmail, manualName, manualCompany);
+                    setProvisionedModal(invitation);
+                    setManualEmail("");
+                    setManualName("");
+                    setManualCompany("");
+                    setManualPostCallConfirmed(false);
+                  } catch (err) {
+                    triggerToast("✗ Invitation Not Sent", err instanceof Error ? err.message : "Check the post-call confirmation and invitation configuration, then try again.");
+                  }
                 }}
                 className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end text-xs"
               >
@@ -808,12 +813,24 @@ export default function AdminDashboardPage() {
                   />
                 </div>
 
+                <label className="sm:col-span-3 flex items-center gap-2 text-[#051836]/70 font-semibold cursor-pointer">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={manualPostCallConfirmed}
+                    onChange={(e) => setManualPostCallConfirmed(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-[#005C27]"
+                  />
+                  <span>I confirm this sponsor has completed an orientation call.</span>
+                </label>
+
                 <button
                   type="submit"
-                  className="bg-[#005C27] hover:brightness-110 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                  disabled={!manualPostCallConfirmed}
+                  className="bg-[#005C27] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                 >
-                  <Key className="w-4 h-4" />
-                  <span>Generate Credentials</span>
+                  <Mail className="w-4 h-4" />
+                  <span>Send Sponsor Invitation</span>
                 </button>
               </form>
             </div>
@@ -828,7 +845,7 @@ export default function AdminDashboardPage() {
                       <th className="p-4">Category &amp; Tier</th>
                       <th className="p-4">Vetting Call Status</th>
                       <th className="p-4">Verification Actions</th>
-                      <th className="p-4">Credentials Token</th>
+                      <th className="p-4">Invitation Status</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -902,27 +919,19 @@ export default function AdminDashboardPage() {
                         </td>
 
                         <td className="p-4">
-                          {sponsor.assignedCredentials ? (
-                            <button
-                              onClick={() =>
-                                setCredentialModalSponsor({
-                                  name: sponsor.name,
-                                  username: sponsor.assignedCredentials!.username,
-                                  tempPass: sponsor.assignedCredentials!.tempPass,
-                                })
-                              }
-                              className="bg-[#051836]/10 hover:bg-[#051836]/20 text-[#051836] font-mono text-[11px] px-3 py-1.5 rounded-lg border border-[#051836]/15 inline-flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Key className="w-3 h-3 text-[#005C27]" />
-                              <span>View Account</span>
-                            </button>
+                          {sponsor.invitationStatus === "sent" ? (
+                            <span className="bg-[#051836]/10 text-[#051836] font-mono text-[11px] px-3 py-1.5 rounded-lg border border-[#051836]/15 inline-flex items-center gap-1.5">
+                              <Mail className="w-3 h-3 text-[#005C27]" />
+                              <span>Invitation Sent</span>
+                            </span>
                           ) : (
                             <button
-                              onClick={() => handleGenerateCredentialsClick(sponsor.id, sponsor.name)}
-                              className="bg-[#005C27] hover:brightness-110 text-white font-bold px-3 py-1.5 rounded-lg transition text-[11px] inline-flex items-center gap-1 cursor-pointer shadow-xs"
+                              disabled={sponsor.status !== "approved"}
+                              onClick={() => handleSendInvitationClick(sponsor.id, sponsor.name)}
+                              className="bg-[#005C27] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-3 py-1.5 rounded-lg transition text-[11px] inline-flex items-center gap-1 cursor-pointer shadow-xs"
                             >
-                              <Sparkles className="w-3 h-3" />
-                              <span>Approve &amp; Create Account</span>
+                              <Mail className="w-3 h-3" />
+                              <span>Send Invitation</span>
                             </button>
                           )}
                         </td>
@@ -1042,15 +1051,15 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL 3: Talent Directory CMS + Unlimited Local File Uploads */}
+        {/* PANEL 3: Sponsor Talent Directory CMS */}
         {activeSection === "talent" && (
           <div className="space-y-6">
             <div>
               <h1 className="font-montserrat font-bold text-2xl text-[#051836]">
-                Youth Talent Directory CMS
+                Sponsor Talent Directory CMS
               </h1>
               <p className="text-xs text-[#051836]/60 mt-0.5">
-                Add, edit, or remove youth creator profiles with unlimited local picture and video uploading.
+                Add and edit controlled Sponsor Talent records. Public visibility is always your choice.
               </p>
             </div>
 
@@ -1059,29 +1068,30 @@ export default function AdminDashboardPage() {
               <div className="bg-white p-6 rounded-2xl border border-[#051836]/10 shadow-xl space-y-4">
                 <div className="flex items-center justify-between border-b border-[#051836]/10 pb-3">
                   <h2 className="font-montserrat font-bold text-base text-[#051836]">
-                    {editingId ? "Edit Creator Profile" : "Add New Youth Profile"}
+                    {editingId ? "Edit Sponsor Talent Record" : "Add Sponsor Talent Record"}
                   </h2>
                   <button
                     type="button"
                     onClick={() => {
-                      setFirstName("Lucas");
+                      setFirstName("Public Talent Profile");
                       setAge("18");
-                      setCategory("Robotics");
-                      setLocation("Austin, TX");
-                      setBio("Pioneering low-cost autonomous drone mapping algorithms for forestry conservation and urban disaster response.");
-                      setCoverPhoto("https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=1200&q=80");
-                      setRawMediaUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+                      setCategory("Technology");
+                      setLocation("Community-based");
+                      setBio("Add an approved, non-identifying summary of the talent and their support pathway.");
+                      setCoverPhoto("");
+                      setRawMediaUrl("");
+                      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
                     }}
                     className="text-[11px] font-bold text-[#005C27] hover:underline flex items-center gap-1 cursor-pointer bg-[#005C27]/10 px-2.5 py-1 rounded-md border border-[#005C27]/20"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Auto-Fill Mock Profile</span>
+                    <span>Fill Safe Draft</span>
                   </button>
                 </div>
 
                 <form onSubmit={handleSaveTalent} className="space-y-4 text-xs font-inter">
                   <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">First Name</label>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Public Display Title</label>
                     <input
                       type="text"
                       required
@@ -1093,7 +1103,7 @@ export default function AdminDashboardPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[#051836]/80 font-semibold mb-1">Age</label>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Internal Reference</label>
                       <input
                         type="number"
                         required
@@ -1124,19 +1134,19 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">Location</label>
+                      <label className="block text-[#051836]/80 font-semibold mb-1">Region / Community</label>
                     <input
                       type="text"
                       required
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      placeholder="e.g. Austin, TX"
+                      placeholder="Use a broad region only"
                       className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">Bio</label>
+                    <label className="block text-[#051836]/80 font-semibold mb-1">Approved Non-identifying Summary</label>
                     <textarea
                       rows={3}
                       required
@@ -1266,12 +1276,33 @@ export default function AdminDashboardPage() {
                     />
                   </div>
 
+                  <fieldset className="rounded-xl border border-[#005C27]/25 bg-[#005C27]/5 p-3 space-y-2">
+                    <legend className="px-1 text-[11px] font-bold text-[#005C27]">Public visibility controls</legend>
+                    <p className="text-[10px] text-[#051836]/60">All public fields are hidden by default. You can edit these choices after publishing.</p>
+                    {[
+                      ["profileVisible", "Publish this Sponsor Talent profile"],
+                      ["summaryVisible", "Show the approved summary"],
+                      ["photoVisible", "Show the approved cover photo"],
+                      ["mediaVisible", "Show approved media"],
+                    ].map(([field, label]) => (
+                      <label key={field} className="flex items-center gap-2 text-[11px] text-[#051836] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={talentVisibility[field as keyof typeof talentVisibility]}
+                          onChange={(event) => setTalentVisibility((current) => ({ ...current, [field]: event.target.checked }))}
+                          className="accent-[#005C27]"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </fieldset>
+
                   <div className="pt-2 flex gap-2">
                     <button
                       type="submit"
                       className="flex-1 bg-[#005C27] hover:brightness-110 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md cursor-pointer"
                     >
-                      {editingId ? "Update Profile" : "Save Profile to Grid"}
+                      {editingId ? "Update Sponsor Talent" : "Save Sponsor Talent"}
                     </button>
                     {editingId && (
                       <button
@@ -1528,6 +1559,28 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
+                  <fieldset className="rounded-xl border border-[#005C27]/25 bg-[#005C27]/5 p-3 space-y-2">
+                    <legend className="px-1 text-[11px] font-bold text-[#005C27]">Public visibility controls</legend>
+                    <p className="text-[10px] text-[#051836]/60">Every field is private by default. You can change these choices later.</p>
+                    {[
+                      ["isPublic", "Publish this team member"],
+                      ["showPhoto", "Show photo"],
+                      ["showRole", "Show role title"],
+                      ["showBio", "Show biography"],
+                      ["showLink", "Show approved external link"],
+                    ].map(([field, label]) => (
+                      <label key={field} className="flex items-center gap-2 text-[11px] text-[#051836] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={memberVisibility[field as keyof typeof memberVisibility]}
+                          onChange={(event) => setMemberVisibility((current) => ({ ...current, [field]: event.target.checked }))}
+                          className="accent-[#005C27]"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </fieldset>
+
                   <button
                     type="submit"
                     className="w-full bg-[#005C27] hover:brightness-110 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md cursor-pointer"
@@ -1581,174 +1634,19 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL: Transparency Financial Reports CMS */}
+        {/* PANEL: Transparency and financial reporting are intentionally disabled. */}
         {activeSection === "transparency" && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-montserrat font-bold text-2xl text-[#051836]">
-                Transparency &amp; Financial Audits CMS
-              </h1>
-              <p className="text-xs text-[#051836]/60 mt-0.5">
-                Publish independent financial audit reports and grant distribution PDFs for public and sponsor inspection.
-              </p>
+              <h1 className="font-montserrat font-bold text-2xl text-[#051836]">Partnership Information</h1>
+              <p className="text-xs text-[#051836]/60 mt-0.5">This portal does not manage financial contributions, tax records, or transparency reports.</p>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-2xl border border-[#051836]/10 shadow-xl space-y-4">
-                <h2 className="font-montserrat font-bold text-base text-[#051836] border-b border-[#051836]/10 pb-3">
-                  Publish Financial Report PDF
-                </h2>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!transparencyTitle.trim()) return;
-                    try {
-                      await addTransparencyReport({
-                        id: "tr-" + Date.now(),
-                        title: transparencyTitle,
-                        year: transparencyAuditDate ? transparencyAuditDate.split("-")[0] : "2026",
-                        auditDate: transparencyAuditDate,
-                        totalFunded: transparencyTotalFunded,
-                        childrenImpacted: Number(transparencyChildrenImpacted),
-                        category: transparencyCategory,
-                        reportPdfUrl: transparencyPdfUrl,
-                      });
-                      triggerToast("✓ Audit Report Published", `Published ${transparencyTitle} to live site.`);
-                      setTransparencyTitle("");
-                    } catch (err) {
-                      triggerToast("✗ Publish Failed", err instanceof Error ? err.message : "Could not publish report. Check your connection and try again.");
-                    }
-                  }}
-                  className="space-y-4 text-xs font-inter"
-                >
-                  <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">Report Title *</label>
-                    <input
-                      type="text"
-                      required
-                      value={transparencyTitle}
-                      onChange={(e) => setTransparencyTitle(e.target.value)}
-                      placeholder="e.g. 2026 Q1 Direct Grant Distribution Audit"
-                      className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[#051836]/80 font-semibold mb-1">Audit Date</label>
-                      <input
-                        type="date"
-                        value={transparencyAuditDate}
-                        onChange={(e) => setTransparencyAuditDate(e.target.value)}
-                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#051836]/80 font-semibold mb-1">Total Funded</label>
-                      <input
-                        type="text"
-                        value={transparencyTotalFunded}
-                        onChange={(e) => setTransparencyTotalFunded(e.target.value)}
-                        placeholder="$250,000"
-                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[#051836]/80 font-semibold mb-1">Children Impacted</label>
-                      <input
-                        type="number"
-                        value={transparencyChildrenImpacted}
-                        onChange={(e) => setTransparencyChildrenImpacted(Number(e.target.value))}
-                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#051836]/80 font-semibold mb-1">Category</label>
-                      <select
-                        value={transparencyCategory}
-                        onChange={(e) => setTransparencyCategory(e.target.value as "Financial Audit" | "Annual Impact Report" | "Program Stewardship")}
-                        className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                      >
-                        <option value="Financial Audit">Financial Audit</option>
-                        <option value="Annual Impact Report">Annual Impact Report</option>
-                        <option value="Program Stewardship">Program Stewardship</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[#051836]/80 font-semibold mb-1">PDF File URL *</label>
-                    <input
-                      type="url"
-                      required
-                      value={transparencyPdfUrl}
-                      onChange={(e) => setTransparencyPdfUrl(e.target.value)}
-                      className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-[#005C27] hover:bg-[#327B2F] text-[#051836] font-bold py-3 rounded-xl transition text-xs shadow-md cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <FileText className="w-4 h-4 text-[#F5AB00]" />
-                    <span>Publish Report PDF</span>
-                  </button>
-                </form>
+            <div className="bg-white p-8 rounded-2xl border border-[#051836]/10 shadow-xl space-y-4 max-w-3xl">
+              <div className="w-11 h-11 rounded-2xl bg-[#005C27]/10 text-[#005C27] flex items-center justify-center">
+                <Lock className="w-5 h-5" />
               </div>
-
-              <div className="lg:col-span-2 space-y-4">
-                <h2 className="font-montserrat font-bold text-base text-[#051836]">
-                  Published Reports ({transparencyReports.length})
-                </h2>
-                <div className="space-y-3">
-                  {transparencyReports.map((report) => (
-                    <div
-                      key={report.id}
-                      className="bg-white p-4 rounded-xl border border-[#051836]/10 flex items-center justify-between gap-4"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-[#005C27]/20 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                            {report.category}
-                          </span>
-                          <span className="text-xs font-mono text-[#051836]/50">{report.auditDate}</span>
-                        </div>
-                        <h4 className="font-montserrat font-bold text-sm text-[#051836]">{report.title}</h4>
-                        <p className="text-xs text-[#051836]/70">Funded: {report.totalFunded} • Impact: {report.childrenImpacted} Children</p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={report.reportPdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-[#051836]/10 hover:bg-[#051836]/20 text-[#051836] font-semibold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1"
-                        >
-                          View PDF <ExternalLink className="w-3 h-3" />
-                        </a>
-                        <button
-                          onClick={async () => {
-                            try {
-                              await deleteTransparencyReport(report.id);
-                              triggerToast("✓ Report Deleted", `Removed report ${report.title}`);
-                            } catch (err) {
-                              triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not delete report. Check your connection and try again.");
-                            }
-                          }}
-                          className="p-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg text-xs"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <h2 className="font-montserrat font-bold text-lg text-[#051836]">Financial and transparency workflows are unavailable</h2>
+              <p className="text-xs text-[#051836]/70 leading-relaxed">Do not upload reports, publish financial figures, or use this portal to process contributions. Appropriate partnership information is handled through private foundation processes outside this application.</p>
             </div>
           </div>
         )}
@@ -1800,7 +1698,7 @@ export default function AdminDashboardPage() {
                       required
                       value={videoTitle}
                       onChange={(e) => setVideoTitle(e.target.value)}
-                      placeholder="e.g. Mathare Robotics Lab Impact Documentary"
+                      placeholder="e.g. Sponsor Talent Introduction Video"
                       className="w-full p-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-[#051836] focus:outline-none focus:border-[#005C27]"
                     />
                   </div>
@@ -2573,11 +2471,11 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between border-b border-[#051836]/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-                  <Key className="w-5 h-5" />
+                  <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-montserrat font-bold text-lg text-[#051836]">Manual Sponsor Provisioned</h3>
-                  <p className="text-xs text-[#051836]/60">Firebase Credentials Generated</p>
+                  <h3 className="font-montserrat font-bold text-lg text-[#051836]">Sponsor Invitation Sent</h3>
+                  <p className="text-xs text-[#051836]/60">Passwordless access invitation delivered</p>
                 </div>
               </div>
               <button
@@ -2592,37 +2490,24 @@ export default function AdminDashboardPage() {
               <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#051836]/15 space-y-2">
                 <div>
                   <span className="text-[#051836]/40 uppercase tracking-wider block text-[10px]">
-                    Sponsor Username / Email
+                    Sponsor Email
                   </span>
-                  <p className="text-[#051836] font-bold text-sm">{provisionedModal.username}</p>
+                  <p className="text-[#051836] font-bold text-sm">{provisionedModal.email}</p>
                 </div>
 
                 <div className="pt-2 border-t border-[#051836]/10">
                   <span className="text-[#051836]/40 uppercase tracking-wider block text-[10px]">
-                    Temporary Token Password
+                    Invitation Status
                   </span>
-                  <p className="text-[#005C27] font-bold text-base tracking-wider">
-                    {provisionedModal.tempPass}
-                  </p>
+                  <p className="text-[#005C27] font-bold text-base tracking-wider">{provisionedModal.invitationStatus}</p>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  copyToClipboard(
-                    `WLP Sponsor Access Credentials:\nUsername: ${provisionedModal.username}\nTemporary Password: ${provisionedModal.tempPass}\nLogin Portal: https://wlp-app.vercel.app/login`
-                  );
-                }}
-                className="flex-1 bg-[#005C27] hover:brightness-110 text-white font-bold py-3 rounded-xl transition text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md"
-              >
-                <Copy className="w-4 h-4" />
-                <span>{copiedNotice ? "Copied to Clipboard!" : "1-Click Copy Credentials"}</span>
-              </button>
-              <button
                 onClick={() => setProvisionedModal(null)}
-                className="bg-[#051836]/10 hover:bg-[#051836]/20 text-[#051836] font-bold px-4 py-3 rounded-xl transition text-xs"
+                className="w-full bg-[#051836]/10 hover:bg-[#051836]/20 text-[#051836] font-bold px-4 py-3 rounded-xl transition text-xs"
               >
                 Done
               </button>
@@ -2631,17 +2516,17 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Credential Issuance Modal */}
+      {/* Sponsor Invitation Status Modal */}
       {credentialModalSponsor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#051836]/15 space-y-6">
             <div className="flex items-center justify-between border-b border-[#051836]/10 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#005C27]/10 text-[#005C27] flex items-center justify-center font-bold">
-                  <Key className="w-5 h-5" />
+                  <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-montserrat font-bold text-lg text-[#051836]">Generated Credentials</h3>
+                  <h3 className="font-montserrat font-bold text-lg text-[#051836]">Invitation Status</h3>
                   <p className="text-xs text-[#051836]/60">Sponsor: {credentialModalSponsor.name}</p>
                 </div>
               </div>
@@ -2657,29 +2542,24 @@ export default function AdminDashboardPage() {
               <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#051836]/15 space-y-2">
                 <div>
                   <span className="text-[#051836]/40 uppercase tracking-wider block text-[10px]">
-                    Sponsor Username / Email
+                    Sponsor Email
                   </span>
-                  <p className="text-[#051836] font-bold text-sm">{credentialModalSponsor.username}</p>
+                  <p className="text-[#051836] font-bold text-sm">{credentialModalSponsor.email}</p>
                 </div>
                 <div className="pt-2 border-t border-[#051836]/10">
                   <span className="text-[#051836]/40 uppercase tracking-wider block text-[10px]">
-                    Temporary Access Password
+                    Invitation Status
                   </span>
-                  <p className="text-[#005C27] font-bold text-sm">{credentialModalSponsor.tempPass}</p>
+                  <p className="text-[#005C27] font-bold text-sm">{credentialModalSponsor.invitationStatus}</p>
                 </div>
               </div>
 
               <div className="flex gap-2">
                 <button
-                  onClick={() =>
-                    copyToClipboard(
-                      `Username: ${credentialModalSponsor.username}\nPassword: ${credentialModalSponsor.tempPass}\nLogin URL: https://wlp-app.vercel.app/login`
-                    )
-                  }
+                  onClick={() => setCredentialModalSponsor(null)}
                   className="w-full bg-[#005C27] hover:brightness-110 text-white font-bold py-3 rounded-xl transition text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
-                  <Copy className="w-4 h-4" />
-                  <span>{copiedNotice ? "Copied to Clipboard!" : "Copy Credential Package"}</span>
+                  <span>Done</span>
                 </button>
               </div>
             </div>

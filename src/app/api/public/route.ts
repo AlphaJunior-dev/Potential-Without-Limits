@@ -40,7 +40,7 @@ export async function GET() {
   return NextResponse.json({
     branding: { ...baseBranding, ...site.branding, heroHeadline: site.heroTitle, heroSubheadline: site.heroText },
     missionVision: { ...fallbackMissionVision, ...site.missionVision },
-    profiles: site.pilotCards.map((card) => ({ id: card.id, name: card.title, age: 0, category: card.supportArea || "Sponsor Talent", location: "Sponsor Talent", country_community: "Sponsor Talent", bio: card.summary, coverPhoto: "/pwlif-logo.png", status: "active", skills: [], dream: card.summary, current_situation: "Information is shared through appropriate private conversations.", progress: "", current_needs: card.supportArea || "Orientation conversation", consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" } })),
+    profiles: site.pilotCards.map((card) => ({ id: card.id, name: card.title, age: 0, category: card.supportArea || "Sponsor Talent", location: "Sponsor Talent", country_community: "Sponsor Talent", bio: card.summary, coverPhoto: card.photoUrl || "/pwlif-logo.png", status: "active", skills: [], dream: card.summary, current_situation: "Information is shared through appropriate private conversations.", progress: "", current_needs: card.supportArea || "Orientation conversation", consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" } })),
     faqItems: fallbackFaqItems,
     teamMembers: site.teamMembers.length ? site.teamMembers : fallbackTeamMembers,
     legalSecurity: { ...fallbackLegalSecurity, ...site.legalSecurity },

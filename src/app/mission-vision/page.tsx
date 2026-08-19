@@ -9,16 +9,16 @@ import { useAuth } from "@/context/AuthContext";
 export default function MissionVisionPage() {
   const { missionVision } = useAuth();
   const values = [
-    { name: "Hope", desc: "Instilling optimism and belief in a brighter future for every child." },
+    { name: "Hope", desc: "Encouraging belief in a future where potential can be recognised and supported." },
     { name: "Integrity", desc: "Upholding the highest moral and ethical standards in all actions." },
-    { name: "Compassion", desc: "Demonstrating deep empathy and care for vulnerable youth." },
-    { name: "Excellence", desc: "Striving for quality and distinction in programs and stewardship." },
-    { name: "Accountability", desc: "Taking full responsibility for outcomes and grant utilization." },
+    { name: "Compassion", desc: "Approaching young people, families, and partners with care and empathy." },
+    { name: "Excellence", desc: "Striving for thoughtful, high-quality foundation work and partnerships." },
+    { name: "Accountability", desc: "Taking responsibility for decisions, communications, and entrusted work." },
     { name: "Innovation", desc: "Embracing creative technology and modern learning tools." },
-    { name: "Inclusion", desc: "Ensuring equal opportunities for youth of all backgrounds." },
-    { name: "Respect", desc: "Honoring the dignity, rights, and voice of every child." },
-    { name: "Empowerment", desc: "Equipping youth with confidence and self-reliance skills." },
-    { name: "Transparency", desc: "Maintaining open, audited, and honest institutional operations." },
+    { name: "Inclusion", desc: "Valuing opportunity, participation, and belonging across diverse communities." },
+    { name: "Respect", desc: "Honouring the dignity, rights, and voice of every young person." },
+    { name: "Empowerment", desc: "Supporting young people to develop confidence, skills, and agency." },
+    { name: "Stewardship", desc: "Approaching foundation decisions and partnerships with care and integrity." },
   ];
 
   return (
@@ -43,7 +43,7 @@ export default function MissionVisionPage() {
             Our Mission &amp; Vision
           </h1>
           <p className="font-inter text-base sm:text-lg text-[#051836]/70 max-w-3xl mx-auto leading-relaxed">
-            Empowering vulnerable children and young people across Africa through education, talent development, mentorship, and transparent humanitarian stewardship.
+            Supporting young people to explore and develop their potential through learning, mentorship, talent development, and responsible partnerships.
           </p>
         </div>
 
@@ -73,9 +73,9 @@ export default function MissionVisionPage() {
 
             <div className="mt-8 pt-4 border-t border-[#051836]/10 text-xs text-[#051836]/50 font-medium flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Verified Governance
+                <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Responsible Foundation Practice
               </span>
-              <span>Child Safety Shield Protocol</span>
+              <span>Safeguarding-Aware Approach</span>
             </div>
           </div>
 
@@ -103,9 +103,9 @@ export default function MissionVisionPage() {
 
             <div className="mt-8 pt-4 border-t border-[#051836]/10 text-xs text-[#051836]/50 font-medium flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Global Outreach
+                <ShieldCheck className="w-4 h-4 text-[#005C27]" /> Long-Term Perspective
               </span>
-              <span>Pan-African &amp; Global Scope</span>
+              <span>Potential Without Limits</span>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function MissionVisionPage() {
               Our 10 Core Values
             </h4>
             <p className="text-xs sm:text-sm text-[#051836]/70 mt-2">
-              The core principles guiding every program, grant, and community intervention across PWLIF.
+              The core principles guiding PWLIF’s programme development, communication, and partnership work.
             </p>
           </div>
 
@@ -176,10 +176,10 @@ export default function MissionVisionPage() {
         {/* Call to Action Banner */}
         <div className="bg-[#051836] text-white rounded-3xl p-8 sm:p-12 text-center space-y-6 shadow-2xl border border-[#005C27]/30 relative overflow-hidden">
           <h3 className="font-montserrat text-2xl sm:text-4xl font-black">
-            Ready to Empower a Child&apos;s Bright Future?
+            Ready to Explore a Potential-Focused Partnership?
           </h3>
           <p className="text-xs sm:text-sm text-white/80 max-w-2xl mx-auto leading-relaxed">
-            Join PWLIF as a sponsor, mentor, or donor to build sustainable pathways of opportunity for vulnerable children.
+            Begin with a private orientation conversation to learn how PWLIF approaches Sponsor Talent, learning, mentorship, and partnership opportunities.
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -187,7 +187,7 @@ export default function MissionVisionPage() {
               className="bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-8 rounded-xl transition shadow-lg inline-flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
             >
               <Heart className="w-4 h-4 text-[#F5AB00] fill-[#F5AB00]" />
-              <span>Sponsor a Child&apos;s Dream</span>
+              <span>Explore Sponsor Talent</span>
             </Link>
 
             <Link

@@ -19,7 +19,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Potential Without Limits International Foundation (PWLIF) | Unlocking Potential. Transforming Lives.",
-  description: "A humanitarian foundation empowering vulnerable children and youth across Africa through education, talent development, mentorship, and strategic sponsorship partnerships.",
+  description: "A potential-focused foundation supporting learning, talent development, mentorship, and careful partnership conversations.",
 };
 
 export default function RootLayout({

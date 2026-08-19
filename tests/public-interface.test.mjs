@@ -97,3 +97,30 @@ test("approved public CMS actions use the protected route and the public reader 
   assert.match(missionPage, /missionVision\.mission/);
   assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
 });
+
+test("sponsor access is issued by post-call passwordless invitation rather than displayed credentials", async () => {
+  const [adminPage, provider, adminRoute, loginPage, bookCall, pendingPage] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/app/login/page.tsx"),
+    readSource("src/app/book-a-call/page.tsx"),
+    readSource("src/app/pending/page.tsx"),
+  ]);
+
+  assert.match(adminPage, /provisionSponsorManual/);
+  assert.match(adminPage, /manualPostCallConfirmed/);
+  assert.match(adminPage, /Send Sponsor Invitation/);
+  assert.match(provider, /runOperationalAction\("sendSponsorInvitation"/);
+  assert.match(provider, /runOperationalAction\("createManualSponsorInvitation"/);
+  assert.match(provider, /postCallConfirmed: true/);
+  assert.match(adminRoute, /body\.action === "sendSponsorInvitation"/);
+  assert.match(loginPage, /signInWithEmailLink/);
+  assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);
+  assert.match(bookCall, /\/api\/orientation/);
+  assert.match(pendingPage, /passwordless(?: sign-in)? invitation/i);
+
+  for (const source of [adminPage, loginPage, bookCall, pendingPage]) {
+    assert.doesNotMatch(source, /Temporary Token Password|Temporary Access Password|Generate Credentials|Credentials Token/i);
+  }
+});

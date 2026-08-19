@@ -29,14 +29,29 @@ export function adminDb() {
   return getFirestore(adminApp());
 }
 
+export function adminAuth() {
+  return getAuth(adminApp());
+}
+
 export async function requireAdministrator(request: NextRequest) {
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   const sessionToken = request.cookies.get("__session")?.value;
   const token = bearer || sessionToken;
   if (!token) throw new Error("UNAUTHENTICATED");
 
-  const decoded = await getAuth(adminApp()).verifyIdToken(token);
+  const decoded = await adminAuth().verifyIdToken(token);
   if (decoded.admin !== true) throw new Error("FORBIDDEN");
+  return decoded;
+}
+
+export async function requireApprovedSponsor(request: NextRequest) {
+  const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const sessionToken = request.cookies.get("__session")?.value;
+  const token = bearer || sessionToken;
+  if (!token) throw new Error("UNAUTHENTICATED");
+
+  const decoded = await adminAuth().verifyIdToken(token);
+  if (decoded.sponsor !== true) throw new Error("FORBIDDEN");
   return decoded;
 }
 
@@ -51,20 +66,23 @@ export const safePublicDefaults = {
       title: "Sponsor Talent Overview",
       summary: "Discover the foundation's Sponsor Talent pathway through a private safeguarding and partnership orientation.",
       supportArea: "Orientation conversation",
+      photoUrl: "",
     },
     {
       id: "community-guided-support",
       title: "Community-guided Support",
       summary: "Potential partners can learn about community-informed Sponsor Talent opportunities during a private orientation call.",
       supportArea: "Partnership conversation",
+      photoUrl: "",
     },
     {
       id: "safeguarding-first",
       title: "Safeguarding First",
       summary: "Sponsor Talent information is reviewed through appropriate safeguarding and privacy practices.",
       supportArea: "Safeguarding review",
+      photoUrl: "",
     },
-  ] as Array<{ id: string; title: string; summary: string; supportArea?: string }>,
+  ] as Array<{ id: string; title: string; summary: string; supportArea?: string; photoUrl?: string }>,
 };
 
 const publicBrandingTextLimits: Record<string, number> = {
@@ -147,18 +165,94 @@ export function sanitizePublicTeam(input: unknown) {
     const role = safePublicText(item.role, 160);
     const bio = safePublicText(item.bio, 1_200);
     if (!name || !role || !bio) return null;
-    const photoUrl = safeAssetUrl(item.photoUrl) || "/pwlif-logo.png";
+    const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
+    const visibility = {
+      isPublic: rawVisibility.isPublic === true,
+      showPhoto: rawVisibility.showPhoto === true,
+      showRole: rawVisibility.showRole === true,
+      showBio: rawVisibility.showBio === true,
+      showLink: rawVisibility.showLink === true,
+    };
+    if (!visibility.isPublic) return null;
+    const photoUrl = visibility.showPhoto ? (safeAssetUrl(item.photoUrl) || "/pwlif-logo.png") : "/pwlif-logo.png";
     const linkedinUrl = safeAssetUrl(item.linkedinUrl);
+    return {
+      id: safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || `team-${index + 1}`,
+      name,
+      role: visibility.showRole ? role : "",
+      bio: visibility.showBio ? bio : "",
+      photoUrl,
+      ...(visibility.showLink && linkedinUrl ? { linkedinUrl } : {}),
+      visibility,
+      order: Math.max(1, Math.min(99, Number.isFinite(item.order) ? Math.trunc(item.order as number) : index + 1)),
+    };
+  }).filter((member): member is NonNullable<typeof member> => Boolean(member));
+}
+
+export function sanitizeAdminTeam(input: unknown) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 12).map((member, index) => {
+    const item = member && typeof member === "object" ? member as Record<string, unknown> : {};
+    const name = safePublicText(item.name, 120);
+    const role = safePublicText(item.role, 160);
+    const bio = safePublicText(item.bio, 1_200);
+    if (!name || !role || !bio) return null;
+    const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
     return {
       id: safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || `team-${index + 1}`,
       name,
       role,
       bio,
-      photoUrl,
-      ...(linkedinUrl ? { linkedinUrl } : {}),
+      photoUrl: safeAssetUrl(item.photoUrl) || "/pwlif-logo.png",
+      ...(safeAssetUrl(item.linkedinUrl) ? { linkedinUrl: safeAssetUrl(item.linkedinUrl) } : {}),
       order: Math.max(1, Math.min(99, Number.isFinite(item.order) ? Math.trunc(item.order as number) : index + 1)),
+      visibility: {
+        isPublic: rawVisibility.isPublic === true,
+        showPhoto: rawVisibility.showPhoto === true,
+        showRole: rawVisibility.showRole === true,
+        showBio: rawVisibility.showBio === true,
+        showLink: rawVisibility.showLink === true,
+      },
     };
   }).filter((member): member is NonNullable<typeof member> => Boolean(member));
+}
+
+export function sanitizeTalentRecord(input: unknown) {
+  const item = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const displayTitle = safePublicText(item.displayTitle, 120);
+  const summary = safePublicText(item.summary, 1_500);
+  const supportArea = safePublicText(item.supportArea, 160);
+  if (!displayTitle || !summary || !supportArea) return null;
+  const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
+  const rawMedia = Array.isArray(item.mediaUrls) ? item.mediaUrls : [];
+  return {
+    displayTitle,
+    summary,
+    supportArea,
+    photoUrl: safeAssetUrl(item.photoUrl) || "",
+    mediaUrls: rawMedia.map(safeAssetUrl).filter((url): url is string => Boolean(url)).slice(0, 4),
+    displayOrder: Math.max(1, Math.min(999, Number.isFinite(item.displayOrder) ? Math.trunc(item.displayOrder as number) : 999)),
+    visibility: {
+      profileVisible: rawVisibility.profileVisible === true,
+      photoVisible: rawVisibility.photoVisible === true,
+      mediaVisible: rawVisibility.mediaVisible === true,
+      summaryVisible: rawVisibility.summaryVisible === true,
+    },
+  };
+}
+
+export function toPublicTalentCard(id: string, input: unknown) {
+  const record = sanitizeTalentRecord(input);
+  if (!record || !record.visibility.profileVisible) return null;
+  return {
+    id,
+    title: record.displayTitle,
+    summary: record.visibility.summaryVisible ? record.summary : "Information is shared through an appropriate private orientation conversation.",
+    supportArea: record.supportArea,
+    ...(record.visibility.photoVisible && record.photoUrl ? { photoUrl: record.photoUrl } : {}),
+    ...(record.visibility.mediaVisible ? { mediaUrls: record.mediaUrls } : {}),
+    displayOrder: record.displayOrder,
+  };
 }
 
 export function sanitizePublicLegal(input: unknown) {
@@ -224,9 +318,10 @@ export function sanitizePublicBranding(input: unknown) {
 export async function readPublicSite() {
   try {
     const db = adminDb();
-    const [siteSnapshot, cardsSnapshot] = await Promise.all([
+    const [siteSnapshot, cardsSnapshot, talentSnapshot] = await Promise.all([
       db.collection("public_site_content").doc("main").get(),
       db.collection("pilot_overview_cards").where("status", "==", "published").orderBy("displayOrder", "asc").get(),
+      db.collection("sponsor_talent_records").where("visibility.profileVisible", "==", true).limit(100).get(),
     ]);
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
     const branding = sanitizePublicBranding(values?.branding);
@@ -237,14 +332,19 @@ export async function readPublicSite() {
         title: sponsorTalentWording(String(card.title ?? "Sponsor Talent Overview")),
         summary: sponsorTalentWording(String(card.summary ?? "")),
         supportArea: typeof card.supportArea === "string" ? sponsorTalentWording(card.supportArea) : undefined,
+        photoUrl: "",
       };
     });
+    const publishedTalentCards = talentSnapshot.docs
+      .map((document) => toPublicTalentCard(document.id, document.data()))
+      .filter((card): card is NonNullable<typeof card> => Boolean(card))
+      .sort((first, second) => first.displayOrder - second.displayOrder);
 
     return {
       heroTitle: typeof values?.heroTitle === "string" ? sponsorTalentWording(values.heroTitle) : branding.heroHeadline || safePublicDefaults.heroTitle,
       heroText: typeof values?.heroText === "string" ? sponsorTalentWording(values.heroText) : branding.heroSubheadline || safePublicDefaults.heroText,
       bookingUrl: typeof values?.bookingUrl === "string" ? values.bookingUrl : safePublicDefaults.bookingUrl,
-      pilotCards: publishedCards.length ? publishedCards : safePublicDefaults.pilotCards,
+      pilotCards: publishedTalentCards.length ? publishedTalentCards : (publishedCards.length ? publishedCards : safePublicDefaults.pilotCards),
       branding,
       missionVision: sanitizePublicMissionVision(values?.missionVision),
       teamMembers: sanitizePublicTeam(values?.teamMembers),

@@ -28,3 +28,13 @@
 - [x] Inventory each remaining Admin Portal action and retain only approved public-content workflows for server-enforced repair.
 - [x] Connect Mission & Vision, Meet the Team, legal, and video metadata controls to authenticated server routes without altering the portal interface; the current portal has no FAQ CMS form and Sponsor Talent records remain privacy-restricted.
 - [x] Preserve Sponsor Vetting, credential generation, talent-directory records, transparency reports, and audit controls as disabled until a dedicated privacy-reviewed workflow is approved.
+- [ ] Define a secure private inquiry queue for submitted sponsor-orientation applications, with statuses, review notes, and access limited to Firebase administrators.
+- [ ] Rebuild Sponsor Vetting so administrators can review, approve, decline, and record the outcome of a completed orientation call without client-side authority.
+- [ ] Build a server-only sponsor invitation workflow that grants limited sponsor access only after a manual administrator approval; never generate or reveal credentials in the browser.
+- [ ] Configure a server-triggered passwordless Firebase invitation path, with delivery method recorded and no password or invite token exposed in the Admin Portal.
+- [ ] Rebuild the Talent Directory as controlled, non-identifying Sponsor Talent records with distinct public and private fields, consent safeguards, and administrator-only management.
+- [ ] Add per-record Sponsor Talent publication controls, with public profile, photo, media, and non-identifying summary disabled by default until an administrator deliberately publishes approved content.
+- [ ] Add per-member Meet the Team visibility controls for the full profile, photo, role, biography, and optional external link so administrators can choose exactly what is public.
+- [ ] Gate the Sponsor Dashboard by sponsor-specific server authorization so each approved sponsor can access only their assigned content.
+- [ ] Add a read-only server-generated operational audit log for sensitive approvals and content changes.
+- [ ] Keep finance and transparency workflows out of the operational rebuild scope unless explicitly re-approved by the foundation.

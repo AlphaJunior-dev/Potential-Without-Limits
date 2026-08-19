@@ -62,14 +62,14 @@ export default function TalentsPage() {
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/20 text-[#005C27] text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-[#005C27]" />
-              <span>Child Dream Directory</span>
+              <span>Sponsor Talent Directory</span>
             </div>
 
             <h1 className="font-montserrat text-3xl sm:text-5xl font-black text-[#051836] tracking-tight">
-              Empower Youth Dreams
+              Explore Sponsor Talent
             </h1>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl leading-relaxed">
-              Explore verified child dream profiles across Technology, Music, Digital Art, Robotics, Sports, Academics, Leadership, and Entrepreneurship. Every profile is backed by 100% verified parental consent records.
+              Explore the non-identifying Sponsor Talent information that PWLIF administrators have approved for public display. Information may be edited or withdrawn at any time.
             </p>
           </div>
 
@@ -81,7 +81,7 @@ export default function TalentsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, dream, category..."
+                placeholder="Search by title, focus, category..."
                 className="w-full pl-10 pr-4 py-3 bg-white border border-[#051836]/15 rounded-xl text-xs text-[#051836] placeholder:text-[#051836]/40 focus:outline-none focus:border-[#005C27] transition shadow-xs"
               />
             </div>
