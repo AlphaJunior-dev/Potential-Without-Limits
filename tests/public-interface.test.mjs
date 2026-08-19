@@ -177,3 +177,21 @@ test("approved sponsors automatically receive the private Talent pipeline on sha
   assert.match(adminLibrary, /export function toPublicTalentCard/);
   assert.match(adminLibrary, /export function toSponsorTalentCard/);
 });
+
+test("the Talent design preview is administrator-only and never seeds mock records into live sponsor or public data paths", async () => {
+  const [previewPage, previewRoute, sponsorRoute, publicRoute] = await Promise.all([
+    readSource("src/app/admin/talent-preview/page.tsx"),
+    readSource("src/app/api/admin/talent-preview/route.ts"),
+    readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/app/api/public/route.ts"),
+  ]);
+
+  assert.match(previewPage, /userStatus !== "admin"/);
+  assert.match(previewPage, /fetch\("\/api\/admin\/talent-preview"/);
+  assert.match(previewPage, /Design preview only/);
+  assert.match(previewRoute, /requireAdministrator\(request\)/);
+  assert.match(previewRoute, /Cache-Control": "private, no-store"/);
+  assert.doesNotMatch(previewRoute, /sponsor_talent_records|adminDb\(/);
+  assert.doesNotMatch(sponsorRoute, /layout-sample-|Technology pathway|Creative practice/);
+  assert.doesNotMatch(publicRoute, /layout-sample-|Technology pathway|Creative practice/);
+});

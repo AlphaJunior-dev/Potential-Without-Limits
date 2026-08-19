@@ -49,3 +49,5 @@
 - [x] Add regression coverage confirming private sponsor access is authorization-gated and remains distinct from the public visibility sanitizer.
 - [x] Make the Foundation Homepage and related Talent views automatically use the complete server-authorized Sponsor Talent pipeline for approved sponsor sessions, while anonymous public sessions remain field-limited.
 - [x] Add regression coverage proving the sponsor-only homepage data handoff requires a fresh Firebase sponsor claim and cannot alter anonymous public responses.
+- [x] Create an administrator-only Sponsor Talent design-preview route with clearly labelled fictional, non-identifying layout cards that cannot appear in public or sponsor-facing data paths.
+- [x] Add regression coverage proving the design-preview route requires the Firebase administrator claim and does not seed or expose mock Talent records through the Sponsor Talent APIs.
