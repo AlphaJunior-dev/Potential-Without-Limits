@@ -124,3 +124,22 @@ test("sponsor access is issued by post-call passwordless invitation rather than 
     assert.doesNotMatch(source, /Temporary Token Password|Temporary Access Password|Generate Credentials|Credentials Token/i);
   }
 });
+
+test("the redesigned sponsor dashboard receives truthful profile and Sponsor Talent data through a sponsor-authorized server route", async () => {
+  const [dashboard, sponsorRoute] = await Promise.all([
+    readSource("src/app/sponsor/dashboard/page.tsx"),
+    readSource("src/app/api/sponsor/route.ts"),
+  ]);
+
+  assert.match(dashboard, /fetch\("\/api\/sponsor"/);
+  assert.match(dashboard, /authenticatedUser\.getIdToken\(true\)/);
+  assert.match(dashboard, /Partnership, with purpose\./);
+  assert.match(dashboard, /Notifications/);
+  assert.doesNotMatch(dashboard, /pendingSponsors|PWLIF Partner|Focus Track Interests|Tier:/);
+
+  assert.match(sponsorRoute, /requireApprovedSponsor\(request\)/);
+  assert.match(sponsorRoute, /collection\("sponsor_accounts"\)\.doc\(sponsor\.uid\)/);
+  assert.match(sponsorRoute, /collection\("sponsor_talent_records"\)/);
+  assert.match(sponsorRoute, /toPublicTalentCard/);
+  assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
+});

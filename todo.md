@@ -40,3 +40,7 @@
 - [ ] Keep finance and transparency workflows out of the operational rebuild scope unless explicitly re-approved by the foundation.
 - [x] Trigger a fresh `repair/pwlif-secure-rebuild` preview after the passwordless invitation variable change and verify it uses the correct source commit.
 - [ ] Verify and correct the Preview `FIREBASE_EMAIL_LINK_CONTINUE_URL` value, then retest one passwordless sponsor invitation without affecting production.
+- [x] Refine the Sponsor Dashboard’s information hierarchy, empty-state treatment, and content density before any merge or production-launch decision, without weakening access controls or altering the established foundation visual identity.
+- [x] Redesign the Sponsor Dashboard’s visual system, navigation hierarchy, and responsive layouts with creative freedom while retaining sponsor-only server authorization, passwordless access, privacy controls, and the foundation brand assets.
+- [x] Retain and redesign the Notifications tab as a clear, non-misleading future communications workspace without fabricating notifications or enabling unapproved automated alerts.
+- [x] Replace Sponsor Dashboard client-side placeholder account metadata with a sponsor-authorized server response that returns only the authenticated sponsor’s approved profile fields and no fabricated defaults.
