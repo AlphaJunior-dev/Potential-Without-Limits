@@ -255,6 +255,26 @@ export function toPublicTalentCard(id: string, input: unknown) {
   };
 }
 
+/**
+ * Approved sponsors have a separate, private authorization boundary from
+ * anonymous visitors. This mapper retains every safe Sponsor Talent field
+ * validated at write time; public field-visibility choices remain enforced by
+ * toPublicTalentCard() and are never relaxed for public routes.
+ */
+export function toSponsorTalentCard(id: string, input: unknown) {
+  const record = sanitizeTalentRecord(input);
+  if (!record) return null;
+  return {
+    id,
+    title: record.displayTitle,
+    summary: record.summary,
+    supportArea: record.supportArea,
+    ...(record.photoUrl ? { photoUrl: record.photoUrl } : {}),
+    ...(record.mediaUrls.length ? { mediaUrls: record.mediaUrls } : {}),
+    displayOrder: record.displayOrder,
+  };
+}
+
 export function sanitizePublicLegal(input: unknown) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
   return {

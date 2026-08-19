@@ -44,3 +44,6 @@
 - [x] Redesign the Sponsor Dashboard’s visual system, navigation hierarchy, and responsive layouts with creative freedom while retaining sponsor-only server authorization, passwordless access, privacy controls, and the foundation brand assets.
 - [x] Retain and redesign the Notifications tab as a clear, non-misleading future communications workspace without fabricating notifications or enabling unapproved automated alerts.
 - [x] Replace Sponsor Dashboard client-side placeholder account metadata with a sponsor-authorized server response that returns only the authenticated sponsor’s approved profile fields and no fabricated defaults.
+- [x] Correct the Sponsor Dashboard header and tab-bar overlap across desktop and mobile layouts without changing the public-site header behavior.
+- [x] Update the sponsor-authorized server route so approved sponsors can access the full private Sponsor Talent pipeline, while public pages continue to receive only administrator-approved field-visible records.
+- [x] Add regression coverage confirming private sponsor access is authorization-gated and remains distinct from the public visibility sanitizer.

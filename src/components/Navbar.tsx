@@ -32,8 +32,9 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   }
 
-  // Strict Admin Isolation: Hide public navbar ONLY when viewing /admin routes
-  if (pathname?.startsWith("/admin")) {
+  // Private workspaces use their own navigation; the public header is never
+  // rendered inside administrative or approved-sponsor portal routes.
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/sponsor/")) {
     return null;
   }
 
@@ -258,4 +259,3 @@ export function Navbar() {
     </header>
   );
 }
-

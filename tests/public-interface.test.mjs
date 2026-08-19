@@ -125,21 +125,30 @@ test("sponsor access is issued by post-call passwordless invitation rather than 
   }
 });
 
-test("the redesigned sponsor dashboard receives truthful profile and Sponsor Talent data through a sponsor-authorized server route", async () => {
-  const [dashboard, sponsorRoute] = await Promise.all([
+test("the redesigned sponsor dashboard uses a dedicated portal header and separates approved-sponsor pipeline access from public visibility controls", async () => {
+  const [dashboard, sponsorRoute, adminLibrary, navbar] = await Promise.all([
     readSource("src/app/sponsor/dashboard/page.tsx"),
     readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/components/Navbar.tsx"),
   ]);
 
   assert.match(dashboard, /fetch\("\/api\/sponsor"/);
   assert.match(dashboard, /authenticatedUser\.getIdToken\(true\)/);
   assert.match(dashboard, /Partnership, with purpose\./);
   assert.match(dashboard, /Notifications/);
+  assert.match(dashboard, /Private Sponsor Talent directory/);
+  assert.match(dashboard, /onClick=\{\(\) => logout\(\)\}/);
+  assert.doesNotMatch(dashboard, /-mt-7/);
   assert.doesNotMatch(dashboard, /pendingSponsors|PWLIF Partner|Focus Track Interests|Tier:/);
 
   assert.match(sponsorRoute, /requireApprovedSponsor\(request\)/);
   assert.match(sponsorRoute, /collection\("sponsor_accounts"\)\.doc\(sponsor\.uid\)/);
   assert.match(sponsorRoute, /collection\("sponsor_talent_records"\)/);
-  assert.match(sponsorRoute, /toPublicTalentCard/);
+  assert.match(sponsorRoute, /toSponsorTalentCard/);
+  assert.doesNotMatch(sponsorRoute, /visibility\.profileVisible/);
+  assert.match(adminLibrary, /export function toPublicTalentCard/);
+  assert.match(adminLibrary, /export function toSponsorTalentCard/);
+  assert.match(navbar, /pathname\?\.startsWith\("\/sponsor\/"\)/);
   assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
 });

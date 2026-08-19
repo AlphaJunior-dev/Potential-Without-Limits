@@ -36,6 +36,7 @@ type SponsorTalent = {
   summary: string;
   supportArea?: string;
   photoUrl?: string;
+  mediaUrls?: string[];
   displayOrder: number;
 };
 
@@ -67,7 +68,7 @@ function DetailRow({ label, value }: { label: string; value?: string }) {
 }
 
 export default function SponsorDashboardPage() {
-  const { user, userStatus } = useAuth();
+  const { user, userStatus, logout } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -129,11 +130,24 @@ export default function SponsorDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F6F0] pb-20 text-[#051836]">
+      <header className="relative z-20 border-b border-white/10 bg-[#051836] text-white">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8">
+          <Link href="/" aria-label="Potential Without Limits International Foundation" className="flex items-center gap-3">
+            <img src="/pwlif-logo.png" alt="Potential Without Limits International Foundation" className="h-12 w-auto rounded-full bg-white object-contain p-1" />
+            <span className="hidden border-l border-white/15 pl-3 text-xs font-bold uppercase tracking-[0.15em] text-white/75 sm:inline">Sponsor Portal</span>
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="hidden rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/70 md:inline-flex">Approved partner</span>
+            <Link href="/" className="hidden text-xs font-bold text-white/75 transition hover:text-[#F5AB00] sm:inline-flex">Foundation home</Link>
+            <button type="button" onClick={() => logout()} className="rounded-xl border border-white/20 px-3 py-2 text-xs font-bold text-white transition hover:border-[#F5AB00] hover:text-[#F5AB00] sm:px-4">Sign out</button>
+          </div>
+        </div>
+      </header>
       <section className="relative overflow-hidden bg-[#051836] text-white">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 84% 18%, #F5AB00 0, transparent 21%), radial-gradient(circle at 7% 88%, #327B2F 0, transparent 28%)" }} />
         <div className="absolute -right-24 top-[-110px] h-80 w-80 rounded-full border border-white/15" />
         <div className="absolute -right-8 top-[-42px] h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+        <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
             <div className="max-w-2xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80">
@@ -142,7 +156,7 @@ export default function SponsorDashboardPage() {
               </div>
               <h1 className="font-montserrat text-3xl font-black tracking-[-0.04em] sm:text-5xl">Partnership, with purpose.</h1>
               <p className="mt-4 max-w-xl text-sm leading-7 text-white/75 sm:text-base">
-                A focused space for approved partners to review foundation-published Sponsor Talent and coordinate appropriate next steps.
+                A focused space for approved partners to review the foundation’s private Sponsor Talent pipeline and coordinate appropriate next steps.
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
@@ -157,8 +171,8 @@ export default function SponsorDashboardPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="-mt-7 rounded-2xl border border-[#051836]/10 bg-white p-2 shadow-[0_18px_45px_rgba(5,24,54,0.12)]">
+      <main className="mx-auto max-w-6xl px-5 pt-7 sm:px-8 sm:pt-8">
+        <div className="rounded-2xl border border-[#051836]/10 bg-white p-2 shadow-[0_18px_45px_rgba(5,24,54,0.12)]">
           <nav aria-label="Sponsor portal sections" className="flex gap-1 overflow-x-auto scrollbar-none">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -219,9 +233,9 @@ export default function SponsorDashboardPage() {
                 <div className="absolute -right-14 -top-14 h-52 w-52 rounded-full border border-white/15" />
                 <div className="relative flex h-full flex-col justify-between">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80"><Sparkles className="h-3.5 w-3.5 text-[#F5AB00]" /> Curated access</div>
-                    <h2 className="mt-5 max-w-md font-montserrat text-3xl font-black leading-tight tracking-[-0.04em]">Explore what the foundation has chosen to share.</h2>
-                    <p className="mt-4 max-w-md text-sm leading-6 text-white/75">Sponsor Talent records appear here only when their publication settings allow it. Partnership planning continues through appropriate private conversations.</p>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80"><Sparkles className="h-3.5 w-3.5 text-[#F5AB00]" /> Approved sponsor access</div>
+                    <h2 className="mt-5 max-w-md font-montserrat text-3xl font-black leading-tight tracking-[-0.04em]">Review the full Sponsor Talent pipeline.</h2>
+                    <p className="mt-4 max-w-md text-sm leading-6 text-white/75">Your approved account provides private access to the complete Sponsor Talent records maintained by the foundation. Public-page visibility is managed separately.</p>
                   </div>
                   <button type="button" onClick={() => setActiveTab("talent")} className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-bold text-[#005C27] transition hover:bg-[#F5AB00] hover:text-[#051836]">
                     Browse Sponsor Talent <ArrowRight className="h-4 w-4" />
@@ -241,7 +255,7 @@ export default function SponsorDashboardPage() {
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 {[
                   ["01", "Verified access", "Sponsor accounts are reviewed and approved before portal access is issued."],
-                  ["02", "Published information", "Only foundation-approved Sponsor Talent details appear in this space."],
+                  ["02", "Private Talent directory", "Approved sponsors can review the complete Sponsor Talent pipeline; public pages have separate visibility controls."],
                   ["03", "Guided next steps", "The partnership team coordinates follow-up through appropriate private channels."],
                 ].map(([number, title, description]) => (
                   <div key={number} className="rounded-2xl bg-[#F5F6F0] p-5">
@@ -260,9 +274,9 @@ export default function SponsorDashboardPage() {
             <div className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#005C27]">Foundation-published records</p>
-                  <h2 className="mt-2 font-montserrat text-3xl font-black tracking-[-0.04em]">Sponsor Talent directory</h2>
-                  <p className="mt-3 text-sm leading-6 text-[#051836]/65">This directory contains only records PWLIF has approved for visibility. Publication settings can be updated or withdrawn by the foundation at any time.</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#005C27]">Approved sponsor access</p>
+                  <h2 className="mt-2 font-montserrat text-3xl font-black tracking-[-0.04em]">Private Sponsor Talent directory</h2>
+                  <p className="mt-3 text-sm leading-6 text-[#051836]/65">Your approved sponsor account provides access to every safe Sponsor Talent record in the foundation’s private pipeline. Anonymous public pages receive a separate, field-limited view.</p>
                 </div>
                 {categories.length > 1 && (
                   <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
@@ -280,7 +294,7 @@ export default function SponsorDashboardPage() {
                   <div className="max-w-md">
                     <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#005C27] shadow-sm"><Sparkles className="h-5 w-5" /></div>
                     <h3 className="mt-5 font-montserrat text-xl font-black">No Sponsor Talent records are available yet.</h3>
-                    <p className="mt-3 text-sm leading-6 text-[#051836]/65">When the foundation publishes an approved record, it will appear here. You can use the Partnership Desk for a private conversation in the meantime.</p>
+                    <p className="mt-3 text-sm leading-6 text-[#051836]/65">No Sponsor Talent records are currently available in the private pipeline. You can use the Partnership Desk for a conversation with the foundation.</p>
                     <button type="button" onClick={() => setActiveTab("partnership")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#005C27] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#327B2F]">Open Partnership Desk <ArrowRight className="h-4 w-4" /></button>
                   </div>
                 </div>
@@ -299,10 +313,16 @@ export default function SponsorDashboardPage() {
                       <div className="p-6">
                         {record.supportArea && <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#005C27]">{record.supportArea}</p>}
                         <h3 className="mt-2 font-montserrat text-lg font-black leading-snug">{record.title}</h3>
-                        <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#051836]/65">{record.summary}</p>
-                        <div className="mt-6 flex items-center justify-between border-t border-[#051836]/10 pt-4">
-                          <Link href={`/portfolio/${record.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#005C27] hover:text-[#327B2F]">View details <ArrowRight className="h-3.5 w-3.5" /></Link>
-                          <Link href="/book-a-call" className="text-xs font-bold text-[#051836]/60 hover:text-[#051836]">Discuss</Link>
+                        <p className="mt-3 text-sm leading-6 text-[#051836]/65">{record.summary}</p>
+                        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#051836]/10 pt-4">
+                          {record.mediaUrls?.length ? (
+                            <div className="flex flex-wrap gap-2">
+                              {record.mediaUrls.map((mediaUrl, index) => (
+                                <a key={mediaUrl} href={mediaUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#F5F6F0] px-2.5 py-2 text-[11px] font-bold text-[#005C27] transition hover:bg-[#005C27] hover:text-white"><FileText className="h-3.5 w-3.5" /> Media {index + 1}</a>
+                              ))}
+                            </div>
+                          ) : <span className="text-[11px] font-semibold text-[#051836]/45">No shared media</span>}
+                          <button type="button" onClick={() => setActiveTab("partnership")} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#005C27] hover:text-[#327B2F]">Discuss <ArrowRight className="h-3.5 w-3.5" /></button>
                         </div>
                       </div>
                     </article>

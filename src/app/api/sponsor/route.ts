@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb, requireApprovedSponsor, toPublicTalentCard } from "@/lib/admin";
+import { adminDb, requireApprovedSponsor, toSponsorTalentCard } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
@@ -21,7 +21,8 @@ function accessDenied(error: unknown) {
  * The dashboard never reads sponsor-account or Sponsor Talent records directly
  * from the browser. This route verifies the current Firebase sponsor claim and
  * returns only the authenticated account's approved application fields plus
- * Sponsor Talent fields already approved for publication.
+ * the complete safe Sponsor Talent pipeline. Anonymous public pages use a
+ * separate field-visibility sanitizer and never call this route.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -35,14 +36,10 @@ export async function GET(request: NextRequest) {
       : null;
     const application = applicationSnapshot?.exists ? applicationSnapshot.data() : undefined;
 
-    const talentSnapshot = await db
-      .collection("sponsor_talent_records")
-      .where("visibility.profileVisible", "==", true)
-      .limit(100)
-      .get();
+    const talentSnapshot = await db.collection("sponsor_talent_records").limit(100).get();
 
     const talent = talentSnapshot.docs
-      .map((document) => toPublicTalentCard(document.id, document.data()))
+      .map((document) => toSponsorTalentCard(document.id, document.data()))
       .filter((record): record is NonNullable<typeof record> => Boolean(record))
       .sort((first, second) => first.displayOrder - second.displayOrder);
 
