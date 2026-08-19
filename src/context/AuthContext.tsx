@@ -81,7 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userStatus, setStatus] = useState<UserStatus>("logged_out");
   const [loading, setLoading] = useState(true);
-  const [profiles, setProfiles] = useState<YouthProfile[]>([]);
+  const [publicProfiles, setPublicProfiles] = useState<YouthProfile[]>([]);
+  const [adminProfiles, setAdminProfiles] = useState<YouthProfile[]>([]);
+  const [sponsorProfiles, setSponsorProfiles] = useState<YouthProfile[]>([]);
   const [branding, setBranding] = useState<BrandingConfig>(safeBranding);
   const [missionVision, setMissionVision] = useState<MissionVisionData>(safeMission);
   const [legalSecurity, setLegalSecurity] = useState<LegalSecurityConfig>(safeLegal);
@@ -92,6 +94,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [inquiries, setInquiries] = useState<FlexibleRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<FlexibleRecord[]>([]);
   const [adminRole, setAdminRole] = useState<AdminRole>("Super Admin");
+  const profiles = userStatus === "approved"
+    ? sponsorProfiles
+    : userStatus === "admin"
+      ? adminProfiles
+      : publicProfiles;
 
   const loadAdminData = async (authenticatedUser: User) => {
     const token = await authenticatedUser.getIdToken(true);
@@ -116,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setInquiries([]);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
     const records = Array.isArray(data.talentRecords) ? data.talentRecords : [];
-    setProfiles(records.map((record: FlexibleRecord) => ({
+    setAdminProfiles(records.map((record: FlexibleRecord) => ({
       id: record.id,
       name: record.displayTitle,
       age: 0,
@@ -145,12 +152,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })) as YouthProfile[]);
   };
 
+  const loadApprovedSponsorProfiles = async (authenticatedUser: User) => {
+    const token = await authenticatedUser.getIdToken(true);
+    const response = await fetch("/api/sponsor", { headers: { authorization: `Bearer ${token}` } });
+    if (!response.ok) throw new Error("Could not load the approved Sponsor Talent pipeline.");
+    const data = await response.json() as FlexibleRecord;
+    const talent = Array.isArray(data.talent) ? data.talent : [];
+    setSponsorProfiles(talent.map((record: FlexibleRecord) => {
+      const mediaUrls = Array.isArray(record.mediaUrls)
+        ? record.mediaUrls.filter((url: unknown): url is string => typeof url === "string" && /^https:\/\//i.test(url))
+        : [];
+      const photoUrl = typeof record.photoUrl === "string" && /^https:\/\//i.test(record.photoUrl)
+        ? record.photoUrl
+        : "/pwlif-logo.png";
+      const summary = typeof record.summary === "string" ? record.summary : "";
+      const supportArea = typeof record.supportArea === "string" ? record.supportArea : "Sponsor Talent";
+      return {
+        id: String(record.id || ""),
+        name: typeof record.title === "string" ? record.title : "Sponsor Talent",
+        age: 0,
+        category: supportArea,
+        location: "Private Sponsor Talent pipeline",
+        bio: summary,
+        coverPhoto: photoUrl,
+        rawMediaUrl: mediaUrls[0] || "",
+        galleryImages: photoUrl !== "/pwlif-logo.png" ? [photoUrl] : [],
+        galleryVideos: mediaUrls,
+        featuredOnHomepage: true,
+        publicVisibility: { profileVisible: true, photoVisible: true, mediaVisible: true, summaryVisible: true },
+        privateSponsorAccess: true,
+        status: "active" as const,
+        inquiriesCount: 0,
+        dream: summary,
+        current_situation: summary,
+        progress: "",
+        current_needs: supportArea,
+        country_community: "Private Sponsor Talent pipeline",
+        consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" },
+      };
+    }) as YouthProfile[]);
+  };
+
   useEffect(() => {
     void fetch("/api/public").then((response) => response.ok ? response.json() : null).then((data) => {
       if (data?.branding) setBranding(data.branding);
       if (data?.missionVision && !isTemporaryMissionCopy(data.missionVision)) setMissionVision(data.missionVision);
       if (data?.legalSecurity) setLegalSecurity(data.legalSecurity);
-      if (Array.isArray(data?.profiles)) setProfiles(data.profiles);
+      if (Array.isArray(data?.profiles)) setPublicProfiles(data.profiles);
       if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
       if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
       if (Array.isArray(data?.foundationVideos)) setFoundationVideos(data.foundationVideos);
@@ -158,11 +206,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      if (!currentUser) { setStatus("logged_out"); setLoading(false); return; }
+      if (!currentUser) {
+        setSponsorProfiles([]);
+        setStatus("logged_out");
+        setLoading(false);
+        return;
+      }
       const claims = await currentUser.getIdTokenResult().then((token) => token.claims as Record<string, unknown>).catch(() => ({} as Record<string, unknown>));
       const nextStatus = claims.admin === true ? "admin" : claims.sponsor === true ? "approved" : "pending";
       setStatus(nextStatus);
       if (nextStatus === "admin") void loadAdminData(currentUser).catch(() => undefined);
+      if (nextStatus === "approved") void loadApprovedSponsorProfiles(currentUser).catch(() => setSponsorProfiles([]));
       setLoading(false);
     });
   }, []);
@@ -282,7 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextType>(() => ({
     user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin",
     pendingSponsors, inquiries, supportInquiries: [], faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
-    login, logout: async () => { await signOut(auth); setUser(null); setStatus("logged_out"); }, setAdminRole,
+    login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
     bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string, category?: string, tier?: string, dreamInterest?: string) => {
       const websiteOrLinkedIn = /^https?:\/\//i.test(linkedin) ? linkedin : `https://${linkedin}`;
@@ -292,7 +346,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
     register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
-  }), [adminRole, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, teamMembers, user, userStatus]);
+  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

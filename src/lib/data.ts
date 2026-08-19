@@ -29,6 +29,8 @@ export interface YouthProfile {
   galleryImages?: string[];
   galleryVideos?: string[];
   featuredOnHomepage?: boolean;
+  /** Set only from the server-authorized approved-sponsor response. */
+  privateSponsorAccess?: boolean;
   publicVisibility?: {
     profileVisible: boolean;
     photoVisible: boolean;

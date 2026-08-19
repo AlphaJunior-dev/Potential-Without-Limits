@@ -47,3 +47,5 @@
 - [x] Correct the Sponsor Dashboard header and tab-bar overlap across desktop and mobile layouts without changing the public-site header behavior.
 - [x] Update the sponsor-authorized server route so approved sponsors can access the full private Sponsor Talent pipeline, while public pages continue to receive only administrator-approved field-visible records.
 - [x] Add regression coverage confirming private sponsor access is authorization-gated and remains distinct from the public visibility sanitizer.
+- [x] Make the Foundation Homepage and related Talent views automatically use the complete server-authorized Sponsor Talent pipeline for approved sponsor sessions, while anonymous public sessions remain field-limited.
+- [x] Add regression coverage proving the sponsor-only homepage data handoff requires a fresh Firebase sponsor claim and cannot alter anonymous public responses.

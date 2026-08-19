@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export default function TalentsPage() {
-  const { profiles } = useAuth();
+  const { profiles, userStatus } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -31,6 +31,7 @@ export default function TalentsPage() {
   ];
 
   const activeProfiles = profiles;
+  const hasApprovedSponsorAccess = userStatus === "approved";
 
   const filteredTalent = activeProfiles.filter((profile) => {
     const matchesCategory =
@@ -69,7 +70,9 @@ export default function TalentsPage() {
               Explore Sponsor Talent
             </h1>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl leading-relaxed">
-              Explore the non-identifying Sponsor Talent information that PWLIF administrators have approved for public display. Information may be edited or withdrawn at any time.
+              {hasApprovedSponsorAccess
+                ? "Your approved sponsor account can review the foundation’s complete safe Sponsor Talent pipeline. Public-page visibility controls do not limit this private directory."
+                : "Explore the non-identifying Sponsor Talent information that PWLIF administrators have approved for public display. Information may be edited or withdrawn at any time."}
             </p>
           </div>
 
@@ -131,7 +134,7 @@ export default function TalentsPage() {
                   </span>
 
                   <span className="absolute top-3 right-3 bg-emerald-950/80 backdrop-blur-md text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Pilot overview
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> {hasApprovedSponsorAccess ? "Approved sponsor access" : "Public overview"}
                   </span>
                 </div>
 

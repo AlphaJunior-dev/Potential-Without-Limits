@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function HomePage() {
-  const { profiles, foundationVideos, branding } = useAuth();
+  const { profiles, foundationVideos, branding, userStatus } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -40,6 +40,7 @@ export default function HomePage() {
 
   const activeProfiles = profiles;
   const featuredProfiles = activeProfiles.slice(0, 3);
+  const hasApprovedSponsorAccess = userStatus === "approved";
 
   const activeVideo = foundationVideos && foundationVideos.length > 0 ? foundationVideos[activeVideoIndex] : null;
 
@@ -73,7 +74,7 @@ export default function HomePage() {
                 className="bg-[#005C27] text-white px-8 py-4 rounded-2xl font-montserrat font-extrabold text-sm hover:bg-[#327B2F] transition shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <Heart className="w-5 h-5 text-[#F5AB00] fill-[#F5AB00]" />
-                <span>{branding?.heroCtaText || "Explore Sponsor Talent"}</span>
+                <span>{hasApprovedSponsorAccess ? "View full Sponsor Talent pipeline" : branding?.heroCtaText || "Explore Sponsor Talent"}</span>
                 <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
               </Link>
 
@@ -212,7 +213,9 @@ export default function HomePage() {
               {branding?.sponsorSectionTitle || "Explore Sponsor Talent"}
             </h2>
             <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl">
-              {branding?.sponsorSectionSubtitle || "Begin with a private orientation to understand the foundation's Sponsor Talent pathway."}
+              {hasApprovedSponsorAccess
+                ? "Your approved sponsor account has access to the foundation’s complete safe Sponsor Talent pipeline."
+                : branding?.sponsorSectionSubtitle || "Begin with a private orientation to understand the foundation's Sponsor Talent pathway."}
             </p>
           </div>
 

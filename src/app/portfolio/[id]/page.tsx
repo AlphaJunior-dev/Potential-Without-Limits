@@ -23,7 +23,7 @@ import {
 export default function PortfolioDetailPage() {
   const params = useParams();
   const id = params?.id as string;
-  const { profiles } = useAuth();
+  const { profiles, userStatus } = useAuth();
   const router = useRouter();
   
   const [message, setMessage] = useState("");
@@ -42,7 +42,8 @@ export default function PortfolioDetailPage() {
     );
   }
 
-  const hasMediaConsent = profile.consentRecord?.mediaReleasePermission !== false;
+  const hasMediaConsent = profile.privateSponsorAccess === true || profile.consentRecord?.mediaReleasePermission !== false;
+  const hasApprovedSponsorAccess = userStatus === "approved" && profile.privateSponsorAccess === true;
 
   const handleSendInquiry = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +106,7 @@ export default function PortfolioDetailPage() {
                     Photo &amp; Video Media Unavailable
                   </h3>
                   <p className="text-xs text-[#051836]/80 max-w-md mx-auto leading-relaxed">
-                    Public media is unavailable to protect privacy. Additional Sponsor Talent context is shared through a private orientation conversation.
+                  Public media is unavailable to protect privacy. Additional Sponsor Talent context is shared through a private orientation conversation.
                   </p>
                 </div>
               ) : (
@@ -200,7 +201,9 @@ export default function PortfolioDetailPage() {
                   Privacy Summary
                 </span>
                 <p className="text-[#051836]/80 text-[11px] leading-relaxed">
-                  Public information is limited to non-identifying Sponsor Talent context. Further details are discussed privately during orientation.
+                  {hasApprovedSponsorAccess
+                    ? "You are viewing the foundation’s approved private Sponsor Talent record through your authenticated sponsor access."
+                    : "Public information is limited to non-identifying Sponsor Talent context. Further details are discussed privately during orientation."}
                 </p>
               </div>
 

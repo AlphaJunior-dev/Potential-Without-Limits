@@ -152,3 +152,28 @@ test("the redesigned sponsor dashboard uses a dedicated portal header and separa
   assert.match(navbar, /pathname\?\.startsWith\("\/sponsor\/"\)/);
   assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
 });
+
+test("approved sponsors automatically receive the private Talent pipeline on shared Foundation pages without changing anonymous public data", async () => {
+  const [provider, homepage, talentsPage, detailPage, publicRoute, adminLibrary] = await Promise.all([
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/page.tsx"),
+    readSource("src/app/talents/page.tsx"),
+    readSource("src/app/portfolio/[id]/page.tsx"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/lib/admin.ts"),
+  ]);
+
+  assert.match(provider, /const \[publicProfiles, setPublicProfiles\]/);
+  assert.match(provider, /const \[sponsorProfiles, setSponsorProfiles\]/);
+  assert.match(provider, /userStatus === "approved"\s*\? sponsorProfiles/);
+  assert.match(provider, /fetch\("\/api\/sponsor"/);
+  assert.match(provider, /authenticatedUser\.getIdToken\(true\)/);
+  assert.match(provider, /privateSponsorAccess: true/);
+  assert.match(provider, /setSponsorProfiles\(\[\]\)/);
+  assert.match(homepage, /hasApprovedSponsorAccess/);
+  assert.match(talentsPage, /hasApprovedSponsorAccess/);
+  assert.match(detailPage, /profile\.privateSponsorAccess === true/);
+  assert.match(publicRoute, /readPublicSite\(\)/);
+  assert.match(adminLibrary, /export function toPublicTalentCard/);
+  assert.match(adminLibrary, /export function toSponsorTalentCard/);
+});
