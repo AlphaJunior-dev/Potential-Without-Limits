@@ -25,7 +25,6 @@ export default function BookACallPage() {
   const [company, setCompany] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
   const [linkedin, setLinkedin] = useState("");
-  const [preferredTime, setPreferredTime] = useState("Tomorrow 10:00 AM EST");
   const [category, setCategory] = useState<SponsorCategory>("Child Sponsor");
   const [orgDescription, setOrgDescription] = useState("");
   const [supportIntent, setSupportIntent] = useState("");
@@ -51,7 +50,6 @@ export default function BookACallPage() {
           websiteOrLinkedIn: linkedin,
           orgDescription,
           supportIntent,
-          preferredContactWindow: preferredTime,
           consent,
         }),
       });
@@ -97,7 +95,7 @@ export default function BookACallPage() {
               1. Submit Orientation Form
             </h4>
             <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">
-              Fill out your details, sponsorship category, and preferred time slot.
+              Fill out your details and partnership interests, then choose a suitable time directly in the booking calendar.
             </p>
           </div>
 
@@ -262,11 +260,11 @@ export default function BookACallPage() {
                       <div className="relative">
                         <Globe className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3" />
                         <input
-                          type="text"
+                          type="url"
                           required
                           value={linkedin}
                           onChange={(e) => setLinkedin(e.target.value)}
-                          placeholder="linkedin.com/in/..."
+                          placeholder="https://linkedin.com/in/..."
                           className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                         />
                       </div>
@@ -316,23 +314,6 @@ export default function BookACallPage() {
                       placeholder="Tell us what you hope to discuss during an orientation call."
                       className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
-                      Select Preferred Time Slot
-                    </label>
-                    <select
-                      value={preferredTime}
-                      onChange={(e) => setPreferredTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
-                    >
-                      <option value="Tomorrow 10:00 AM EST">Tomorrow 10:00 AM EST</option>
-                      <option value="Tomorrow 2:30 PM EST">Tomorrow 2:30 PM EST</option>
-                      <option value="Friday 11:00 AM EST">Friday 11:00 AM EST</option>
-                      <option value="Friday 4:00 PM EST">Friday 4:00 PM EST</option>
-                      <option value="Next Monday 1:00 PM EST">Next Monday 1:00 PM EST</option>
-                    </select>
                   </div>
 
                   <div className="pt-2">

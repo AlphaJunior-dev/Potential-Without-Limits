@@ -418,9 +418,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     pendingSponsors, inquiries, supportInquiries: [], faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
-    bookVettingCall: (name: string, email: string, company: string, linkedin: string, preferredTime: string, category?: string, tier?: string, dreamInterest?: string) => {
+    bookVettingCall: (name: string, email: string, company: string, linkedin: string, category?: string, dreamInterest?: string) => {
       const websiteOrLinkedIn = /^https?:\/\//i.test(linkedin) ? linkedin : `https://${linkedin}`;
-      void fetch("/api/orientation", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fullName: name, email, organization: company, roleTitle: category || "Prospective partner", websiteOrLinkedIn, orgDescription: dreamInterest || "Orientation request submitted from the public booking form.", supportIntent: `${category || "Partnership"} — ${tier || "Orientation"}`, preferredContactWindow: preferredTime, consent: true }) });
+      void fetch("/api/orientation", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ fullName: name, email, organization: company, roleTitle: category || "Prospective partner", websiteOrLinkedIn, orgDescription: dreamInterest || "Orientation request submitted from the public booking form.", supportIntent: `${category || "Partnership"} — Orientation`, consent: true }) });
     },
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });

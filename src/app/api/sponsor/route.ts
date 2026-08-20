@@ -55,7 +55,6 @@ export async function GET(request: NextRequest) {
           websiteOrLinkedIn: optionalText(application.websiteOrLinkedIn, 300),
           organizationDescription: optionalText(application.orgDescription, 1000),
           supportIntent: optionalText(application.supportIntent, 1000),
-          preferredContactWindow: optionalText(application.preferredContactWindow, 300),
         } : null,
         passwordSetupComplete: account?.passwordSetupRequired !== true || Boolean(account?.passwordSetupCompletedAt),
       },

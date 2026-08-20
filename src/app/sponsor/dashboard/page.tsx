@@ -34,7 +34,6 @@ type SponsorProfile = {
     websiteOrLinkedIn?: string;
     organizationDescription?: string;
     supportIntent?: string;
-    preferredContactWindow?: string;
   } | null;
 };
 
@@ -264,7 +263,6 @@ export default function SponsorDashboardPage() {
                 </div>
                 <div className="mt-5 grid gap-x-8 md:grid-cols-2">
                   <DetailRow label="Website or LinkedIn" value={profile.orientationSubmission?.websiteOrLinkedIn} />
-                  <DetailRow label="Preferred contact window" value={profile.orientationSubmission?.preferredContactWindow} />
                   <DetailRow label="About your organization" value={profile.orientationSubmission?.organizationDescription} />
                   <DetailRow label="How you hope to support" value={profile.orientationSubmission?.supportIntent} />
                 </div>

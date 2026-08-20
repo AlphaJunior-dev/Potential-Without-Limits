@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
   const websiteOrLinkedIn = text(body.websiteOrLinkedIn, 300);
   const orgDescription = text(body.orgDescription, 1000);
   const supportIntent = text(body.supportIntent, 1000);
-  const preferredContactWindow = text(body.preferredContactWindow, 300);
   const consent = body.consent === true;
 
   if (!fullName || !emailPattern.test(email) || !organization || !roleTitle || !urlPattern.test(websiteOrLinkedIn) || !orgDescription || !supportIntent || !consent) {
@@ -45,7 +44,6 @@ export async function POST(request: NextRequest) {
       websiteOrLinkedIn,
       orgDescription,
       supportIntent,
-      preferredContactWindow: preferredContactWindow || null,
       consent: true,
       status: "new",
       createdAt: FieldValue.serverTimestamp(),

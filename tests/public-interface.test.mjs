@@ -111,12 +111,16 @@ test("public Talent retrieval applies the strict sanitizer after a server-only c
 });
 
 test("sponsor access is issued by post-call verified invitation with sponsor-chosen credentials, never displayed credentials", async () => {
-  const [adminPage, provider, adminRoute, loginPage, bookCall, pendingPage] = await Promise.all([
+  const [adminPage, provider, adminRoute, loginPage, bookCall, orientationForm, orientationRoute, sponsorRoute, publicRoute, pendingPage] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/api/admin/route.ts"),
     readSource("src/app/login/page.tsx"),
     readSource("src/app/book-a-call/page.tsx"),
+    readSource("src/components/OrientationForm.tsx"),
+    readSource("src/app/api/orientation/route.ts"),
+    readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/app/api/public/route.ts"),
     readSource("src/app/pending/page.tsx"),
   ]);
 
@@ -131,6 +135,15 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.match(loginPage, /createUserWithEmailAndPassword|updatePassword/);
   assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);
   assert.match(bookCall, /\/api\/orientation/);
+  assert.match(bookCall, /type="url"/);
+  assert.match(orientationForm, /calendly-inline-widget/);
+  assert.match(orientationRoute, /websiteOrLinkedIn/);
+  assert.match(sponsorRoute, /websiteOrLinkedIn/);
+  assert.match(adminRoute, /sponsor_applications/);
+  assert.doesNotMatch(publicRoute, /websiteOrLinkedIn|sponsor_applications/);
+  for (const source of [bookCall, orientationForm, orientationRoute, provider, sponsorRoute]) {
+    assert.doesNotMatch(source, /preferredTime|preferredContactWindow/);
+  }
   assert.match(pendingPage, /create your own dashboard password/i);
 
   for (const source of [adminPage, loginPage, bookCall, pendingPage]) {

@@ -95,7 +95,9 @@
 - [x] Remove consent-review date inputs from the Talent CMS while retaining the private consent reference and explicit public-release controls.
 - [x] Clarify and implement the administrator-controlled public age option using a non-identifying age band by default.
 - [x] Replace growing inline category and skills tag lists with compact selection controls and a separate administrator management view.
-- [ ] Repair the protected Sponsor Vetting delete action and confirm that it removes the intended sponsor record safely.
+- [x] Repair the protected Sponsor Vetting delete action and confirm that it removes the intended sponsor record safely.
 - [x] Remove obsolete sponsor tier fields, labels, and workflow logic from Sponsor Vetting and sponsor records.
 - [x] Inspect and document whether the approved sponsor dashboard safely presents the applicant’s orientation-form information.
 - [x] Assess a secure invite-to-password onboarding option without exposing, generating, or storing passwords in application data.
+- [x] Remove redundant orientation time-slot collection so applicants schedule solely through the Calendly embed after submission.
+- [x] Verify the LinkedIn profile field’s validation, private admin visibility, and authenticated sponsor-only dashboard visibility.
