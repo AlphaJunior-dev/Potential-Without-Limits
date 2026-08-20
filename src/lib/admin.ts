@@ -52,6 +52,8 @@ export async function requireApprovedSponsor(request: NextRequest) {
 
   const decoded = await adminAuth().verifyIdToken(token);
   if (decoded.sponsor !== true) throw new Error("FORBIDDEN");
+  const account = await adminDb().collection("sponsor_accounts").doc(decoded.uid).get();
+  if (!account.exists || account.data()?.accessStatus === "revoked") throw new Error("FORBIDDEN");
   return decoded;
 }
 

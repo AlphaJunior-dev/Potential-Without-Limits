@@ -61,10 +61,10 @@ export default function AdminDashboardPage() {
     approveSponsor, 
     rejectSponsor,
     deleteSponsor,
+    revokeSponsorAccess,
     updateSponsorPassword,
     generateCredentials,
     provisionSponsorManual,
-    updateCallStatus,
     approveTalentAddition,
     rejectTalentAddition,
     addProfile,
@@ -211,7 +211,6 @@ export default function AdminDashboardPage() {
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCallStatus, setFilterCallStatus] = useState<string>("All");
 
   // CMS State: Talent Profiles
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -564,8 +563,7 @@ export default function AdminDashboardPage() {
       s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (s.company && s.company.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesStatus = filterCallStatus === "All" || s.callStatus === filterCallStatus;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   return (
@@ -840,16 +838,6 @@ export default function AdminDashboardPage() {
                   />
                 </div>
 
-                <select
-                  value={filterCallStatus}
-                  onChange={(e) => setFilterCallStatus(e.target.value)}
-                  className="bg-white border border-[#0B2E6B]/15 text-xs text-[#0B2E6B] rounded-xl p-2 focus:outline-none"
-                >
-                  <option value="All">All Call Statuses</option>
-                  <option value="Call Scheduled">Call Scheduled</option>
-                  <option value="Vetted (Approved)">Vetted (Approved)</option>
-                  <option value="Vetted (Rejected)">Vetted (Rejected)</option>
-                </select>
               </div>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-[#0B2E6B]/10 shadow-xl space-y-4">
@@ -941,7 +929,6 @@ export default function AdminDashboardPage() {
                   <thead className="bg-[#F8FAFC] text-[#0B2E6B]/60 uppercase font-mono tracking-wider border-b border-[#0B2E6B]/10">
                     <tr>
                       <th className="p-4">Organization / Contact</th>
-                      <th className="p-4">Vetting Call Status</th>
                       <th className="p-4">Verification Actions</th>
                       <th className="p-4">Invitation Status</th>
                       <th className="p-4 text-right">Actions</th>
@@ -966,19 +953,6 @@ export default function AdminDashboardPage() {
                           >
                             LinkedIn Record <ExternalLink className="w-2.5 h-2.5" />
                           </a>
-                        </td>
-
-                        <td className="p-4 space-y-2">
-                          <select
-                            value={sponsor.callStatus}
-                            onChange={(e) => updateCallStatus(sponsor.id, e.target.value as PendingSponsor["callStatus"])}
-                            className="bg-[#F8FAFC] border border-[#0B2E6B]/15 text-xs text-[#0B2E6B] rounded-lg p-1.5 focus:outline-none"
-                          >
-                            <option value="Not Scheduled">Not Scheduled</option>
-                            <option value="Call Scheduled">Call Scheduled</option>
-                            <option value="Vetted (Approved)">Vetted (Approved)</option>
-                            <option value="Vetted (Rejected)">Vetted (Rejected)</option>
-                          </select>
                         </td>
 
                         <td className="p-4">
@@ -1006,11 +980,20 @@ export default function AdminDashboardPage() {
                         </td>
 
                         <td className="p-4">
-                          {sponsor.invitationStatus === "sent" ? (
-                            <span className="bg-[#0B2E6B]/10 text-[#0B2E6B] font-mono text-[11px] px-3 py-1.5 rounded-lg border border-[#0B2E6B]/15 inline-flex items-center gap-1.5">
-                              <Mail className="w-3 h-3 text-[#079432]" />
-                              <span>Invitation Sent</span>
-                            </span>
+                          {sponsor.invitationStatus === "requested" ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="bg-[#0B2E6B]/10 text-[#0B2E6B] font-mono text-[11px] px-3 py-1.5 rounded-lg border border-[#0B2E6B]/15 inline-flex items-center gap-1.5">
+                                <Mail className="w-3 h-3 text-[#079432]" />
+                                <span>Email Request Accepted</span>
+                              </span>
+                              <button
+                                onClick={() => handleSendInvitationClick(sponsor.id, sponsor.name)}
+                                className="border border-[#079432]/30 bg-[#079432]/10 px-2.5 py-1.5 text-[10px] font-bold text-[#079432] transition hover:bg-[#079432] hover:text-white"
+                                title="Request a new Firebase invitation email for this sponsor"
+                              >
+                                Resend
+                              </button>
+                            </div>
                           ) : (
                             <button
                               disabled={sponsor.status !== "approved"}
@@ -1026,6 +1009,23 @@ export default function AdminDashboardPage() {
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
+                              disabled={sponsor.accessStatus === "revoked"}
+                              onClick={async () => {
+                                if (!window.confirm(`Revoke dashboard access for "${sponsor.name}"? Their application record will be retained.`)) return;
+                                try {
+                                  await revokeSponsorAccess(sponsor.id);
+                                  triggerToast("✓ Sponsor Access Revoked", `${sponsor.name} can no longer access the sponsor dashboard. Their application was retained.`);
+                                } catch (err) {
+                                  triggerToast("✗ Access Not Revoked", err instanceof Error ? err.message : "The protected sponsor account could not be revoked. Please try again.");
+                                }
+                              }}
+                              className="bg-amber-500/10 hover:bg-amber-500 text-amber-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-60 font-bold px-2.5 py-1.5 rounded-lg border border-amber-500/30 transition text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                              title={sponsor.accessStatus === "revoked" ? "Dashboard access is already revoked" : "Revoke dashboard access without deleting this sponsor record"}
+                            >
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>{sponsor.accessStatus === "revoked" ? "Access Revoked" : "Revoke Access"}</span>
+                            </button>
+                            <button
                               onClick={() => setSelectedSponsorOverview(sponsor)}
                               className="bg-[#079432]/10 hover:bg-[#079432] text-[#079432] hover:text-[#0B2E6B] font-bold px-2.5 py-1.5 rounded-lg border border-[#079432]/30 transition text-[11px] inline-flex items-center gap-1 cursor-pointer"
                             >
@@ -1035,17 +1035,17 @@ export default function AdminDashboardPage() {
 
                             <button
                               onClick={async () => {
-                                if (window.confirm(`Revoke access and delete sponsor "${sponsor.name}" (${sponsor.company || sponsor.email})?`)) {
+                                if (window.confirm(`Delete sponsor "${sponsor.name}" (${sponsor.company || sponsor.email})? This permanently removes the private application and account record.`)) {
                                   try {
                                     await deleteSponsor(sponsor.id);
-                                    triggerToast("✓ Sponsor Access Revoked", `Removed ${sponsor.name} and revoked dashboard access.`);
+                                    triggerToast("✓ Sponsor Deleted", `Removed ${sponsor.name} and their private sponsor record.`);
                                   } catch (err) {
                                     triggerToast("✗ Sponsor Not Removed", err instanceof Error ? err.message : "The protected sponsor record could not be removed. Please try again.");
                                   }
                                 }
                               }}
                               className="bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white font-bold p-1.5 rounded-lg border border-red-500/30 transition text-[11px] cursor-pointer"
-                              title="Delete Sponsor & Revoke Access"
+                              title="Delete sponsor record"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -2593,8 +2593,8 @@ export default function AdminDashboardPage() {
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-montserrat font-bold text-lg text-[#0B2E6B]">Sponsor Invitation Sent</h3>
-                  <p className="text-xs text-[#0B2E6B]/60">Passwordless access invitation delivered</p>
+                  <h3 className="font-montserrat font-bold text-lg text-[#0B2E6B]">Invitation Email Requested</h3>
+                  <p className="text-xs text-[#0B2E6B]/60">Firebase accepted the request; inbox delivery is not reported back to the portal.</p>
                 </div>
               </div>
               <button
@@ -2631,6 +2631,7 @@ export default function AdminDashboardPage() {
                 Done
               </button>
             </div>
+            <p className="text-[11px] leading-relaxed text-[#0B2E6B]/60">Ask the sponsor to check their inbox and spam folder. If it does not arrive, use the resend control after confirming the email address and Firebase email-link configuration.</p>
           </div>
         </div>
       )}
@@ -2727,15 +2728,23 @@ export default function AdminDashboardPage() {
                   <span className="font-mono text-[#0B2E6B] text-sm">{selectedSponsorOverview.email}</span>
                 </div>
                 <div>
-                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Vetting Status</span>
-                  <span className="bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5">
-                    {selectedSponsorOverview.callStatus} ({selectedSponsorOverview.status})
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Organization</span>
+                  <span className="font-semibold text-[#0B2E6B]/90 text-xs block mt-0.5">{selectedSponsorOverview.company || "Not provided"}</span>
+                </div>
+                <div>
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Role or title</span>
+                  <span className="font-semibold text-[#0B2E6B]/90 text-xs block mt-0.5">{selectedSponsorOverview.roleTitle || "Not provided"}</span>
+                </div>
+                <div>
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Dashboard access</span>
+                  <span className={`font-bold px-2 py-0.5 rounded text-[11px] inline-block mt-0.5 ${selectedSponsorOverview.accessStatus === "revoked" ? "bg-red-500/10 text-red-600" : "bg-emerald-500/20 text-emerald-600"}`}>
+                    {selectedSponsorOverview.accessStatus === "revoked" ? "Revoked" : "Active"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Password Security</span>
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Password setup</span>
                   <span className="font-semibold text-[#0B2E6B]/90 text-xs block mt-0.5">
-                    {selectedSponsorOverview.customPassword ? "✓ Custom Password Set (Temp Pass Revoked)" : "⚡ Active Temporary Password"}
+                    {selectedSponsorOverview.passwordSetupComplete ? "Completed by sponsor" : "Awaiting sponsor completion"}
                   </span>
                 </div>
                 <div className="sm:col-span-2">
@@ -2748,6 +2757,22 @@ export default function AdminDashboardPage() {
                   >
                     {selectedSponsorOverview.linkedin} <ExternalLink className="w-3 h-3" />
                   </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#FCFCFA] p-5 rounded-2xl border border-[#0B2E6B]/10 space-y-4">
+              <h4 className="font-montserrat font-bold text-xs uppercase tracking-wider text-[#079432] flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" /> Orientation Form Submission
+              </h4>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">Organization description</span>
+                  <p className="mt-1 whitespace-pre-wrap leading-relaxed text-[#0B2E6B]/85">{selectedSponsorOverview.orgDescription || "Not provided"}</p>
+                </div>
+                <div className="border-t border-[#0B2E6B]/10 pt-3">
+                  <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">How they hope to support</span>
+                  <p className="mt-1 whitespace-pre-wrap leading-relaxed text-[#0B2E6B]/85">{selectedSponsorOverview.supportIntent || "Not provided"}</p>
                 </div>
               </div>
             </div>
@@ -2805,27 +2830,47 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-[#0B2E6B]/10 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t border-[#0B2E6B]/10 flex flex-wrap items-center justify-between gap-3">
               <button
-                onClick={() => {
-                  if (window.confirm(`Revoke access and delete sponsor "${selectedSponsorOverview.name}" (${selectedSponsorOverview.company || selectedSponsorOverview.email})?`)) {
-                    deleteSponsor(selectedSponsorOverview.id);
+                disabled={selectedSponsorOverview.accessStatus === "revoked"}
+                onClick={async () => {
+                  if (!window.confirm(`Revoke dashboard access for "${selectedSponsorOverview.name}"? Their application record will be retained.`)) return;
+                  try {
+                    await revokeSponsorAccess(selectedSponsorOverview.id);
                     setSelectedSponsorOverview(null);
-                    triggerToast("✓ Sponsor Access Revoked", `Sponsor ${selectedSponsorOverview.name} deleted.`);
+                    triggerToast("✓ Sponsor Access Revoked", `${selectedSponsorOverview.name} can no longer access the sponsor dashboard. Their application was retained.`);
+                  } catch (err) {
+                    triggerToast("✗ Access Not Revoked", err instanceof Error ? err.message : "The protected sponsor account could not be revoked. Please try again.");
                   }
                 }}
-                className="bg-red-600 hover:bg-red-500 text-[#0B2E6B] font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+                className="bg-amber-500 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 text-[#0B2E6B] font-bold py-2.5 px-4 rounded-xl transition text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
               >
-                <Trash2 className="w-4 h-4" />
-                <span>Revoke &amp; Delete Sponsor</span>
+                <Lock className="w-4 h-4" />
+                <span>{selectedSponsorOverview.accessStatus === "revoked" ? "Access Revoked" : "Revoke Access"}</span>
               </button>
-
-              <button
-                onClick={() => setSelectedSponsorOverview(null)}
-                className="bg-[#0B2E6B]/10 hover:bg-[#0B2E6B]/20 text-[#0B2E6B] font-semibold py-2.5 px-5 rounded-xl transition text-xs"
-              >
-                Close Overview
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={async () => {
+                    if (!window.confirm(`Delete sponsor "${selectedSponsorOverview.name}" (${selectedSponsorOverview.company || selectedSponsorOverview.email})? This permanently removes the private application and account record.`)) return;
+                    try {
+                      await deleteSponsor(selectedSponsorOverview.id);
+                      setSelectedSponsorOverview(null);
+                      triggerToast("✓ Sponsor Deleted", `${selectedSponsorOverview.name}'s private sponsor record was removed.`);
+                    } catch (err) {
+                      triggerToast("✗ Sponsor Not Removed", err instanceof Error ? err.message : "The protected sponsor record could not be removed. Please try again.");
+                    }
+                  }}
+                  className="border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-600 hover:text-white"
+                >
+                  Delete Sponsor
+                </button>
+                <button
+                  onClick={() => setSelectedSponsorOverview(null)}
+                  className="bg-[#0B2E6B]/10 hover:bg-[#0B2E6B]/20 text-[#0B2E6B] font-semibold py-2.5 px-5 rounded-xl transition text-xs"
+                >
+                  Close Overview
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -111,7 +111,7 @@ test("public Talent retrieval applies the strict sanitizer after a server-only c
 });
 
 test("sponsor access is issued by post-call verified invitation with sponsor-chosen credentials, never displayed credentials", async () => {
-  const [adminPage, provider, adminRoute, loginPage, bookCall, orientationForm, orientationRoute, sponsorRoute, publicRoute, pendingPage] = await Promise.all([
+  const [adminPage, provider, adminRoute, loginPage, bookCall, orientationForm, orientationRoute, sponsorRoute, publicRoute, pendingPage, adminLibrary] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/api/admin/route.ts"),
@@ -122,6 +122,7 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
     readSource("src/app/api/sponsor/route.ts"),
     readSource("src/app/api/public/route.ts"),
     readSource("src/app/pending/page.tsx"),
+    readSource("src/lib/admin.ts"),
   ]);
 
   assert.match(adminPage, /provisionSponsorManual/);
@@ -131,6 +132,16 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.match(provider, /runOperationalAction\("createManualSponsorInvitation"/);
   assert.match(provider, /postCallConfirmed: true/);
   assert.match(adminRoute, /body\.action === "sendSponsorInvitation"/);
+  assert.match(adminRoute, /requestSponsorSetupEmail/);
+  assert.match(adminRoute, /invitationStatus: "requested"/);
+  assert.match(adminRoute, /body\.action === "revokeSponsorAccess"/);
+  assert.match(adminRoute, /revokeRefreshTokens/);
+  assert.match(adminPage, /Orientation Form Submission/);
+  assert.match(adminPage, /Organization description/);
+  assert.match(adminPage, /Revoke Access/);
+  assert.doesNotMatch(adminPage, /Vetting Call Status|Call Scheduled|Revoke &amp; Delete Sponsor/);
+  assert.match(provider, /revokeSponsorAccess/);
+  assert.match(adminLibrary, /account\.data\(\)\?\.accessStatus === "revoked"/);
   assert.match(loginPage, /signInWithEmailLink/);
   assert.match(loginPage, /createUserWithEmailAndPassword|updatePassword/);
   assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);

@@ -130,19 +130,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await response.json() as FlexibleRecord;
     const applications = Array.isArray(data.applications) ? data.applications : [];
     const sponsorAccounts = Array.isArray(data.sponsorAccounts) ? data.sponsorAccounts : [];
-    const invitationStatusByApplicationId = new Map(
+    const sponsorAccountByApplicationId = new Map(
       sponsorAccounts
         .filter((account: FlexibleRecord) => typeof account.applicationId === "string")
-        .map((account: FlexibleRecord) => [account.applicationId as string, account.invitationStatus as string | undefined])
+        .map((account: FlexibleRecord) => [account.applicationId as string, account])
     );
-    setPendingSponsors(applications.map((application: FlexibleRecord) => ({
-      ...application,
-      name: application.fullName || "Orientation applicant",
-      company: application.organization || "",
-      linkedin: application.websiteOrLinkedIn || "",
-      callStatus: application.status === "call_scheduled" ? "Call Scheduled" : application.status === "approved" ? "Vetted (Approved)" : application.status === "declined" ? "Vetted (Rejected)" : "Not Scheduled",
-      invitationStatus: invitationStatusByApplicationId.get(application.id),
-    })));
+    setPendingSponsors(applications.map((application: FlexibleRecord) => {
+      const account = sponsorAccountByApplicationId.get(application.id) as FlexibleRecord | undefined;
+      return {
+        ...application,
+        name: application.fullName || "Orientation applicant",
+        company: application.organization || "",
+        linkedin: application.websiteOrLinkedIn || "",
+        invitationStatus: account?.invitationStatus,
+        accessStatus: account?.accessStatus === "revoked" || application.accessStatus === "revoked" ? "revoked" : "active",
+        passwordSetupComplete: Boolean(account?.passwordSetupCompletedAt),
+      };
+    }));
     setInquiries([]);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
     setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
@@ -192,6 +196,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadApprovedSponsorProfiles = async (authenticatedUser: User) => {
     const token = await authenticatedUser.getIdToken(true);
     const response = await fetch("/api/sponsor", { headers: { authorization: `Bearer ${token}` } });
+    if (response.status === 403) {
+      await signOut(auth);
+      throw new Error("Sponsor dashboard access has been revoked.");
+    }
     if (!response.ok) throw new Error("Could not load the approved Sponsor Talent pipeline.");
     const data = await response.json() as FlexibleRecord;
     const talent = Array.isArray(data.talent) ? data.talent : [];
@@ -350,18 +358,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
-  const updateCallStatus = async (applicationId: string, callStatus: string) => {
-    const statusByLabel: Record<string, string> = { "Not Scheduled": "new", "Call Scheduled": "call_scheduled", "Vetted (Approved)": "approved", "Vetted (Rejected)": "declined" };
-    await runOperationalAction("reviewApplication", { applicationId, status: statusByLabel[callStatus] || "new" });
-  };
-
   const approveSponsor = async (applicationId: string) => runOperationalAction("reviewApplication", { applicationId, status: "approved" });
   const rejectSponsor = async (applicationId: string) => runOperationalAction("reviewApplication", { applicationId, status: "declined" });
   const deleteSponsor = async (applicationId: string) => runOperationalAction("deleteSponsor", { applicationId });
+  const revokeSponsorAccess = async (applicationId: string) => runOperationalAction("revokeSponsorAccess", { applicationId });
   const generateCredentials = async (applicationId: string) => {
     const result = await runOperationalAction("sendSponsorInvitation", { applicationId });
     const sponsor = pendingSponsors.find((item) => item.id === applicationId);
-    return { email: sponsor?.email || "Approved sponsor", invitationStatus: result.invitationStatus === "sent" ? "Invitation sent" : "Invitation pending" };
+    return { email: sponsor?.email || "Approved sponsor", invitationStatus: result.invitationStatus === "requested" ? "Email request accepted" : "Invitation request pending" };
   };
 
   const provisionSponsorManual = async (email: string, fullName: string, organization: string) => {
@@ -371,7 +375,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       organization,
       postCallConfirmed: true,
     });
-    return { email: email.trim().toLowerCase(), invitationStatus: result.invitationStatus === "sent" ? "Invitation sent" : "Invitation pending" };
+    return { email: email.trim().toLowerCase(), invitationStatus: result.invitationStatus === "requested" ? "Email request accepted" : "Invitation request pending" };
   };
 
   const saveTalentRecord = async (profile: YouthProfile, id?: string) => {
@@ -425,7 +429,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
   }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

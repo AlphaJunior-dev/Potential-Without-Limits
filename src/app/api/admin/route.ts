@@ -34,7 +34,7 @@ async function appendAudit(action: string, entityType: string, entityId: string,
   });
 }
 
-async function sendSponsorSetupLink(email: string) {
+async function requestSponsorSetupEmail(email: string) {
   const apiKey = process.env.FIREBASE_WEB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   const continueUrl = process.env.FIREBASE_EMAIL_LINK_CONTINUE_URL;
   if (!apiKey || !continueUrl) throw new Error("Sponsor invitation delivery is not configured.");
@@ -44,7 +44,11 @@ async function sendSponsorSetupLink(email: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ requestType: "EMAIL_SIGNIN", email, continueUrl, canHandleCodeInApp: true }),
   });
-  if (!response.ok) throw new Error("Firebase could not send the sponsor setup invitation.");
+  const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;
+  if (!response.ok) {
+    const providerMessage = payload?.error?.message;
+    throw new Error(providerMessage ? `Firebase could not accept the sponsor invitation request: ${providerMessage}` : "Firebase could not accept the sponsor invitation request.");
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -166,23 +170,25 @@ export async function PATCH(request: NextRequest) {
       }
       await adminAuth().setCustomUserClaims(userRecord.uid, { ...(userRecord.customClaims ?? {}), sponsor: true });
       try {
-        await sendSponsorSetupLink(email);
+        await requestSponsorSetupEmail(email);
       } catch (error) {
-        await db.collection("sponsor_accounts").doc(userRecord.uid).set({ email, applicationId: applicationRef.id, invitationStatus: "delivery_failed", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+        await db.collection("sponsor_accounts").doc(userRecord.uid).set({ email, applicationId: applicationRef.id, invitationStatus: "delivery_failed", deliveryStatus: "delivery_failed", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
         throw error;
       }
       await db.collection("sponsor_accounts").doc(userRecord.uid).set({
         email,
         applicationId: applicationRef.id,
-        invitationStatus: "sent",
-        invitedAt: FieldValue.serverTimestamp(),
+        invitationStatus: "requested",
+        deliveryStatus: "requested",
+        invitationRequestedAt: FieldValue.serverTimestamp(),
         passwordSetupRequired: true,
         passwordSetupCompletedAt: null,
+        accessStatus: "active",
         updatedAt: FieldValue.serverTimestamp(),
         assignedTalentIds: [],
       }, { merge: true });
       await appendAudit("sendManualSponsorInvitation", "sponsor_account", userRecord.uid, administrator.uid, { applicationId: applicationRef.id });
-      return NextResponse.json({ ok: true, invitationStatus: "sent", applicationId: applicationRef.id });
+      return NextResponse.json({ ok: true, invitationStatus: "requested", applicationId: applicationRef.id });
     } else if (body.action === "sendSponsorInvitation" && typeof body.applicationId === "string") {
       const application = await db.collection("sponsor_applications").doc(body.applicationId).get();
       const data = application.data();
@@ -196,23 +202,25 @@ export async function PATCH(request: NextRequest) {
       }
       await adminAuth().setCustomUserClaims(userRecord.uid, { ...(userRecord.customClaims ?? {}), sponsor: true });
       try {
-        await sendSponsorSetupLink(email);
+        await requestSponsorSetupEmail(email);
       } catch (error) {
-        await db.collection("sponsor_accounts").doc(userRecord.uid).set({ email, applicationId: body.applicationId, invitationStatus: "delivery_failed", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+        await db.collection("sponsor_accounts").doc(userRecord.uid).set({ email, applicationId: body.applicationId, invitationStatus: "delivery_failed", deliveryStatus: "delivery_failed", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
         throw error;
       }
       await db.collection("sponsor_accounts").doc(userRecord.uid).set({
         email,
         applicationId: body.applicationId,
-        invitationStatus: "sent",
-        invitedAt: FieldValue.serverTimestamp(),
+        invitationStatus: "requested",
+        deliveryStatus: "requested",
+        invitationRequestedAt: FieldValue.serverTimestamp(),
         passwordSetupRequired: true,
         passwordSetupCompletedAt: null,
+        accessStatus: "active",
         updatedAt: FieldValue.serverTimestamp(),
         assignedTalentIds: [],
       }, { merge: true });
       await appendAudit("sendSponsorInvitation", "sponsor_account", userRecord.uid, administrator.uid, { applicationId: body.applicationId });
-      return NextResponse.json({ ok: true, invitationStatus: "sent" });
+      return NextResponse.json({ ok: true, invitationStatus: "requested" });
     } else if ((body.action === "createTalentRecord" || body.action === "updateTalentRecord") && body.talentRecord) {
       const talentRecord = sanitizeTalentRecord(body.talentRecord);
       if (!talentRecord) return NextResponse.json({ error: "A display title, non-identifying summary, and support area are required." }, { status: 400 });
@@ -226,6 +234,29 @@ export async function PATCH(request: NextRequest) {
       await db.collection("sponsor_talent_records").doc(body.talentId).delete();
       await appendAudit("deleteTalentRecord", "sponsor_talent", body.talentId, administrator.uid);
       return NextResponse.json({ ok: true });
+    } else if (body.action === "revokeSponsorAccess" && typeof body.applicationId === "string") {
+      const application = await db.collection("sponsor_applications").doc(body.applicationId).get();
+      if (!application.exists) return NextResponse.json({ error: "Sponsor application not found." }, { status: 404 });
+      const email = typeof application.data()?.email === "string" ? application.data()!.email.trim().toLowerCase() : "";
+      if (!email) return NextResponse.json({ error: "This sponsor application has no email address." }, { status: 400 });
+      try {
+        const sponsorUser = await adminAuth().getUserByEmail(email);
+        await adminAuth().setCustomUserClaims(sponsorUser.uid, { ...(sponsorUser.customClaims ?? {}), sponsor: false });
+        await adminAuth().revokeRefreshTokens(sponsorUser.uid);
+        await db.collection("sponsor_accounts").doc(sponsorUser.uid).set({
+          email,
+          applicationId: body.applicationId,
+          accessStatus: "revoked",
+          revokedAt: FieldValue.serverTimestamp(),
+          revokedBy: administrator.uid,
+          updatedAt: FieldValue.serverTimestamp(),
+        }, { merge: true });
+      } catch {
+        return NextResponse.json({ error: "The sponsor account could not be revoked. No application data was deleted." }, { status: 409 });
+      }
+      await application.ref.set({ accessStatus: "revoked", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      await appendAudit("revokeSponsorAccess", "sponsor_application", body.applicationId, administrator.uid, { email });
+      return NextResponse.json({ ok: true, accessStatus: "revoked" });
     } else if (body.action === "deleteSponsor" && typeof body.applicationId === "string") {
       const application = await db.collection("sponsor_applications").doc(body.applicationId).get();
       if (!application.exists) return NextResponse.json({ error: "Sponsor application not found." }, { status: 404 });

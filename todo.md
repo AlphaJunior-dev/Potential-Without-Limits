@@ -101,3 +101,6 @@
 - [x] Assess a secure invite-to-password onboarding option without exposing, generating, or storing passwords in application data.
 - [x] Remove redundant orientation time-slot collection so applicants schedule solely through the Calendly embed after submission.
 - [x] Verify the LinkedIn profile field’s validation, private admin visibility, and authenticated sponsor-only dashboard visibility.
+- [x] Expand the private Sponsor Vetting overview to show the full orientation submission without exposing it publicly.
+- [ ] Complete a controlled inbox-receipt test of the Firebase invitation email after this Preview is available; the portal now records only Firebase request acceptance and reports initiation failures honestly.
+- [x] Replace the vetting-call status control with a non-destructive revoke-access action that disables the sponsor dashboard while retaining the sponsor record and delete control.
