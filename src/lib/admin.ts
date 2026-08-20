@@ -67,6 +67,8 @@ export const safePublicDefaults = {
       summary: "Discover the foundation's Sponsor Talent pathway through a private safeguarding and partnership orientation.",
       supportArea: "Orientation conversation",
       photoUrl: "",
+      mediaUrls: [],
+      visibility: { profileVisible: true, photoVisible: false, mediaVisible: false, summaryVisible: true },
     },
     {
       id: "community-guided-support",
@@ -74,6 +76,8 @@ export const safePublicDefaults = {
       summary: "Potential partners can learn about community-informed Sponsor Talent opportunities during a private orientation call.",
       supportArea: "Partnership conversation",
       photoUrl: "",
+      mediaUrls: [],
+      visibility: { profileVisible: true, photoVisible: false, mediaVisible: false, summaryVisible: true },
     },
     {
       id: "safeguarding-first",
@@ -81,8 +85,23 @@ export const safePublicDefaults = {
       summary: "Sponsor Talent information is reviewed through appropriate safeguarding and privacy practices.",
       supportArea: "Safeguarding review",
       photoUrl: "",
+      mediaUrls: [],
+      visibility: { profileVisible: true, photoVisible: false, mediaVisible: false, summaryVisible: true },
     },
-  ] as Array<{ id: string; title: string; summary: string; supportArea?: string; photoUrl?: string }>,
+  ] as Array<{
+    id: string;
+    title: string;
+    summary: string;
+    supportArea?: string;
+    photoUrl?: string;
+    mediaUrls?: string[];
+    visibility?: {
+      profileVisible: boolean;
+      photoVisible: boolean;
+      mediaVisible: boolean;
+      summaryVisible: boolean;
+    };
+  }>,
 };
 
 const publicBrandingTextLimits: Record<string, number> = {
@@ -244,13 +263,21 @@ export function sanitizeTalentRecord(input: unknown) {
 export function toPublicTalentCard(id: string, input: unknown) {
   const record = sanitizeTalentRecord(input);
   if (!record || !record.visibility.profileVisible) return null;
+  const photoVisible = record.visibility.photoVisible && Boolean(record.photoUrl);
+  const mediaVisible = record.visibility.mediaVisible && record.mediaUrls.length > 0;
   return {
     id,
     title: record.displayTitle,
     summary: record.visibility.summaryVisible ? record.summary : "Information is shared through an appropriate private orientation conversation.",
     supportArea: record.supportArea,
-    ...(record.visibility.photoVisible && record.photoUrl ? { photoUrl: record.photoUrl } : {}),
-    ...(record.visibility.mediaVisible ? { mediaUrls: record.mediaUrls } : {}),
+    visibility: {
+      profileVisible: true,
+      photoVisible,
+      mediaVisible,
+      summaryVisible: record.visibility.summaryVisible,
+    },
+    ...(photoVisible ? { photoUrl: record.photoUrl } : {}),
+    ...(mediaVisible ? { mediaUrls: record.mediaUrls } : {}),
     displayOrder: record.displayOrder,
   };
 }
@@ -353,6 +380,8 @@ export async function readPublicSite() {
         summary: sponsorTalentWording(String(card.summary ?? "")),
         supportArea: typeof card.supportArea === "string" ? sponsorTalentWording(card.supportArea) : undefined,
         photoUrl: "",
+        mediaUrls: [],
+        visibility: { profileVisible: true, photoVisible: false, mediaVisible: false, summaryVisible: true },
       };
     });
     const publishedTalentCards = talentSnapshot.docs

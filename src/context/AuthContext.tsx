@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       name: record.displayTitle,
       age: 0,
       category: record.supportArea,
-      location: "Not publicly displayed",
+      location: record.visibility?.profileVisible === true ? "Publicly displayed" : "Not publicly displayed",
       bio: record.summary,
       coverPhoto: record.photoUrl || "/pwlif-logo.png",
       rawMediaUrl: Array.isArray(record.mediaUrls) ? record.mediaUrls[0] || "" : "",

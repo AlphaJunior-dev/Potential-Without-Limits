@@ -170,11 +170,18 @@ test("approved sponsors automatically receive the private Talent pipeline on sha
   assert.match(provider, /authenticatedUser\.getIdToken\(true\)/);
   assert.match(provider, /privateSponsorAccess: true/);
   assert.match(provider, /setSponsorProfiles\(\[\]\)/);
+  assert.match(provider, /location: record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"/);
   assert.match(homepage, /hasApprovedSponsorAccess/);
   assert.match(talentsPage, /hasApprovedSponsorAccess/);
   assert.match(detailPage, /profile\.privateSponsorAccess === true/);
+  assert.match(detailPage, /profile\.publicVisibility\?\.photoVisible === true/);
+  assert.match(detailPage, /const profile = profiles\.find\(\(p\) => p\.id === id\);/);
+  assert.doesNotMatch(detailPage, /profiles\.find\(\(p\) => p\.id === id\) \?\? profiles\[0\]/);
   assert.match(publicRoute, /readPublicSite\(\)/);
+  assert.match(publicRoute, /publicVisibility,/);
+  assert.match(publicRoute, /galleryImages: card\.photoUrl \? \[card\.photoUrl\] : \[\]/);
   assert.match(adminLibrary, /export function toPublicTalentCard/);
+  assert.match(adminLibrary, /visibility: \{/);
   assert.match(adminLibrary, /export function toSponsorTalentCard/);
 });
 

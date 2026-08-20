@@ -30,7 +30,7 @@ export default function PortfolioDetailPage() {
   const [sent, setSent] = useState(false);
   const [showSponsorModal, setShowSponsorModal] = useState(false);
 
-  const profile = profiles.find((p) => p.id === id) ?? profiles[0];
+  const profile = profiles.find((p) => p.id === id);
   if (!profile) {
     return (
       <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] bg-foundation-pattern flex items-center justify-center px-4">
@@ -42,7 +42,13 @@ export default function PortfolioDetailPage() {
     );
   }
 
-  const hasMediaConsent = profile.privateSponsorAccess === true || profile.consentRecord?.mediaReleasePermission !== false;
+  const hasCoverPhoto = Boolean(profile.coverPhoto && profile.coverPhoto !== "/pwlif-logo.png");
+  const hasServerApprovedMediaAccess = profile.privateSponsorAccess === true
+    || userStatus === "admin"
+    || profile.publicVisibility?.photoVisible === true
+    || profile.publicVisibility?.mediaVisible === true;
+  const hasVisibleMedia = hasServerApprovedMediaAccess
+    && (hasCoverPhoto || (Array.isArray(profile.galleryVideos) && profile.galleryVideos.length > 0));
   const hasApprovedSponsorAccess = userStatus === "approved" && profile.privateSponsorAccess === true;
 
   const handleSendInquiry = (e: React.FormEvent) => {
@@ -86,7 +92,7 @@ export default function PortfolioDetailPage() {
                   </span>
                   <span className="text-xs text-[#0B2E6B]/70 font-bold flex items-center gap-1">
                     <Globe className="w-3.5 h-3.5 text-[#079432]" />
-                    {profile.country_community || profile.location}
+                    {profile.publicVisibility?.profileVisible === true ? "Publicly displayed" : "Not publicly displayed"}
                   </span>
                 </div>
                 <span className="text-xs font-semibold text-[#079432] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
@@ -99,7 +105,7 @@ export default function PortfolioDetailPage() {
               </h1>
 
               {/* Parental / Guardian Media Release Check */}
-              {!hasMediaConsent ? (
+              {!hasVisibleMedia ? (
                 <div className="p-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-3">
                   <Lock className="w-10 h-10 text-amber-600 mx-auto" />
                   <h3 className="font-montserrat font-bold text-lg text-[#0B2E6B]">
