@@ -59,3 +59,4 @@
 - [x] Replace the Talent editor’s browser-only local photo picker with a persistent server-authorized image-upload workflow and truthful upload-state feedback.
 - [x] Make the Admin Portal left navigation fixed on larger screens, responsive on smaller screens, and keep homepage return and administrator sign-out controls accessible without scrolling the page body.
 - [x] Add regression coverage for administrator-only image uploads and preserve the existing public-profile and public-photo opt-in requirements.
+- [ ] Diagnose and repair the Preview Firebase Storage error that prevents an administrator-selected Talent photo from being persisted.

@@ -24,7 +24,8 @@ function adminApp() {
     throw new Error("Server Firebase credentials are not configured.");
   }
 
-  return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || `${projectId}.firebasestorage.app`;
+  return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }), storageBucket });
 }
 
 export function adminDb() {

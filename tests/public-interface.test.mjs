@@ -225,7 +225,12 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(uploadRoute, /imageTypeFromBytes/);
   assert.match(uploadRoute, /firebaseStorageDownloadTokens/);
   assert.match(uploadRoute, /talent-photos\//);
+  assert.match(uploadRoute, /Talent photo upload failed/);
+  assert.match(uploadRoute, /STORAGE_BUCKET_NOT_READY/);
+  assert.match(uploadRoute, /STORAGE_WRITE_NOT_AUTHORIZED/);
+  assert.match(uploadRoute, /Firebase Storage has not been initialized/);
   assert.doesNotMatch(uploadRoute, /setPublic\(/);
   assert.match(adminLibrary, /firebase-admin\/storage/);
+  assert.match(adminLibrary, /storageBucket/);
   assert.match(imageConfig, /firebasestorage\.googleapis\.com/);
 });

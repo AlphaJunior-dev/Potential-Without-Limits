@@ -43,8 +43,32 @@ function imageTypeFromBytes(bytes: Uint8Array) {
 
 function errorResponse(error: unknown) {
   const message = error instanceof Error ? error.message : "Upload could not be completed.";
+  const code = error && typeof error === "object" && "code" in error ? String(error.code) : "unknown";
+
+  // Do not expose stack traces or service-account details to the browser. The
+  // compact diagnostic is retained in protected Vercel runtime logs instead.
+  console.error("Talent photo upload failed", { code, message });
+
   if (message === "UNAUTHENTICATED") return NextResponse.json({ error: "Sign in as an administrator before uploading a photo." }, { status: 401 });
   if (message === "FORBIDDEN") return NextResponse.json({ error: "Administrator access is required to upload a photo." }, { status: 403 });
+  if (/specified bucket does not exist|bucket.+not found|not.?found/i.test(message)) {
+    return NextResponse.json(
+      {
+        error: "Firebase Storage has not been initialized for this Foundation project yet. In Firebase Console, open Storage, select Get started, and create the default bucket. No photo was saved.",
+        code: "STORAGE_BUCKET_NOT_READY",
+      },
+      { status: 503 },
+    );
+  }
+  if (/storage\.objects\.create|permission.?denied|insufficient.?permission/i.test(message)) {
+    return NextResponse.json(
+      {
+        error: "The Foundation server is not authorized to save photos to Firebase Storage. An administrator must grant the Firebase Admin service account write access to the configured Storage bucket. No photo was saved.",
+        code: "STORAGE_WRITE_NOT_AUTHORIZED",
+      },
+      { status: 503 },
+    );
+  }
   return NextResponse.json({ error: "The image could not be stored. Please try again." }, { status: 500 });
 }
 
