@@ -368,7 +368,10 @@ export async function readPublicSite() {
     const [siteSnapshot, cardsSnapshot, talentSnapshot] = await Promise.all([
       db.collection("public_site_content").doc("main").get(),
       db.collection("pilot_overview_cards").where("status", "==", "published").orderBy("displayOrder", "asc").get(),
-      db.collection("sponsor_talent_records").where("visibility.profileVisible", "==", true).limit(100).get(),
+      // Apply public visibility below via toPublicTalentCard(). This avoids a
+      // fragile Firestore nested-field query turning every published record
+      // into the generic fallback while retaining a private-by-default output.
+      db.collection("sponsor_talent_records").limit(100).get(),
     ]);
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
     const branding = sanitizePublicBranding(values?.branding);

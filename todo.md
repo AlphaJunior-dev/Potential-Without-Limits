@@ -71,3 +71,4 @@
 - [x] Diagnose and repair the Preview handoff where a successful Talent upload or CMS save is reported as updated but the selected cover image or public profile does not reflect the saved state.
 - [x] Repair the Admin Portal’s browser URL validation so a valid protected `/api/talent-photo/…` cover reference can be saved without relaxing server-side asset validation.
 - [x] Repair the Preview visibility handoff so administrator-enabled public profile, photo, summary, and media settings are reflected on the corresponding public Talent profile.
+- [x] Prevent legacy Firestore query failures from replacing published Sponsor Talent records with generic public fallback cards.

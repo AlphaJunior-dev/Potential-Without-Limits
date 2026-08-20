@@ -98,6 +98,15 @@ test("approved public CMS actions use the protected route and the public reader 
   assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
 });
 
+test("public Talent retrieval applies the strict sanitizer after a server-only collection read", async () => {
+  const adminLibrary = await readSource("src/lib/admin.ts");
+
+  assert.match(adminLibrary, /collection\("sponsor_talent_records"\)\.limit\(100\)\.get\(\)/);
+  assert.doesNotMatch(adminLibrary, /collection\("sponsor_talent_records"\)\.where\("visibility\.profileVisible"/);
+  assert.match(adminLibrary, /\.map\(\(document\) => toPublicTalentCard\(document\.id, document\.data\(\)\)\)/);
+  assert.match(adminLibrary, /if \(!record \|\| !record\.visibility\.profileVisible\) return null/);
+});
+
 test("sponsor access is issued by post-call passwordless invitation rather than displayed credentials", async () => {
   const [adminPage, provider, adminRoute, loginPage, bookCall, pendingPage] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
