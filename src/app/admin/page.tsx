@@ -1276,10 +1276,11 @@ export default function AdminDashboardPage() {
                   <div>
                     <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Cover Photo URL (Or select uploaded image)</label>
                     <input
-                      type="url"
+                      type="text"
+                      inputMode="url"
                       value={coverPhoto}
                       onChange={(e) => setCoverPhoto(e.target.value)}
-                      placeholder="https://..."
+                      placeholder="https://... or select an uploaded image"
                       className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
                     />
                   </div>

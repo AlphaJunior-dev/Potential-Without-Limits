@@ -217,6 +217,13 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.doesNotMatch(talentImageHandler, /FileReader|readAsDataURL/);
   assert.match(talentImageHandler, /setCoverPhoto\(photoUrls\[0\] \|\| ""\)/);
   assert.match(talentImageHandler, /selected as the cover and ready to save/);
+  const coverPhotoInput = adminPage.slice(
+    adminPage.indexOf("Cover Photo URL"),
+    adminPage.indexOf("Raw Media Video URL"),
+  );
+  assert.match(coverPhotoInput, /type="text"/);
+  assert.match(coverPhotoInput, /inputMode="url"/);
+  assert.doesNotMatch(coverPhotoInput, /type="url"/);
 
   assert.match(provider, /new FormData\(\)/);
   assert.match(provider, /prepareTalentPhotoForPrivateMedia/);
