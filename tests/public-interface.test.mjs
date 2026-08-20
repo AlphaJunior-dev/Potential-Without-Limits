@@ -215,6 +215,8 @@ test("Talent photo uploads use a verified administrator server boundary and pres
     adminPage.indexOf("const handleVideoUpload"),
   );
   assert.doesNotMatch(talentImageHandler, /FileReader|readAsDataURL/);
+  assert.match(talentImageHandler, /setCoverPhoto\(photoUrls\[0\] \|\| ""\)/);
+  assert.match(talentImageHandler, /selected as the cover and ready to save/);
 
   assert.match(provider, /new FormData\(\)/);
   assert.match(provider, /prepareTalentPhotoForPrivateMedia/);

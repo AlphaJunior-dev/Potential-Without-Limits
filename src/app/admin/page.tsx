@@ -216,8 +216,8 @@ export default function AdminDashboardPage() {
         photoUrls.push(await uploadTalentPhoto(file));
       }
       setUploadedImages((current) => [...current, ...photoUrls]);
-      setCoverPhoto((current) => current || photoUrls[0] || "");
-      triggerToast("✓ Photo Stored", `${photoUrls.length} Talent photo${photoUrls.length === 1 ? "" : "s"} is ready to save.`);
+      setCoverPhoto(photoUrls[0] || "");
+      triggerToast("✓ Photo Stored", `${photoUrls.length} Talent photo${photoUrls.length === 1 ? "" : "s"} is selected as the cover and ready to save.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "The Talent photo could not be stored.";
       setImageUploadError(message);

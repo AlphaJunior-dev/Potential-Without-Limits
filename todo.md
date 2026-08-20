@@ -68,3 +68,4 @@
 - [ ] Define and implement a distinctive original PWLIF hero that does not imitate the Allan Children Foundation editorial header treatment.
 - [x] Obtain the selected durable media provider’s project credentials and configure server-only media access before replacing the temporary Firestore image fallback.
 - [x] Create and securely connect the Foundation-owned Supabase project for private PWLIF media storage without migrating Firebase authentication or Firestore CMS data.
+- [x] Diagnose and repair the Preview handoff where a successful Talent upload or CMS save is reported as updated but the selected cover image or public profile does not reflect the saved state.
