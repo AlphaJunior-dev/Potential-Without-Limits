@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { WlpLogo } from "./WlpLogo";
-import { LogOut, ShieldAlert, LayoutDashboard, Calendar, Menu, X, ArrowRight, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldAlert, LayoutDashboard, Calendar, Menu, X, ArrowRight, ShieldCheck, ChevronDown } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { userStatus, logout, branding } = useAuth();
+  const { userStatus, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -38,6 +38,14 @@ export function Navbar() {
     return null;
   }
 
+  const publicMenus = [
+    { label: "About Us", items: [{ href: "/mission-vision", label: "Mission & Vision" }, { href: "/meet-the-team", label: "Meet the Team" }] },
+    { label: "Our Approach", items: [{ href: "/talents", label: "Sponsor Talent" }, { href: "/our-pilot", label: "How It Works" }] },
+    { label: "News & Updates", items: [{ href: "/foundation-updates", label: "Foundation Updates" }, { href: "/stories-learning", label: "Stories & Learning" }] },
+    { label: "Media & Press", items: [{ href: "/media-gallery", label: "Media Gallery" }, { href: "/press-resources", label: "Press & Resources" }] },
+    { label: "Get Involved", items: [{ href: "/book-a-call", label: "Book Orientation" }, { href: "/partnership", label: "Partner With Us" }, { href: "/volunteer", label: "Volunteer" }] },
+  ];
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 font-inter ${
@@ -46,6 +54,9 @@ export function Navbar() {
           : "bg-[#FCFCFA]/92 backdrop-blur-md border-b border-[#0B2E6B]/8"
       }`}
     >
+      <div className="border-b border-white/10 bg-[#061D45] px-5 py-1.5 text-center text-[9px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3] sm:px-8 lg:px-10">
+        Potential in Motion <span className="mx-2 text-white/30">/</span> Privacy-first Talent development
+      </div>
       <div className="max-w-[92rem] mx-auto px-5 sm:px-8 lg:px-10 h-[4.85rem] flex items-center justify-between">
         {/* Brand Logo & Title */}
         <Link
@@ -60,27 +71,24 @@ export function Navbar() {
           />
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-7 text-[10px] font-bold uppercase tracking-[0.13em] text-[#0B2E6B]/72">
-          <Link href="/talents" className="hover:text-[#079432] transition-colors">
-            Sponsor a Dream
-          </Link>
-          <Link href="/mission-vision" className="hover:text-[#079432] transition-colors">
-            Mission &amp; Vision
-          </Link>
-          <Link href="/meet-the-team" className="hover:text-[#079432] transition-colors">
-            Meet the Team
-          </Link>
-          <Link href="/security-standards" className="hover:text-[#079432] transition-colors">
-            Security &amp; Consent
-          </Link>
-          <Link href="/faq" className="hover:text-[#079432] transition-colors">
-            FAQ
-          </Link>
-        </div>
+        {/* Desktop public navigation. Native details elements keep the menus keyboard accessible. */}
+        <nav aria-label="Foundation navigation" className="hidden xl:flex items-center gap-4 text-[9px] font-bold uppercase tracking-[0.11em] text-[#0B2E6B]/72 2xl:gap-5">
+          <Link href="/" className="whitespace-nowrap hover:text-[#079432] transition-colors">Home</Link>
+          {publicMenus.map((menu) => (
+            <details key={menu.label} className="group relative">
+              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[#079432] [&::-webkit-details-marker]:hidden">
+                {menu.label}<ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="absolute left-1/2 top-[calc(100%+1.1rem)] w-52 -translate-x-1/2 rounded-2xl border border-[#0B2E6B]/10 bg-[#061D45] p-2.5 shadow-[0_18px_46px_rgba(6,29,69,0.22)]">
+                {menu.items.map((item) => <Link key={item.href} href={item.href} className="block rounded-xl px-3 py-2.5 text-[10px] font-bold normal-case tracking-normal text-white/84 transition hover:bg-white/10 hover:text-[#A9F1C3]">{item.label}</Link>)}
+              </div>
+            </details>
+          ))}
+          <Link href="/support" className="whitespace-nowrap hover:text-[#079432] transition-colors">Contact</Link>
+        </nav>
 
         {/* Navigation Action Buttons (Desktop) */}
-        <nav aria-label="Global Navigation" className="hidden sm:flex items-center gap-3">
+        <nav aria-label="Global Navigation" className="hidden xl:flex items-center gap-3">
           {userStatus === "admin" ? (
             <div className="flex items-center gap-3">
               <Link
@@ -155,7 +163,7 @@ export function Navbar() {
         </nav>
 
         {/* Mobile Hamburger Toggle Button */}
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle navigation menu"
@@ -168,48 +176,18 @@ export function Navbar() {
 
       {/* Mobile Slide-Over Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[4.85rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
-          <nav className="flex flex-col space-y-4 text-sm font-semibold text-[#0B2E6B]">
-            <Link
-              href="/talents"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
-            >
-              <span>Sponsor a Dream</span>
-              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
-            </Link>
-            <Link
-              href="/mission-vision"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
-            >
-              <span>Mission &amp; Vision</span>
-              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
-            </Link>
-            <Link
-              href="/meet-the-team"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
-            >
-              <span>Meet the Team</span>
-              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
-            </Link>
-            <Link
-              href="/security-standards"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
-            >
-              <span>Security &amp; Consent</span>
-              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
-            </Link>
-            <Link
-              href="/faq"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
-            >
-              <span>FAQ</span>
-              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
-            </Link>
+        <div className="xl:hidden fixed inset-x-0 top-[6.55rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col space-y-3 text-sm font-semibold text-[#0B2E6B]">
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"><span>Home</span><ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" /></Link>
+            {publicMenus.map((menu) => (
+              <details key={menu.label} className="border-b border-[#0B2E6B]/10 pb-3">
+                <summary className="flex cursor-pointer list-none items-center justify-between py-2 hover:text-[#079432] [&::-webkit-details-marker]:hidden"><span>{menu.label}</span><ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
+                <div className="mt-1 space-y-1 border-l-2 border-[#079432]/20 pl-4">
+                  {menu.items.map((item) => <Link key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-[#0B2E6B]/70 hover:text-[#079432]">{item.label}</Link>)}
+                </div>
+              </details>
+            ))}
+            <Link href="/support" onClick={() => setIsMobileMenuOpen(false)} className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"><span>Contact</span><ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" /></Link>
           </nav>
 
           <div className="pt-2 space-y-3">

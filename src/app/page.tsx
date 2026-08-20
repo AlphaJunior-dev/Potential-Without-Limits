@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, LockKeyhole, Play, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, Play, ShieldCheck, Sparkles, MessageCircleHeart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
 import { EditorialSplit, PublicAction, PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
@@ -41,13 +41,7 @@ export default function HomePage() {
             number="01"
             eyebrow="The starting point"
             title="Every journey begins with a respectful conversation."
-            aside={
-              featuredProfiles[0]?.coverPhoto ? (
-                <><TalentPhoto src={featuredProfiles[0].coverPhoto} alt="Sponsor Talent overview" fill className="object-cover" /><div className="absolute inset-x-0 bottom-0 z-10 p-7 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3]">Sponsor Talent</p><p className="mt-2 font-montserrat text-2xl font-bold">Potential deserves a private, informed introduction.</p></div></>
-              ) : (
-                <div className="relative z-10 flex h-full min-h-[300px] items-end p-8"><div><span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#14B84A] text-white"><ShieldCheck className="h-6 w-6" /></span><p className="mt-8 font-montserrat text-3xl font-black text-white">Possibility is not a profile.</p></div></div>
-              )
-            }
+            aside={<div className="relative z-10 flex h-full min-h-[300px] flex-col justify-between overflow-hidden p-8"><div className="absolute -right-10 -top-16 h-56 w-56 rounded-full border border-[#14B84A]/50" /><div className="absolute -bottom-20 -left-10 h-64 w-64 rounded-full border border-[#0A8CF5]/40" /><div className="relative"><span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#14B84A] text-white"><MessageCircleHeart className="h-6 w-6" /></span><p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3]">The PWLIF starting point</p><p className="mt-3 max-w-sm font-montserrat text-3xl font-black leading-tight text-white">A respectful conversation, before any introduction.</p></div><div className="relative flex items-center gap-3 border-t border-white/15 pt-5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/65"><span>Listen</span><span className="h-px flex-1 bg-white/15" /><span>Orient</span><span className="h-px flex-1 bg-white/15" /><span>Connect</span></div></div>}
           >
             <p>PWLIF introduces supporters to the foundation’s talent-development approach before sharing additional context. Public information is deliberately non-identifying and may be updated or withdrawn at any time.</p>
             <div className="mt-8 flex flex-wrap gap-3"><PublicAction href="/mission-vision" label="How we work" /><Link href="/security-standards" className="inline-flex items-center gap-2 px-3 py-3 text-sm font-bold text-[#0B2E6B] hover:text-[#079432]">Our safeguards <ArrowUpRight className="h-4 w-4" /></Link></div>

@@ -79,3 +79,6 @@
 - [x] Map every reference-site public page to an original PWLIF public route and document the approved structural translation.
 - [x] Rebuild the complete PWLIF public route set with the approved high-media structural rhythm, without copying reference-site assets, content, or code.
 - [x] Preserve the existing Admin Portal and Sponsor Dashboard layouts and all authorization boundaries during the public-site refresh.
+- [x] Replace the confusing LUXARO hero-side card with a clearly labelled original PWLIF privacy-and-potential visual.
+- [x] Add the approved PWLIF top navigation and keyboard-accessible dropdown menus without changing portal navigation or authorization.
+- [x] Add the approved truthful public pages for Foundation Updates, Stories & Learning, Media Gallery, and Press & Resources with safe empty states until real materials are published.
