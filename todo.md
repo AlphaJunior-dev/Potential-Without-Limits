@@ -72,3 +72,4 @@
 - [x] Repair the Admin Portal’s browser URL validation so a valid protected `/api/talent-photo/…` cover reference can be saved without relaxing server-side asset validation.
 - [x] Repair the Preview visibility handoff so administrator-enabled public profile, photo, summary, and media settings are reflected on the corresponding public Talent profile.
 - [x] Prevent legacy Firestore query failures from replacing published Sponsor Talent records with generic public fallback cards.
+- [x] Remove the remaining legacy public-card Firestore filter and ordering query that can cause the complete public reader to fall back despite valid published Talent records.

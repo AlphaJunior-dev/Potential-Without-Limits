@@ -367,7 +367,7 @@ export async function readPublicSite() {
     const db = adminDb();
     const [siteSnapshot, cardsSnapshot, talentSnapshot] = await Promise.all([
       db.collection("public_site_content").doc("main").get(),
-      db.collection("pilot_overview_cards").where("status", "==", "published").orderBy("displayOrder", "asc").get(),
+      db.collection("pilot_overview_cards").limit(100).get(),
       // Apply public visibility below via toPublicTalentCard(). This avoids a
       // fragile Firestore nested-field query turning every published record
       // into the generic fallback while retaining a private-by-default output.
@@ -377,6 +377,7 @@ export async function readPublicSite() {
     const branding = sanitizePublicBranding(values?.branding);
     const publishedCards = cardsSnapshot.docs.map((document) => {
       const card = document.data();
+      if (card.status !== "published") return null;
       return {
         id: document.id,
         title: sponsorTalentWording(String(card.title ?? "Sponsor Talent Overview")),
@@ -385,8 +386,9 @@ export async function readPublicSite() {
         photoUrl: "",
         mediaUrls: [],
         visibility: { profileVisible: true, photoVisible: false, mediaVisible: false, summaryVisible: true },
+        displayOrder: Number.isFinite(card.displayOrder) ? Math.trunc(card.displayOrder) : 999,
       };
-    });
+    }).filter((card): card is NonNullable<typeof card> => Boolean(card)).sort((first, second) => first.displayOrder - second.displayOrder);
     const publishedTalentCards = talentSnapshot.docs
       .map((document) => toPublicTalentCard(document.id, document.data()))
       .filter((card): card is NonNullable<typeof card> => Boolean(card))

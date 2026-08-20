@@ -103,6 +103,9 @@ test("public Talent retrieval applies the strict sanitizer after a server-only c
 
   assert.match(adminLibrary, /collection\("sponsor_talent_records"\)\.limit\(100\)\.get\(\)/);
   assert.doesNotMatch(adminLibrary, /collection\("sponsor_talent_records"\)\.where\("visibility\.profileVisible"/);
+  assert.match(adminLibrary, /collection\("pilot_overview_cards"\)\.limit\(100\)\.get\(\)/);
+  assert.doesNotMatch(adminLibrary, /collection\("pilot_overview_cards"\)\.where\("status"/);
+  assert.match(adminLibrary, /if \(card\.status !== "published"\) return null/);
   assert.match(adminLibrary, /\.map\(\(document\) => toPublicTalentCard\(document\.id, document\.data\(\)\)\)/);
   assert.match(adminLibrary, /if \(!record \|\| !record\.visibility\.profileVisible\) return null/);
 });
