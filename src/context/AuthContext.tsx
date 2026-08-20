@@ -73,6 +73,51 @@ function isTemporaryMissionCopy(value: unknown) {
 const safeLegal: LegalSecurityConfig = { termsContent: "", privacyContent: "", securityStandardsContent: "", lastUpdated: "" };
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const internalTalentPhotoPattern = /^\/api\/talent-photo\/[A-Za-z0-9_-]{8,80}$/;
+const MAX_TALENT_PHOTO_BYTES = 180 * 1024;
+const MAX_TALENT_PHOTO_SOURCE_BYTES = 4 * 1024 * 1024;
+
+async function prepareTalentPhotoForNoCostStorage(source: File) {
+  if (!/^image\/(jpeg|png|webp)$/i.test(source.type)) {
+    throw new Error("Choose a JPEG, PNG, or WebP photo.");
+  }
+
+  if (source.size > MAX_TALENT_PHOTO_SOURCE_BYTES) {
+    throw new Error("Choose a source photo smaller than 4 MB.");
+  }
+
+  if (source.size <= MAX_TALENT_PHOTO_BYTES) return source;
+
+  const objectUrl = URL.createObjectURL(source);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error("This image could not be prepared for upload."));
+      element.src = objectUrl;
+    });
+    const longestSide = Math.max(image.naturalWidth, image.naturalHeight);
+    const scale = Math.min(1, 1280 / Math.max(1, longestSide));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("This browser cannot prepare the image for upload.");
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    for (const quality of [0.78, 0.68, 0.58, 0.48]) {
+      const compressed = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      if (compressed && compressed.size <= MAX_TALENT_PHOTO_BYTES) {
+        return new File([compressed], `${source.name.replace(/\.[^.]+$/, "") || "talent-photo"}.jpg`, { type: "image/jpeg" });
+      }
+    }
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  throw new Error("This photo is too detailed for the Foundation's no-cost image service. Please choose a simpler or smaller image.");
+}
 
 function isSafeTalentPhotoUrl(value: unknown) {
   return typeof value === "string" && (/^https:\/\//i.test(value) || internalTalentPhotoPattern.test(value));
@@ -266,8 +311,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const uploadTalentPhoto = async (photo: File) => {
     if (!user || userStatus !== "admin") throw new Error("Administrator access is required to upload a Talent photo.");
     const token = await user.getIdToken(true);
+    const preparedPhoto = await prepareTalentPhotoForNoCostStorage(photo);
     const form = new FormData();
-    form.append("photo", photo);
+    form.append("photo", preparedPhoto);
     const response = await fetch("/api/admin/talent-photo", {
       method: "POST",
       headers: { authorization: `Bearer ${token}` },

@@ -1181,7 +1181,7 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <p className="text-[10px] leading-relaxed text-[#0B2E6B]/60">
-                      JPEG, PNG, or WebP only, up to 4 MB per photo. Each selected file is stored securely before it can be saved to this Sponsor Talent record.
+                      JPEG, PNG, or WebP source files up to 4 MB are accepted. Larger source images are resized securely in this browser for the Foundation’s no-cost image service before they can be saved to this Sponsor Talent record.
                     </p>
 
                     <input

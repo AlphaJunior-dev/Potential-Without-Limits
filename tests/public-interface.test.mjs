@@ -216,7 +216,10 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.doesNotMatch(talentImageHandler, /FileReader|readAsDataURL/);
 
   assert.match(provider, /new FormData\(\)/);
-  assert.match(provider, /form\.append\("photo", photo\)/);
+  assert.match(provider, /prepareTalentPhotoForNoCostStorage/);
+  assert.match(provider, /MAX_TALENT_PHOTO_BYTES = 180 \* 1024/);
+  assert.match(provider, /canvas\.toBlob/);
+  assert.match(provider, /form\.append\("photo", preparedPhoto\)/);
   assert.match(provider, /fetch\("\/api\/admin\/talent-photo"/);
   assert.match(provider, /getIdToken\(true\)/);
 
