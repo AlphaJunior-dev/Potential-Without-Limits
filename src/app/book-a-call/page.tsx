@@ -68,7 +68,7 @@ export default function BookACallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
+    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
       <div className="max-w-5xl mx-auto space-y-10">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -80,15 +80,15 @@ export default function BookACallPage() {
             />
           </Link>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/20 text-[#005C27] text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-[#005C27]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#079432]/10 border border-[#079432]/20 text-[#079432] text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-[#079432]" />
             <span>Sponsor Orientation &amp; Foundation Inquiry</span>
           </div>
 
-          <h1 className="font-montserrat text-3xl sm:text-5xl font-black tracking-tight text-[#051836]">
+          <h1 className="font-montserrat text-3xl sm:text-5xl font-black tracking-tight text-[#0B2E6B]">
             Schedule a Sponsor Orientation
           </h1>
-          <p className="font-inter text-base text-[#051836]/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-inter text-base text-[#0B2E6B]/70 max-w-2xl mx-auto leading-relaxed">
             Potential Without Limits International Foundation (PWLIF) connects prospective sponsors with carefully published Sponsor Talent information. Submit an orientation request, then schedule a private conversation with our foundation team.
           </p>
 
@@ -96,54 +96,54 @@ export default function BookACallPage() {
 
         {/* 3-Step Journey */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-inter">
-          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
+            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
               01
             </div>
-            <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
+            <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
               1. Submit Orientation Form
             </h4>
-            <p className="text-xs text-[#051836]/70 leading-relaxed">
+            <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">
               Fill out your details, sponsorship category, and preferred time slot.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
+            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
               02
             </div>
-            <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
+            <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
               2. Orientation &amp; Vetting
             </h4>
-            <p className="text-xs text-[#051836]/70 leading-relaxed">
+            <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">
               Our foundation officers discuss your organization, interests, and responsible partnership approach.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
+            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
               03
             </div>
-            <h4 className="font-montserrat font-bold text-sm text-[#051836] mb-1">
+            <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
               3. Passwordless Sponsor Access
             </h4>
-            <p className="text-xs text-[#051836]/70 leading-relaxed">
+            <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">
               After approval, PWLIF sends a secure email-link invitation for private dashboard access.
             </p>
           </div>
         </div>
 
         {/* Direct Orientation Form */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#051836]/10 shadow-2xl">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#0B2E6B]/10 shadow-2xl">
             {submitted ? (
               <div className="py-12 text-center space-y-4">
-                <div className="inline-flex p-4 rounded-full bg-emerald-50 text-[#005C27] mb-2 border border-[#005C27]/20">
+                <div className="inline-flex p-4 rounded-full bg-emerald-50 text-[#079432] mb-2 border border-[#079432]/20">
                   <CheckCircle2 className="w-12 h-12" />
                 </div>
-                <h3 className="font-montserrat text-2xl font-black text-[#051836]">
+                <h3 className="font-montserrat text-2xl font-black text-[#0B2E6B]">
                   Orientation Session Requested!
                 </h3>
-                <p className="text-sm text-[#051836]/70 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm text-[#0B2E6B]/70 max-w-md mx-auto leading-relaxed">
                   Thank you, <strong>{name}</strong>. Your orientation request was saved. Please use the booking calendar below to choose a suitable time.
                 </p>
                 {bookingUrl ? (
@@ -152,86 +152,86 @@ export default function BookACallPage() {
                     <Script src="https://assets.calendly.com/assets/external/widget.js" strategy="afterInteractive" />
                   </div>
                 ) : (
-                  <p className="text-xs text-[#051836]/60">The booking calendar is not available yet. The PWLIF team will follow up using the contact details you provided.</p>
+                  <p className="text-xs text-[#0B2E6B]/60">The booking calendar is not available yet. The PWLIF team will follow up using the contact details you provided.</p>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-inter text-xs text-[#051836]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 font-inter text-xs text-[#0B2E6B]">
                 {/* Information Card */}
-                <div className="lg:col-span-5 bg-[#F8FAFC] text-[#051836] p-6 rounded-2xl flex flex-col justify-between space-y-6 border border-[#051836]/10">
+                <div className="lg:col-span-5 bg-[#F8FAFC] text-[#0B2E6B] p-6 rounded-2xl flex flex-col justify-between space-y-6 border border-[#0B2E6B]/10">
                   <div>
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#005C27] mb-3">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#079432] mb-3">
                       <Calendar className="w-4 h-4" />
                       <span>Direct Orientation Channel</span>
                     </div>
                     <h3 className="font-montserrat text-xl font-bold">15-Min Foundation Session</h3>
-                    <p className="text-xs text-[#051836]/70 mt-2 leading-relaxed">
+                    <p className="text-xs text-[#0B2E6B]/70 mt-2 leading-relaxed">
                       Meet with a PWLIF foundation officer to discuss Sponsor Talent interests, safeguarding, and potential partnership approaches.
                     </p>
 
-                    <div className="mt-6 space-y-3 text-xs text-[#051836]/80">
+                    <div className="mt-6 space-y-3 text-xs text-[#0B2E6B]/80">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-[#005C27]" />
+                        <Clock className="w-4 h-4 text-[#079432]" />
                         <span>15-Minute Virtual Session</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-[#005C27]" />
+                        <ShieldCheck className="w-4 h-4 text-[#079432]" />
                         <span>Safeguarding-informed discussion</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-[#005C27]" />
+                        <Lock className="w-4 h-4 text-[#079432]" />
                         <span>Invitation sent only after approval</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-white border border-[#051836]/10 text-[11px] text-[#051836]/80 space-y-1">
+                  <div className="p-4 rounded-xl bg-white border border-[#0B2E6B]/10 text-[11px] text-[#0B2E6B]/80 space-y-1">
                     <p><strong>Booking calendar:</strong> It will appear after you submit the orientation request.</p>
                   </div>
                 </div>
 
                 {/* Booking Form */}
                 <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-4">
-                  <h3 className="font-montserrat font-bold text-lg text-[#051836] border-b border-[#051836]/10 pb-2">
+                  <h3 className="font-montserrat font-bold text-lg text-[#0B2E6B] border-b border-[#0B2E6B]/10 pb-2">
                     Sponsor Orientation Request Form
                   </h3>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Your Full Name
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3" />
+                      <User className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3" />
                       <input
                         type="text"
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="e.g. John Mwangi"
-                        className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3" />
+                      <Mail className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3" />
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="e.g. john@example.org"
-                        className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Your Role / Title
                     </label>
                     <input
@@ -240,41 +240,41 @@ export default function BookACallPage() {
                       value={roleTitle}
                       onChange={(e) => setRoleTitle(e.target.value)}
                       placeholder="e.g. Partnerships Director"
-                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                         Organization / Individual
                       </label>
                       <div className="relative">
-                        <Building2 className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3" />
+                        <Building2 className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3" />
                         <input
                           type="text"
                           required
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                           placeholder="e.g. Organization or Individual Sponsor"
-                          className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                          className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                         LinkedIn / Website URL
                       </label>
                       <div className="relative">
-                        <Globe className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3" />
+                        <Globe className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3" />
                         <input
                           type="text"
                           required
                           value={linkedin}
                           onChange={(e) => setLinkedin(e.target.value)}
                           placeholder="linkedin.com/in/..."
-                          className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                          className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                         />
                       </div>
                     </div>
@@ -282,13 +282,13 @@ export default function BookACallPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                         Sponsorship Category *
                       </label>
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value as SponsorCategory)}
-                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
                       >
                         <option value="Child Sponsor">Sponsor Talent Partner</option>
                         <option value="Program Sponsor">Programme Partner</option>
@@ -299,13 +299,13 @@ export default function BookACallPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                      <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                         Membership Tier *
                       </label>
                       <select
                         value={tier}
                         onChange={(e) => setTier(e.target.value as MembershipTier)}
-                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
                       >
                         <option value="Platinum">Platinum</option>
                         <option value="Gold">Gold</option>
@@ -316,7 +316,7 @@ export default function BookACallPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Tell us about your organization
                     </label>
                     <textarea
@@ -325,12 +325,12 @@ export default function BookACallPage() {
                       value={orgDescription}
                       onChange={(e) => setOrgDescription(e.target.value)}
                       placeholder="Briefly describe your organization and its work."
-                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Partnership Interest
                     </label>
                     <textarea
@@ -339,18 +339,18 @@ export default function BookACallPage() {
                       value={supportIntent}
                       onChange={(e) => setSupportIntent(e.target.value)}
                       placeholder="Tell us what you hope to discuss during an orientation call."
-                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                       Select Preferred Time Slot
                     </label>
                     <select
                       value={preferredTime}
                       onChange={(e) => setPreferredTime(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                      className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
                     >
                       <option value="Tomorrow 10:00 AM EST">Tomorrow 10:00 AM EST</option>
                       <option value="Tomorrow 2:30 PM EST">Tomorrow 2:30 PM EST</option>
@@ -361,15 +361,15 @@ export default function BookACallPage() {
                   </div>
 
                   <div className="pt-2">
-                    <label className="mb-3 flex items-start gap-2 text-[11px] text-[#051836]/70 cursor-pointer">
-                      <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-[#005C27]" />
+                    <label className="mb-3 flex items-start gap-2 text-[11px] text-[#0B2E6B]/70 cursor-pointer">
+                      <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 accent-[#079432]" />
                       <span>I confirm that the information provided is accurate and that PWLIF may use it to review this orientation request.</span>
                     </label>
                     {submitError && <p className="mb-3 text-xs text-red-700">{submitError}</p>}
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
+                      className="w-full bg-[#079432] hover:bg-[#14B84A] text-white font-montserrat font-bold py-3.5 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
                     >
                       <span>{submitting ? "Saving Request..." : "Save Request &amp; Continue to Booking"}</span>
                       <ArrowRight className="w-4 h-4 text-white" />

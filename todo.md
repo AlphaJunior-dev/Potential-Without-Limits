@@ -51,3 +51,6 @@
 - [x] Add regression coverage proving the sponsor-only homepage data handoff requires a fresh Firebase sponsor claim and cannot alter anonymous public responses.
 - [x] Create an administrator-only Sponsor Talent design-preview route with clearly labelled fictional, non-identifying layout cards that cannot appear in public or sponsor-facing data paths.
 - [x] Add regression coverage proving the design-preview route requires the Firebase administrator claim and does not seed or expose mock Talent records through the Sponsor Talent APIs.
+- [x] Replace shared PWLIF logo references with the supplied official logo asset, including accessible alternative text and appropriate compact-header treatments.
+- [x] Apply a cohesive accessible visual system derived from the supplied logo’s navy, green, blue, gold, and restrained magenta colors across shared brand tokens and primary interface surfaces.
+- [x] Verify the logo and palette update does not affect sponsor authorization, public data filtering, or passwordless invitation workflows.

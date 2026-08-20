@@ -40,7 +40,7 @@ type AuthContextType = {
 
 const safeBranding: BrandingConfig = {
   logoUrl: "/pwlif-logo.png", siteTitle: "Potential Without Limits International Foundation",
-  primaryColor: "#051836", secondaryColor: "#005C27", backgroundColor: "#FDFCF9", cardBackgroundColor: "#FFFFFF", textColor: "#051836", headerFont: "Montserrat", bodyFont: "Inter",
+  primaryColor: "#0B2E6B", secondaryColor: "#079432", backgroundColor: "#FCFCFA", cardBackgroundColor: "#FFFFFF", textColor: "#0B2E6B", headerFont: "Montserrat", bodyFont: "Inter",
   heroMediaType: "image", heroImage: "/pwlif-logo.png", heroBadgeText: "Potential Without Limits International Foundation (PWLIF)",
   heroHeadline: "Potential grows when communities lead.",
   heroSubheadline: "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.",

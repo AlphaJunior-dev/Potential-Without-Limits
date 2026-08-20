@@ -42,8 +42,8 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 font-inter ${
         isScrolled
-          ? "bg-[#FDFCF9]/95 backdrop-blur-md border-b border-[#051836]/10 shadow-md py-1"
-          : "bg-[#FDFCF9] border-b border-[#051836]/10 shadow-xs py-1"
+          ? "bg-[#FCFCFA]/95 backdrop-blur-md border-b border-[#0B2E6B]/10 shadow-md py-1"
+          : "bg-[#FCFCFA] border-b border-[#0B2E6B]/10 shadow-xs py-1"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -61,20 +61,20 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#051836]/80">
-          <Link href="/talents" className="hover:text-[#005C27] transition">
+        <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#0B2E6B]/80">
+          <Link href="/talents" className="hover:text-[#079432] transition">
             Sponsor a Dream
           </Link>
-          <Link href="/mission-vision" className="hover:text-[#005C27] transition">
+          <Link href="/mission-vision" className="hover:text-[#079432] transition">
             Mission &amp; Vision
           </Link>
-          <Link href="/meet-the-team" className="hover:text-[#005C27] transition">
+          <Link href="/meet-the-team" className="hover:text-[#079432] transition">
             Meet the Team
           </Link>
-          <Link href="/security-standards" className="hover:text-[#005C27] transition">
+          <Link href="/security-standards" className="hover:text-[#079432] transition">
             Security &amp; Consent
           </Link>
-          <Link href="/faq" className="hover:text-[#005C27] transition">
+          <Link href="/faq" className="hover:text-[#079432] transition">
             FAQ
           </Link>
         </div>
@@ -85,17 +85,17 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/admin"
-                className="bg-[#051836] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#042554] transition shadow-xs inline-flex items-center gap-2"
+                className="bg-[#0B2E6B] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#082657] transition shadow-xs inline-flex items-center gap-2"
               >
-                <ShieldCheck className="w-4 h-4 text-[#F5AB00]" />
+                <ShieldCheck className="w-4 h-4 text-[#F7B500]" />
                 <span>Admin Portal</span>
               </Link>
               <button
                 onClick={logout}
                 aria-label="Log out"
-                className="flex items-center gap-1.5 text-xs text-[#051836]/70 hover:text-[#051836] font-medium cursor-pointer"
+                className="flex items-center gap-1.5 text-xs text-[#0B2E6B]/70 hover:text-[#0B2E6B] font-medium cursor-pointer"
               >
-                <LogOut className="w-4 h-4 text-[#005C27]" />
+                <LogOut className="w-4 h-4 text-[#079432]" />
                 <span>Logout</span>
               </button>
             </div>
@@ -103,7 +103,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/sponsor/dashboard"
-                className="bg-[#005C27] text-white px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#327B2F] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#14B84A] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
               >
                 <LayoutDashboard className="w-4 h-4 text-white" />
                 <span>My Dashboard</span>
@@ -111,9 +111,9 @@ export function Navbar() {
               <button
                 onClick={logout}
                 aria-label="Log out"
-                className="flex items-center gap-1.5 text-xs text-[#051836]/70 hover:text-[#051836] font-medium cursor-pointer"
+                className="flex items-center gap-1.5 text-xs text-[#0B2E6B]/70 hover:text-[#0B2E6B] font-medium cursor-pointer"
               >
-                <LogOut className="w-4 h-4 text-[#005C27]" />
+                <LogOut className="w-4 h-4 text-[#079432]" />
                 <span>Logout</span>
               </button>
             </div>
@@ -121,7 +121,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/book-a-call"
-                className="flex items-center gap-1.5 text-xs font-inter text-[#005C27] bg-[#005C27]/10 px-3.5 py-2 rounded-xl border border-[#005C27]/30 hover:bg-[#005C27]/20 transition"
+                className="flex items-center gap-1.5 text-xs font-inter text-[#079432] bg-[#079432]/10 px-3.5 py-2 rounded-xl border border-[#079432]/30 hover:bg-[#079432]/20 transition"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 <span>Book Vetting Call</span>
@@ -129,9 +129,9 @@ export function Navbar() {
               <button
                 onClick={logout}
                 aria-label="Log out"
-                className="flex items-center gap-1.5 text-xs text-[#051836]/70 hover:text-[#051836] font-medium cursor-pointer"
+                className="flex items-center gap-1.5 text-xs text-[#0B2E6B]/70 hover:text-[#0B2E6B] font-medium cursor-pointer"
               >
-                <LogOut className="w-4 h-4 text-[#005C27]" />
+                <LogOut className="w-4 h-4 text-[#079432]" />
                 <span>Logout</span>
               </button>
             </div>
@@ -139,14 +139,14 @@ export function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/book-a-call"
-                className="bg-[#005C27] text-white px-4 sm:px-5 py-2.5 rounded-xl font-inter font-bold text-xs sm:text-sm hover:bg-[#327B2F] transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-xl font-inter font-bold text-xs sm:text-sm hover:bg-[#14B84A] transition shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-white" />
                 <span>Book Orientation Call</span>
               </Link>
               <Link
                 href="/login"
-                className="bg-[#051836] text-white border border-[#051836] px-4 sm:px-5 py-2.5 rounded-xl font-inter font-semibold text-xs sm:text-sm hover:bg-[#042554] transition shadow-2xs"
+                className="bg-[#0B2E6B] text-white border border-[#0B2E6B] px-4 sm:px-5 py-2.5 rounded-xl font-inter font-semibold text-xs sm:text-sm hover:bg-[#082657] transition shadow-2xs"
               >
                 Sponsor Login
               </Link>
@@ -159,7 +159,7 @@ export function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle navigation menu"
-            className="p-2 rounded-xl text-[#051836] hover:bg-[#051836]/10 transition cursor-pointer"
+            className="p-2 rounded-xl text-[#0B2E6B] hover:bg-[#0B2E6B]/10 transition cursor-pointer"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -168,47 +168,47 @@ export function Navbar() {
 
       {/* Mobile Slide-Over Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-20 bg-[#FDFCF9]/98 backdrop-blur-2xl border-b border-[#051836]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
-          <nav className="flex flex-col space-y-4 text-sm font-semibold text-[#051836]">
+        <div className="lg:hidden fixed inset-x-0 top-20 bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col space-y-4 text-sm font-semibold text-[#0B2E6B]">
             <Link
               href="/talents"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#051836]/10 hover:text-[#005C27] transition flex items-center justify-between"
+              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
             >
               <span>Sponsor a Dream</span>
-              <ArrowRight className="w-4 h-4 text-[#051836]/40" />
+              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
             </Link>
             <Link
               href="/mission-vision"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#051836]/10 hover:text-[#005C27] transition flex items-center justify-between"
+              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
             >
               <span>Mission &amp; Vision</span>
-              <ArrowRight className="w-4 h-4 text-[#051836]/40" />
+              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
             </Link>
             <Link
               href="/meet-the-team"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#051836]/10 hover:text-[#005C27] transition flex items-center justify-between"
+              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
             >
               <span>Meet the Team</span>
-              <ArrowRight className="w-4 h-4 text-[#051836]/40" />
+              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
             </Link>
             <Link
               href="/security-standards"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#051836]/10 hover:text-[#005C27] transition flex items-center justify-between"
+              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
             >
               <span>Security &amp; Consent</span>
-              <ArrowRight className="w-4 h-4 text-[#051836]/40" />
+              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
             </Link>
             <Link
               href="/faq"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="py-2 border-b border-[#051836]/10 hover:text-[#005C27] transition flex items-center justify-between"
+              className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"
             >
               <span>FAQ</span>
-              <ArrowRight className="w-4 h-4 text-[#051836]/40" />
+              <ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" />
             </Link>
           </nav>
 
@@ -218,7 +218,7 @@ export function Navbar() {
                 <Link
                   href="/sponsor/dashboard"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-[#005C27] text-white py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                  className="w-full bg-[#079432] text-white py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   <span>My Dashboard</span>
@@ -228,9 +228,9 @@ export function Navbar() {
                     logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full text-xs font-semibold text-[#051836]/70 py-2 flex items-center justify-center gap-1.5"
+                  className="w-full text-xs font-semibold text-[#0B2E6B]/70 py-2 flex items-center justify-center gap-1.5"
                 >
-                  <LogOut className="w-4 h-4 text-[#005C27]" />
+                  <LogOut className="w-4 h-4 text-[#079432]" />
                   <span>Logout</span>
                 </button>
               </div>
@@ -239,7 +239,7 @@ export function Navbar() {
                 <Link
                   href="/book-a-call"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-[#005C27] text-white py-3 px-4 rounded-xl font-bold text-xs text-center shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-[#079432] text-white py-3 px-4 rounded-xl font-bold text-xs text-center shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Calendar className="w-4 h-4" />
                   <span>Book Orientation Call</span>
@@ -247,7 +247,7 @@ export function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-[#051836] text-white border border-[#051836] py-3 px-4 rounded-xl font-semibold text-xs text-center"
+                  className="w-full bg-[#0B2E6B] text-white border border-[#0B2E6B] py-3 px-4 rounded-xl font-semibold text-xs text-center"
                 >
                   Sponsor Login
                 </Link>
