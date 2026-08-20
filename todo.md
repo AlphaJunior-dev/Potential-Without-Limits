@@ -59,6 +59,12 @@
 - [x] Replace the Talent editor’s browser-only local photo picker with a persistent server-authorized image-upload workflow and truthful upload-state feedback.
 - [x] Make the Admin Portal left navigation fixed on larger screens, responsive on smaller screens, and keep homepage return and administrator sign-out controls accessible without scrolling the page body.
 - [x] Add regression coverage for administrator-only image uploads and preserve the existing public-profile and public-photo opt-in requirements.
-- [ ] Diagnose and repair the Preview Firebase Storage error that prevents an administrator-selected Talent photo from being persisted.
+- [x] Diagnose and repair the Preview Firebase Storage error that prevents an administrator-selected Talent photo from being persisted.
 - [x] Replace the unavailable paid Firebase Storage dependency with a bounded, administrator-only Firestore-backed Talent image workflow.
 - [x] Preserve the exact public photo opt-ins while serving Firestore-backed Talent images through safe public and approved-sponsor data boundaries.
+- [x] Assess and select a durable media architecture suitable for large photo and video collections without relying on the Firestore image fallback.
+- [ ] Review the Allan Children Foundation public site and define an original PWLIF visual translation that preserves PWLIF branding, content safeguards, and existing authorization boundaries.
+- [x] Do not implement the high-media architecture or reference-inspired visual changes until the foundation approves a staged scope and media-provider decision.
+- [ ] Define and implement a distinctive original PWLIF hero that does not imitate the Allan Children Foundation editorial header treatment.
+- [x] Obtain the selected durable media provider’s project credentials and configure server-only media access before replacing the temporary Firestore image fallback.
+- [x] Create and securely connect the Foundation-owned Supabase project for private PWLIF media storage without migrating Firebase authentication or Firestore CMS data.

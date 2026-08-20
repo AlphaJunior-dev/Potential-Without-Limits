@@ -16,8 +16,8 @@ type TalentPhotoProps = {
 
 /**
  * The public branch uses the original same-origin image URL. Approved sponsors
- * and administrators fetch private Firestore-backed photo bytes with a fresh
- * Firebase token, then display the temporary in-memory object URL.
+ * and administrators fetch private Supabase-backed photo bytes through the
+ * server with a fresh Firebase token, then display an in-memory object URL.
  */
 export function TalentPhoto({ src, alt, className, fill = false, priority = false }: TalentPhotoProps) {
   const { user, userStatus } = useAuth();

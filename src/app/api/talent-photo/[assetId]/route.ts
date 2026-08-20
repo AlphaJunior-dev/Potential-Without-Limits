@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, toPublicTalentCard } from "@/lib/admin";
+import { loadTalentPhoto } from "@/lib/supabase-media";
 
 export const runtime = "nodejs";
 
@@ -18,7 +19,7 @@ function assetBytes(value: unknown) {
 }
 
 /**
- * Anonymous visitors may retrieve a Firestore-backed photo only when its
+ * Anonymous visitors may retrieve a privately stored photo only when its
  * linked Sponsor Talent record has both public-profile and public-photo
  * visibility enabled. The raw asset document itself is never publicly listed.
  */
@@ -33,8 +34,9 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ as
     if (!card || card.photoUrl !== photoUrl) return notFound();
 
     const asset = await adminDb().collection("talent_photo_assets").doc(assetId).get();
-    const bytes = asset.exists ? assetBytes(asset.data()?.bytes) : null;
     const contentType = asset.data()?.contentType;
+    const storagePath = asset.data()?.storagePath;
+    const bytes = typeof storagePath === "string" ? await loadTalentPhoto(storagePath) : assetBytes(asset.data()?.bytes);
     if (!bytes || !["image/jpeg", "image/png", "image/webp"].includes(contentType)) return notFound();
 
     return new NextResponse(bytes, {

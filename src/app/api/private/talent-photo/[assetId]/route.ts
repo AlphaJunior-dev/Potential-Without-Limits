@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, requireAdministrator, requireApprovedSponsor, toSponsorTalentCard } from "@/lib/admin";
+import { loadTalentPhoto } from "@/lib/supabase-media";
 
 export const runtime = "nodejs";
 
@@ -39,7 +40,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ass
 
     const asset = await adminDb().collection("talent_photo_assets").doc(assetId).get();
     if (!asset.exists || (administratorUid && asset.data()?.uploadedBy !== administratorUid)) return notFound();
-    const bytes = assetBytes(asset.data()?.bytes);
+    const storagePath = asset.data()?.storagePath;
+    const bytes = typeof storagePath === "string" ? await loadTalentPhoto(storagePath) : assetBytes(asset.data()?.bytes);
     const contentType = asset.data()?.contentType;
     if (!bytes || !["image/jpeg", "image/png", "image/webp"].includes(contentType)) return notFound();
 

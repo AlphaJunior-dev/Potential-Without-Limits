@@ -197,12 +197,13 @@ test("the Talent design preview is administrator-only and never seeds mock recor
 });
 
 test("Talent photo uploads use a verified administrator server boundary and preserve the two deliberate public-photo opt-ins", async () => {
-  const [adminPage, provider, uploadRoute, adminLibrary, imageConfig] = await Promise.all([
+  const [adminPage, provider, uploadRoute, adminLibrary, imageConfig, mediaLibrary] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/api/admin/talent-photo/route.ts"),
     readSource("src/lib/admin.ts"),
     readSource("next.config.ts"),
+    readSource("src/lib/supabase-media.ts"),
   ]);
 
   assert.match(adminPage, /uploadTalentPhoto/);
@@ -216,9 +217,8 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.doesNotMatch(talentImageHandler, /FileReader|readAsDataURL/);
 
   assert.match(provider, /new FormData\(\)/);
-  assert.match(provider, /prepareTalentPhotoForNoCostStorage/);
-  assert.match(provider, /MAX_TALENT_PHOTO_BYTES = 180 \* 1024/);
-  assert.match(provider, /canvas\.toBlob/);
+  assert.match(provider, /prepareTalentPhotoForPrivateMedia/);
+  assert.match(provider, /MAX_TALENT_PHOTO_SOURCE_BYTES = 4 \* 1024 \* 1024/);
   assert.match(provider, /form\.append\("photo", preparedPhoto\)/);
   assert.match(provider, /fetch\("\/api\/admin\/talent-photo"/);
   assert.match(provider, /getIdToken\(true\)/);
@@ -227,11 +227,17 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(uploadRoute, /MAX_IMAGE_BYTES/);
   assert.match(uploadRoute, /imageTypeFromBytes/);
   assert.match(uploadRoute, /adminDb\(\)\.collection\("talent_photo_assets"\)/);
-  assert.match(uploadRoute, /192 \* 1024/);
+  assert.match(uploadRoute, /storeTalentPhoto/);
+  assert.match(uploadRoute, /4 \* 1024 \* 1024/);
+  assert.match(uploadRoute, /mediaProvider: "supabase"/);
   assert.match(uploadRoute, /\/api\/talent-photo\/\$\{asset\.id\}/);
   assert.match(uploadRoute, /Talent photo upload failed/);
+  assert.doesNotMatch(uploadRoute, /bytes: Buffer\.from\(bytes\)/);
   assert.doesNotMatch(uploadRoute, /setPublic\(/);
   assert.doesNotMatch(adminLibrary, /firebase-admin\/storage/);
   assert.doesNotMatch(adminLibrary, /storageBucket/);
+  assert.match(mediaLibrary, /public: false/);
+  assert.match(mediaLibrary, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(mediaLibrary, /allowedMimeTypes/);
   assert.match(imageConfig, /remotePatterns/);
 });

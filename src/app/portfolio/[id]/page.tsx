@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { TalentPhoto } from "@/components/TalentPhoto";
 import { 
   ShieldCheck, 
   Lock, 
@@ -112,7 +112,7 @@ export default function PortfolioDetailPage() {
               ) : (
                 /* Media Stage */
                 <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#0B2E6B] border border-[#0B2E6B]/15 flex items-center justify-center">
-                  <Image
+                  <TalentPhoto
                     src={profile.coverPhoto}
                     alt={profile.name}
                     fill

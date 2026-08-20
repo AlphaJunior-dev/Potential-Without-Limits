@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, requireAdministrator } from "@/lib/admin";
+import { storeTalentPhoto } from "@/lib/supabase-media";
 
 export const runtime = "nodejs";
 
-// Firestore has a 1 MiB document limit. Keeping each photo below 192 KiB leaves
-// material room for metadata and makes this a deliberately small, no-cost
-// fallback—not a general-purpose file storage system.
-const MAX_IMAGE_BYTES = 192 * 1024;
+// The private Supabase bucket enforces the same limit. This cap keeps each
+// administrator upload reliable through the server boundary without storing
+// binary media in Firestore.
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 function imageTypeFromBytes(bytes: Uint8Array) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
@@ -54,13 +55,17 @@ function errorResponse(error: unknown) {
 
   if (message === "UNAUTHENTICATED") return NextResponse.json({ error: "Sign in as an administrator before uploading a photo." }, { status: 401 });
   if (message === "FORBIDDEN") return NextResponse.json({ error: "Administrator access is required to upload a photo." }, { status: 403 });
+  if (message === "SUPABASE_MEDIA_NOT_CONFIGURED") {
+    return NextResponse.json({ error: "The private media service is not configured yet." }, { status: 503 });
+  }
   return NextResponse.json({ error: "The image could not be stored. Please try again." }, { status: 500 });
 }
 
 /**
- * Stores a small, validated Talent photo only after the Firebase administrator
- * claim has been verified server-side. The raw bytes are never returned in
- * public CMS data and are served only by dedicated visibility-aware routes.
+ * Stores a validated Talent photo in a private Supabase bucket only after the
+ * Firebase administrator claim has been verified server-side. Firestore keeps
+ * only safe metadata; bytes remain outside the CMS database and are served by
+ * dedicated visibility-aware routes.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -73,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (photo.size === 0 || photo.size > MAX_IMAGE_BYTES) {
-      return NextResponse.json({ error: "Each Talent photo must be between 1 byte and 192 KB for the Foundation's no-cost image service." }, { status: 400 });
+      return NextResponse.json({ error: "Each Talent photo must be between 1 byte and 4 MB." }, { status: 400 });
     }
 
     const bytes = new Uint8Array(await photo.arrayBuffer());
@@ -83,9 +88,12 @@ export async function POST(request: NextRequest) {
     }
 
     const asset = adminDb().collection("talent_photo_assets").doc();
+    const storagePath = await storeTalentPhoto(asset.id, bytes, image.contentType, image.extension);
     await asset.set({
-      bytes: Buffer.from(bytes),
+      storagePath,
+      mediaProvider: "supabase",
       contentType: image.contentType,
+      size: bytes.byteLength,
       uploadedBy: administrator.uid,
       createdAt: new Date(),
     });
