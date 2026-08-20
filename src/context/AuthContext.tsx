@@ -28,6 +28,8 @@ type AuthContextType = {
   transparencyReports: FlexibleRecord[];
   foundationVideos: FlexibleRecord[];
   talentTags: TalentTag[];
+  talentCategories: TalentTag[];
+  updateTalentCategories: (categories: TalentTag[]) => Promise<void>;
   sponsorDreams: FlexibleRecord[];
   mfaVerified: boolean;
   adminRole: AdminRole;
@@ -110,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [foundationVideos, setFoundationVideos] = useState<FlexibleRecord[]>([]);
   const [talentTags, setTalentTags] = useState<TalentTag[]>([]);
+  const [talentCategories, setTalentCategories] = useState<TalentTag[]>([]);
   const [pendingSponsors, setPendingSponsors] = useState<PendingSponsor[]>([]);
   const [inquiries, setInquiries] = useState<FlexibleRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<FlexibleRecord[]>([]);
@@ -143,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setInquiries([]);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
     setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
+    setTalentCategories(Array.isArray(data.site?.talentCategories) ? data.site.talentCategories : []);
     const records = Array.isArray(data.talentRecords) ? data.talentRecords : [];
     setAdminProfiles(records.map((record: FlexibleRecord) => ({
       id: record.id,
@@ -335,6 +339,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (Array.isArray(result.talentTags)) setTalentTags(result.talentTags as TalentTag[]);
   };
 
+  const updateTalentCategories = async (nextTalentCategories: TalentTag[]) => {
+    const result = await updatePublicContent("updateTalentCategoryLibrary", { talentCategories: nextTalentCategories });
+    if (Array.isArray(result.talentCategories)) setTalentCategories(result.talentCategories as TalentTag[]);
+  };
+
   const runOperationalAction = async (action: string, payload: FlexibleRecord = {}) => {
     const result = await updatePublicContent(action, payload);
     if (user) await loadAdminData(user);
@@ -394,7 +403,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         story: profile.story || profile.current_situation || "",
         aspiration: profile.aspiration || profile.dream || "",
         supportPathway: profile.supportPathway || profile.current_needs || "",
-        consent: { reference: profile.consentRecord?.reference || "", reviewedAt: profile.consentRecord?.reviewedAt || "", reviewDueAt: profile.consentRecord?.reviewDueAt || "" },
+        consent: { reference: profile.consentRecord?.reference || "" },
         photoUrl: isSafeTalentPhotoUrl(profile.coverPhoto) ? profile.coverPhoto : "",
         mediaUrls: (profile.galleryVideos || []).filter((url) => /^https:\/\//i.test(url)),
         displayOrder: 0,
@@ -404,7 +413,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo<AuthContextType>(() => ({
-    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin", talentTags,
+    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
     pendingSponsors, inquiries, supportInquiries: [], faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
@@ -415,8 +424,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
-  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentTags, teamMembers, user, userStatus]);
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

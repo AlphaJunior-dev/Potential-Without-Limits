@@ -89,6 +89,8 @@ export default function AdminDashboardPage() {
     uploadTalentPhoto,
     talentTags,
     updateTalentTags,
+    talentCategories,
+    updateTalentCategories,
     logout
   } = useAuth();
 
@@ -165,6 +167,32 @@ export default function AdminDashboardPage() {
     setSelectedSkills((skills) => skills.filter((skill) => skill !== current.name));
   };
 
+  const addCustomCategory = async () => {
+    const name = customCategory.trim().replace(/\s+/g, " ");
+    if (!name) return;
+    const existing = talentCategories.find((categoryItem) => categoryItem.name.toLowerCase() === name.toLowerCase());
+    const categoryItem = existing || { id: `category-${Date.now()}`, name, status: "active" as const };
+    if (!existing) await updateTalentCategories([...talentCategories, categoryItem]);
+    setCategory(categoryItem.name);
+    setCustomCategory("");
+  };
+
+  const renameTalentCategory = async (id: string) => {
+    const current = talentCategories.find((categoryItem) => categoryItem.id === id);
+    if (!current) return;
+    const requestedName = window.prompt("Rename this Foundation category", current.name)?.trim().replace(/\s+/g, " ");
+    if (!requestedName || requestedName === current.name || talentCategories.some((categoryItem) => categoryItem.id !== id && categoryItem.name.toLowerCase() === requestedName.toLowerCase())) return;
+    await updateTalentCategories(talentCategories.map((categoryItem) => categoryItem.id === id ? { ...categoryItem, name: requestedName } : categoryItem));
+    if (category === current.name) setCategory(requestedName);
+  };
+
+  const retireTalentCategory = async (id: string) => {
+    const current = talentCategories.find((categoryItem) => categoryItem.id === id);
+    if (!current || !window.confirm(`Retire “${current.name}” from future Talent profiles? Existing profiles will keep their saved category.`)) return;
+    await updateTalentCategories(talentCategories.map((categoryItem) => categoryItem.id === id ? { ...categoryItem, status: "retired" as const } : categoryItem));
+    if (category === current.name) setCategory("");
+  };
+
   // Branding CMS Form State
   const [brandingForm, setBrandingForm] = useState(branding);
   const [brandingNotice, setBrandingNotice] = useState(false);
@@ -199,12 +227,11 @@ export default function AdminDashboardPage() {
   const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [story, setStory] = useState("");
   const [aspiration, setAspiration] = useState("");
   const [supportPathway, setSupportPathway] = useState("");
   const [consentReference, setConsentReference] = useState("");
-  const [consentReviewedAt, setConsentReviewedAt] = useState("");
-  const [consentReviewDueAt, setConsentReviewDueAt] = useState("");
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
@@ -303,6 +330,7 @@ export default function AdminDashboardPage() {
             current_needs: currentNeeds || existing.current_needs,
             country_community: countryCommunity || existing.country_community,
             skills: selectedSkills,
+            ageBand: age,
             story,
             aspiration,
             supportPathway,
@@ -312,8 +340,6 @@ export default function AdminDashboardPage() {
               signedDate: existing.consentRecord?.signedDate || "2026-01-10",
               guardianName: existing.consentRecord?.guardianName || "Parent/Guardian",
               reference: consentReference,
-              reviewedAt: consentReviewedAt,
-              reviewDueAt: consentReviewDueAt,
             }
           });
         }
@@ -340,18 +366,17 @@ export default function AdminDashboardPage() {
           current_needs: currentNeeds || "Educational grant & laptop hardware",
           country_community: countryCommunity || location,
           skills: selectedSkills,
+          ageBand: age,
           story,
           aspiration,
           supportPathway,
-          consentRecord: {
+            consentRecord: {
             parentalConsent: true,
             mediaReleasePermission: mediaReleasePermission,
             signedDate: "2026-01-10",
-            guardianName: "Parent/Guardian",
-            reference: consentReference,
-            reviewedAt: consentReviewedAt,
-            reviewDueAt: consentReviewDueAt,
-          }
+              guardianName: "Parent/Guardian",
+              reference: consentReference,
+            }
         };
         await addProfile(newProfile);
         triggerToast("✓ Profile Created", "New youth creator added to directory.");
@@ -370,8 +395,6 @@ export default function AdminDashboardPage() {
       setAspiration("");
       setSupportPathway("");
       setConsentReference("");
-      setConsentReviewedAt("");
-      setConsentReviewDueAt("");
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
     }
@@ -380,7 +403,7 @@ export default function AdminDashboardPage() {
   const handleEditTalent = (p: YouthProfile) => {
     setEditingId(p.id);
     setFirstName(p.name);
-    setAge(p.age.toString());
+    setAge(p.ageBand || "");
     setCategory(p.category);
     setLocation(p.location || "");
     setBio(p.bio);
@@ -394,8 +417,6 @@ export default function AdminDashboardPage() {
     setAspiration(p.aspiration || p.dream || "");
     setSupportPathway(p.supportPathway || p.current_needs || "");
     setConsentReference(p.consentRecord?.reference || "");
-    setConsentReviewedAt(p.consentRecord?.reviewedAt || "");
-    setConsentReviewDueAt(p.consentRecord?.reviewDueAt || "");
   };
 
   const handleDeleteTalent = async (id: string) => {
@@ -1181,34 +1202,33 @@ export default function AdminDashboardPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Internal Reference</label>
+                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Optional public age band</label>
                       <input
-                        type="number"
-                        required
+                        type="text"
                         value={age}
                         onChange={(e) => setAge(e.target.value)}
+                        placeholder="For example: 13–15"
                         className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Category</label>
+                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Primary category</label>
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
                       >
-                        <option value="Technology">Technology</option>
-                        <option value="Robotics">Robotics</option>
-                        <option value="Digital Art">Digital Art</option>
-                        <option value="Music">Music</option>
-                        <option value="Sports">Sports</option>
-                        <option value="Academics">Academics</option>
-                        <option value="Leadership">Leadership</option>
-                        <option value="Entrepreneurship">Entrepreneurship</option>
-                        <option value="Biotech">Biotech</option>
-                        <option value="Creative Writing">Creative Writing</option>
+                        <option value="">Select a category</option>
+                        {category && !talentCategories.some((categoryItem) => categoryItem.name === category && categoryItem.status === "active") && <option value={category}>{category}</option>}
+                        {talentCategories.filter((categoryItem) => categoryItem.status === "active").map((categoryItem) => <option key={categoryItem.id} value={categoryItem.name}>{categoryItem.name}</option>)}
                       </select>
                     </div>
+                  </div>
+
+                  <div className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
+                    <div className="flex items-center justify-between gap-3"><label className="font-semibold text-[#0B2E6B]">Category library</label><span className="text-[10px] text-[#0B2E6B]/55">Add or manage reusable primary categories</span></div>
+                    <div className="flex gap-2"><input value={customCategory} onChange={(event) => setCustomCategory(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomCategory(); } }} placeholder="Add a category, for example Architecture" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomCategory()} className="rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add category</button></div>
+                    <div className="flex flex-wrap gap-1.5">{talentCategories.filter((categoryItem) => categoryItem.status === "active").map((categoryItem) => <span key={categoryItem.id} className="inline-flex items-center gap-1 rounded-full border border-[#0B2E6B]/12 bg-white py-1 pl-2 pr-1 text-[9px] font-bold text-[#0B2E6B]"><span>{categoryItem.name}</span><button type="button" onClick={() => void renameTalentCategory(categoryItem.id)} aria-label={`Rename ${categoryItem.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentCategory(categoryItem.id)} aria-label={`Retire ${categoryItem.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span>)}</div>
                   </div>
 
                   <div>
@@ -1245,7 +1265,7 @@ export default function AdminDashboardPage() {
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Where they are heading</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved learning or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">What support could unlock</label><input value={supportPathway} onChange={(event) => setSupportPathway(event.target.value)} placeholder="Examples: mentoring, equipment, training, creative materials" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 
-	                  <div className="space-y-2 rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent record — never public</p><input value={consentReference} onChange={(event) => setConsentReference(event.target.value)} placeholder="Consent reference / internal file ID" className="w-full rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><div className="grid grid-cols-2 gap-2"><input type="date" value={consentReviewedAt} onChange={(event) => setConsentReviewedAt(event.target.value)} className="rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><input type="date" value={consentReviewDueAt} onChange={(event) => setConsentReviewDueAt(event.target.value)} className="rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /></div></div>
+	                  <div className="space-y-2 rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent record — never public</p><input value={consentReference} onChange={(event) => setConsentReference(event.target.value)} placeholder="Consent reference / internal file ID" className="w-full rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><p className="text-[10px] leading-relaxed text-amber-900/70">Consent review is handled by your safeguarding team. This CMS keeps only the private reference and the public-release switches.</p></div>
 
 	                  {/* Persistent server-authorized Talent photo uploads */}
                   <div className="p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl space-y-2">

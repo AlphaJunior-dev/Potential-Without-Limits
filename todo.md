@@ -91,3 +91,6 @@
 - [x] Replace fixed public Talent category filters with active Foundation-managed tags and add safe empty states.
 - [x] Upgrade public Talent detail pages to present only explicitly released profile content and route interest through sponsor orientation.
 - [x] Add regression coverage for private-by-default Talent fields, media, and flexible tags.
+- [x] Replace the fixed primary-category dropdown with a Foundation-managed expandable category library, including administrator create, rename, and retire controls.
+- [x] Remove consent-review date inputs from the Talent CMS while retaining the private consent reference and explicit public-release controls.
+- [x] Clarify and implement the administrator-controlled public age option using a non-identifying age band by default.

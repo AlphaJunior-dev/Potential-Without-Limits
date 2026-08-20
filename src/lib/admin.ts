@@ -259,8 +259,6 @@ export function sanitizeTalentRecord(input: unknown) {
     skills,
     consent: {
       reference: safePublicText((item.consent as Record<string, unknown> | undefined)?.reference, 120) || "",
-      reviewedAt: safePublicText((item.consent as Record<string, unknown> | undefined)?.reviewedAt, 40) || "",
-      reviewDueAt: safePublicText((item.consent as Record<string, unknown> | undefined)?.reviewDueAt, 40) || "",
     },
     photoUrl: safeAssetUrl(item.photoUrl) || "",
     mediaUrls: rawMedia.map(safeAssetUrl).filter((url): url is string => Boolean(url)).slice(0, 4),
@@ -292,6 +290,10 @@ export function sanitizeTalentTagLibrary(input: unknown) {
     seen.add(id);
     return { id, name, status: item.status === "retired" ? "retired" as const : "active" as const };
   }).filter((entry): entry is { id: string; name: string; status: "active" | "retired" } => Boolean(entry)).slice(0, 80);
+}
+
+export function sanitizeTalentCategoryLibrary(input: unknown) {
+  return sanitizeTalentTagLibrary(input);
 }
 
 export function toPublicTalentCard(id: string, input: unknown) {

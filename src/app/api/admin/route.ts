@@ -9,6 +9,7 @@ import {
   sanitizePublicLegal,
   sanitizePublicMissionVision,
   sanitizePublicVideos,
+  sanitizeTalentCategoryLibrary,
   sanitizeTalentRecord,
   sanitizeTalentTagLibrary,
 } from "@/lib/admin";
@@ -122,6 +123,11 @@ export async function PATCH(request: NextRequest) {
       await db.collection("public_site_content").doc("main").set({ talentTags, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
       await appendAudit("updateTalentTagLibrary", "site_content", "main", administrator.uid, { activeTags: talentTags.filter((tag) => tag.status === "active").length });
       return NextResponse.json({ ok: true, talentTags });
+    } else if (body.action === "updateTalentCategoryLibrary") {
+      const talentCategories = sanitizeTalentCategoryLibrary(body.talentCategories);
+      await db.collection("public_site_content").doc("main").set({ talentCategories, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await appendAudit("updateTalentCategoryLibrary", "site_content", "main", administrator.uid, { activeCategories: talentCategories.filter((category) => category.status === "active").length });
+      return NextResponse.json({ ok: true, talentCategories });
     } else if (body.action === "reviewApplication" && typeof body.applicationId === "string") {
       if (typeof body.status !== "string" || !reviewStatuses.has(body.status)) return NextResponse.json({ error: "Invalid review status." }, { status: 400 });
       const reviewNote = typeof body.reviewNote === "string" ? body.reviewNote.trim().slice(0, 2_000) : "";
