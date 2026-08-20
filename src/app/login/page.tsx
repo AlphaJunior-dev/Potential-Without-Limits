@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebase";
-import { isSignInWithEmailLink, signInWithEmailLink, signOut } from "firebase/auth";
+import { isSignInWithEmailLink, signInWithEmailAndPassword, signInWithEmailLink, signOut, updatePassword } from "firebase/auth";
 import { Mail, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
@@ -15,6 +15,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isEmailLink, setIsEmailLink] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
   useEffect(() => {
     if (userStatus === "approved") router.replace("/sponsor/dashboard");
@@ -31,13 +33,24 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      if (!isSignInWithEmailLink(auth, window.location.href)) {
-        throw new Error("Use the secure sign-in link sent to your approved sponsor email address.");
-      }
-
-      const credential = await signInWithEmailLink(auth, email.trim().toLowerCase(), window.location.href);
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!password) throw new Error("Enter your password to continue.");
+      const credential = isSignInWithEmailLink(auth, window.location.href)
+        ? await signInWithEmailLink(auth, normalizedEmail, window.location.href)
+        : await signInWithEmailAndPassword(auth, normalizedEmail, password);
       const token = await credential.user.getIdTokenResult(true);
       if (token.claims.sponsor === true) {
+        if (isEmailLink) {
+          if (password.length < 10) throw new Error("Choose a password with at least 10 characters.");
+          if (password !== passwordConfirmation) throw new Error("Your password confirmation does not match.");
+          await updatePassword(credential.user, password);
+          const freshToken = await credential.user.getIdToken(true);
+          await fetch("/api/sponsor", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${freshToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "completePasswordSetup" }),
+          });
+        }
         router.replace("/sponsor/dashboard");
         return;
       }
@@ -45,7 +58,7 @@ export default function LoginPage() {
       await signOut(auth);
       throw new Error("This email address is not approved for sponsor access. Please contact PWLIF after your orientation call.");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Could not complete secure sign-in. Please use the invitation link sent to your approved email address.";
+      const message = err instanceof Error ? err.message : "Could not complete secure sign-in. Please try again or use a new invitation link.";
       setError(message);
     } finally {
       setSubmitting(false);
@@ -69,7 +82,7 @@ export default function LoginPage() {
             Sponsor Access
           </h1>
           <p className="font-inter text-xs text-[#0B2E6B]/70 mt-1">
-            Access your approved PWLIF sponsor hub through a secure email link
+            {isEmailLink ? "Verify your invitation, then choose a password for future secure sign-in." : "Sign in to your approved PWLIF sponsor hub."}
           </p>
         </div>
 
@@ -83,7 +96,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-5 font-inter text-xs">
           <div>
             <label className="block text-xs font-bold text-[#0B2E6B] uppercase tracking-wider mb-2">
-              Email Address
+              Approved Email Address
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-[#0B2E6B]/40 absolute left-3.5 top-3.5" />
@@ -98,19 +111,57 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-bold text-[#0B2E6B] uppercase tracking-wider mb-2">
+              {isEmailLink ? "Create Password" : "Password"}
+            </label>
+            <input
+              type="password"
+              required
+              minLength={isEmailLink ? 10 : 1}
+              autoComplete={isEmailLink ? "new-password" : "current-password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isEmailLink ? "At least 10 characters" : "Your password"}
+              className="w-full px-4 py-3 bg-[#F8FAFC] text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 border border-[#0B2E6B]/15 rounded-xl text-sm font-medium focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
+            />
+          </div>
+
+          {isEmailLink && (
+            <div>
+              <label className="block text-xs font-bold text-[#0B2E6B] uppercase tracking-wider mb-2">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                required
+                minLength={10}
+                autoComplete="new-password"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                placeholder="Re-enter your password"
+                className="w-full px-4 py-3 bg-[#F8FAFC] text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 border border-[#0B2E6B]/15 rounded-xl text-sm font-medium focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
+              />
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={submitting || !isEmailLink}
+            disabled={submitting}
             className="w-full bg-[#079432] hover:bg-[#14B84A] text-white font-montserrat font-extrabold py-3.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 font-inter mt-2 disabled:opacity-50 cursor-pointer text-xs"
           >
-            <span>{submitting ? "Completing Access..." : "Complete Secure Sign-In"}</span>
+            <span>{submitting ? "Completing Access..." : isEmailLink ? "Set Password & Continue" : "Sign In Securely"}</span>
             <ArrowRight className="w-4 h-4 text-white" />
           </button>
         </form>
 
-        {!isEmailLink && (
+        {isEmailLink ? (
           <p className="mt-3 text-center text-[11px] text-[#0B2E6B]/60 font-inter">
-            Open the invitation link sent to your approved email address, then enter that same address here to complete sign-in.
+            This one-time invitation verifies your approved email address. PWLIF never sees or stores the password you choose.
+          </p>
+        ) : (
+          <p className="mt-3 text-center text-[11px] text-[#0B2E6B]/60 font-inter">
+            First-time sponsor? Open the secure invitation link sent after your orientation call to set your password.
           </p>
         )}
 

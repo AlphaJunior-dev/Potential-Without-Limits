@@ -50,7 +50,7 @@ export default function PendingPage() {
 
           {/* Body Description */}
           <p className="font-inter text-[#0B2E6B]/70 leading-relaxed mb-6 text-xs md:text-sm">
-            To uphold careful safeguarding and partnership review, sponsor access is granted only after an orientation call and manual approval. If approved, PWLIF will send a secure passwordless sign-in invitation to your email address.
+            To uphold careful safeguarding and partnership review, sponsor access is granted only after an orientation call and manual approval. If approved, PWLIF will send a secure email invitation so you can verify your address and create your own dashboard password.
           </p>
 
           {/* Review In Progress Pill */}

@@ -823,7 +823,7 @@ export default function AdminDashboardPage() {
                   Sponsor Vetting &amp; Onboarding
                 </h1>
                 <p className="text-xs text-[#0B2E6B]/60 mt-0.5">
-                  Review incoming sponsor applications, verify categories and tiers, and approve access.
+                  Review incoming sponsor applications, confirm orientation completion, and approve access.
                 </p>
               </div>
 
@@ -941,7 +941,6 @@ export default function AdminDashboardPage() {
                   <thead className="bg-[#F8FAFC] text-[#0B2E6B]/60 uppercase font-mono tracking-wider border-b border-[#0B2E6B]/10">
                     <tr>
                       <th className="p-4">Organization / Contact</th>
-                      <th className="p-4">Category &amp; Tier</th>
                       <th className="p-4">Vetting Call Status</th>
                       <th className="p-4">Verification Actions</th>
                       <th className="p-4">Invitation Status</th>
@@ -967,17 +966,6 @@ export default function AdminDashboardPage() {
                           >
                             LinkedIn Record <ExternalLink className="w-2.5 h-2.5" />
                           </a>
-                        </td>
-
-                        <td className="p-4 space-y-1">
-                          <div className="flex flex-col gap-1">
-                            <span className="bg-[#079432]/10 text-[#079432] text-[10px] font-bold px-2.5 py-0.5 rounded-full w-fit">
-                              {sponsor.sponsorCategory || "Child Sponsor"}
-                            </span>
-                            <span className="bg-[#F7B500]/15 text-[#0B2E6B] text-[10px] font-bold px-2.5 py-0.5 rounded-full w-fit">
-                              {sponsor.membershipTier || "Gold Tier"}
-                            </span>
-                          </div>
                         </td>
 
                         <td className="p-4 space-y-2">
@@ -1046,10 +1034,14 @@ export default function AdminDashboardPage() {
                             </button>
 
                             <button
-                              onClick={() => {
+                              onClick={async () => {
                                 if (window.confirm(`Revoke access and delete sponsor "${sponsor.name}" (${sponsor.company || sponsor.email})?`)) {
-                                  deleteSponsor(sponsor.id);
-                                  triggerToast("✓ Sponsor Access Revoked", `Removed ${sponsor.name} and revoked dashboard access.`);
+                                  try {
+                                    await deleteSponsor(sponsor.id);
+                                    triggerToast("✓ Sponsor Access Revoked", `Removed ${sponsor.name} and revoked dashboard access.`);
+                                  } catch (err) {
+                                    triggerToast("✗ Sponsor Not Removed", err instanceof Error ? err.message : "The protected sponsor record could not be removed. Please try again.");
+                                  }
                                 }
                               }}
                               className="bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white font-bold p-1.5 rounded-lg border border-red-500/30 transition text-[11px] cursor-pointer"
@@ -1225,11 +1217,13 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
-                    <div className="flex items-center justify-between gap-3"><label className="font-semibold text-[#0B2E6B]">Category library</label><span className="text-[10px] text-[#0B2E6B]/55">Add or manage reusable primary categories</span></div>
-                    <div className="flex gap-2"><input value={customCategory} onChange={(event) => setCustomCategory(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomCategory(); } }} placeholder="Add a category, for example Architecture" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomCategory()} className="rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add category</button></div>
-                    <div className="flex flex-wrap gap-1.5">{talentCategories.filter((categoryItem) => categoryItem.status === "active").map((categoryItem) => <span key={categoryItem.id} className="inline-flex items-center gap-1 rounded-full border border-[#0B2E6B]/12 bg-white py-1 pl-2 pr-1 text-[9px] font-bold text-[#0B2E6B]"><span>{categoryItem.name}</span><button type="button" onClick={() => void renameTalentCategory(categoryItem.id)} aria-label={`Rename ${categoryItem.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentCategory(categoryItem.id)} aria-label={`Retire ${categoryItem.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span>)}</div>
-                  </div>
+                  <details className="rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
+                    <summary className="cursor-pointer list-none font-semibold text-[#0B2E6B] [&::-webkit-details-marker]:hidden">Manage category library <span className="ml-1 text-[10px] font-normal text-[#0B2E6B]/55">({talentCategories.filter((item) => item.status === "active").length} active)</span></summary>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex gap-2"><input value={customCategory} onChange={(event) => setCustomCategory(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomCategory(); } }} placeholder="Add a category, for example Architecture" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomCategory()} className="shrink-0 rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add</button></div>
+                      <div className="max-h-36 space-y-1 overflow-y-auto pr-1">{talentCategories.filter((item) => item.status === "active").map((item) => <div key={item.id} className="flex items-center justify-between gap-2 rounded-lg border border-[#0B2E6B]/10 bg-white px-2 py-1.5 text-[10px] font-semibold text-[#0B2E6B]"><span className="truncate">{item.name}</span><span className="shrink-0 space-x-1"><button type="button" onClick={() => void renameTalentCategory(item.id)} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentCategory(item.id)} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span></div>)}</div>
+                    </div>
+                  </details>
 
                   <div>
                       <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Region / Community</label>
@@ -1254,12 +1248,11 @@ export default function AdminDashboardPage() {
 	                    />
 	                  </div>
 
-	                  <div className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
-	                    <div className="flex items-center justify-between gap-3"><label className="font-semibold text-[#0B2E6B]">Skills &amp; interests</label><span className="text-[10px] text-[#0B2E6B]/55">Select or create a reusable tag</span></div>
-	                    <div className="flex flex-wrap gap-1.5">{talentTags.filter((tag) => tag.status === "active").map((tag) => <button key={tag.id} type="button" onClick={() => toggleSkill(tag.name)} className={`rounded-full border px-2 py-1 text-[10px] font-bold transition ${selectedSkills.includes(tag.name) ? "border-[#079432] bg-[#079432] text-white" : "border-[#0B2E6B]/15 bg-white text-[#0B2E6B]/70 hover:border-[#079432]"}`}>{tag.name}</button>)}</div>
-	                    <div className="flex gap-2"><input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomSkill(); } }} placeholder="Add a new skill or interest" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomSkill()} className="rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add tag</button></div>
-	                    <div className="border-t border-[#0B2E6B]/10 pt-2"><p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#0B2E6B]/55">Manage tag library</p><div className="mt-1.5 flex flex-wrap gap-1.5">{talentTags.filter((tag) => tag.status === "active").map((tag) => <span key={`manage-${tag.id}`} className="inline-flex items-center gap-1 rounded-full border border-[#0B2E6B]/12 bg-white py-1 pl-2 pr-1 text-[9px] font-bold text-[#0B2E6B]"><span>{tag.name}</span><button type="button" onClick={() => void renameTalentTag(tag.id)} aria-label={`Rename ${tag.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentTag(tag.id)} aria-label={`Retire ${tag.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span>)}</div></div>
-	                  </div>
+                  <div className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
+                    <div className="flex items-center justify-between gap-3"><label className="font-semibold text-[#0B2E6B]">Skills &amp; interests</label><span className="text-[10px] text-[#0B2E6B]/55">{selectedSkills.length ? `${selectedSkills.length} selected` : "None selected"}</span></div>
+                    <select value="" onChange={(event) => { if (event.target.value) toggleSkill(event.target.value); }} className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none"><option value="">Select or remove a skill</option>{talentTags.filter((tag) => tag.status === "active").map((tag) => <option key={tag.id} value={tag.name}>{selectedSkills.includes(tag.name) ? `✓ ${tag.name}` : tag.name}</option>)}</select>
+                    <details className="rounded-lg border border-[#0B2E6B]/10 bg-white p-2"><summary className="cursor-pointer list-none text-[10px] font-semibold text-[#0B2E6B] [&::-webkit-details-marker]:hidden">Manage skills library <span className="font-normal text-[#0B2E6B]/55">({talentTags.filter((tag) => tag.status === "active").length} active)</span></summary><div className="mt-2 space-y-2"><div className="flex gap-2"><input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomSkill(); } }} placeholder="Add a new skill or interest" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomSkill()} className="shrink-0 rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add</button></div><div className="max-h-36 space-y-1 overflow-y-auto pr-1">{talentTags.filter((tag) => tag.status === "active").map((tag) => <div key={`manage-${tag.id}`} className="flex items-center justify-between gap-2 rounded-lg border border-[#0B2E6B]/10 px-2 py-1.5 text-[10px] font-semibold text-[#0B2E6B]"><span className="truncate">{tag.name}</span><span className="shrink-0 space-x-1"><button type="button" onClick={() => void renameTalentTag(tag.id)} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentTag(tag.id)} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span></div>)}</div></div></details>
+                  </div>
 
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved story</label><textarea rows={3} value={story} onChange={(event) => setStory(event.target.value)} placeholder="Focus on learning, effort, and interests — never private family, school, health, or financial details." className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Where they are heading</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved learning or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>

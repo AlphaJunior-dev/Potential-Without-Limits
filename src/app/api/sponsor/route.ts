@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb, requireApprovedSponsor, toSponsorTalentCard } from "@/lib/admin";
 
 export const runtime = "nodejs";
@@ -50,9 +51,34 @@ export async function GET(request: NextRequest) {
         roleTitle: optionalText(application?.roleTitle, 160),
         email: optionalText(sponsor.email, 320) || optionalText(application?.email, 320),
         applicationRecorded: Boolean(application),
+        orientationSubmission: application ? {
+          websiteOrLinkedIn: optionalText(application.websiteOrLinkedIn, 300),
+          organizationDescription: optionalText(application.orgDescription, 1000),
+          supportIntent: optionalText(application.supportIntent, 1000),
+          preferredContactWindow: optionalText(application.preferredContactWindow, 300),
+        } : null,
+        passwordSetupComplete: account?.passwordSetupRequired !== true || Boolean(account?.passwordSetupCompletedAt),
       },
       talent,
     });
+  } catch (error) {
+    return accessDenied(error);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const sponsor = await requireApprovedSponsor(request);
+    const body = await request.json().catch(() => null);
+    if (!body || body.action !== "completePasswordSetup") {
+      return NextResponse.json({ error: "Unsupported sponsor action." }, { status: 400 });
+    }
+    await adminDb().collection("sponsor_accounts").doc(sponsor.uid).set({
+      passwordSetupRequired: false,
+      passwordSetupCompletedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    return NextResponse.json({ ok: true });
   } catch (error) {
     return accessDenied(error);
   }

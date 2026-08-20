@@ -17,7 +17,7 @@ import {
   Lock,
 } from "lucide-react";
 
-import { SponsorCategory, MembershipTier } from "@/lib/data";
+import { SponsorCategory } from "@/lib/data";
 
 export default function BookACallPage() {
   const [name, setName] = useState("");
@@ -27,7 +27,6 @@ export default function BookACallPage() {
   const [linkedin, setLinkedin] = useState("");
   const [preferredTime, setPreferredTime] = useState("Tomorrow 10:00 AM EST");
   const [category, setCategory] = useState<SponsorCategory>("Child Sponsor");
-  const [tier, setTier] = useState<MembershipTier>("Gold");
   const [orgDescription, setOrgDescription] = useState("");
   const [supportIntent, setSupportIntent] = useState("");
   const [consent, setConsent] = useState(false);
@@ -51,7 +50,7 @@ export default function BookACallPage() {
           roleTitle,
           websiteOrLinkedIn: linkedin,
           orgDescription,
-          supportIntent: `${category}; ${tier}. ${supportIntent}`,
+          supportIntent,
           preferredContactWindow: preferredTime,
           consent,
         }),
@@ -119,10 +118,10 @@ export default function BookACallPage() {
               03
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
-              3. Passwordless Sponsor Access
+              3. Secure Sponsor Access
             </h4>
             <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">
-              After approval, PWLIF sends a secure email-link invitation for private dashboard access.
+              After approval, PWLIF sends a secure email invitation. The sponsor verifies it and creates their own password for future dashboard sign-in.
             </p>
           </div>
         </div>
@@ -274,8 +273,7 @@ export default function BookACallPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+                  <div>
                       <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
                         Sponsorship Category *
                       </label>
@@ -290,23 +288,6 @@ export default function BookACallPage() {
                         <option value="Corporate Partner">Corporate Partner</option>
                         <option value="Strategic Partner">Strategic Partner</option>
                       </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#0B2E6B]/80 uppercase tracking-wider mb-1">
-                        Membership Tier *
-                      </label>
-                      <select
-                        value={tier}
-                        onChange={(e) => setTier(e.target.value as MembershipTier)}
-                        className="w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-xs text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
-                      >
-                        <option value="Platinum">Platinum</option>
-                        <option value="Gold">Gold</option>
-                        <option value="Silver">Silver</option>
-                        <option value="Bronze">Bronze</option>
-                      </select>
-                    </div>
                   </div>
 
                   <div>

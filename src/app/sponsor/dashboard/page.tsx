@@ -29,6 +29,13 @@ type SponsorProfile = {
   roleTitle?: string;
   email?: string;
   applicationRecorded: boolean;
+  passwordSetupComplete?: boolean;
+  orientationSubmission?: {
+    websiteOrLinkedIn?: string;
+    organizationDescription?: string;
+    supportIntent?: string;
+    preferredContactWindow?: string;
+  } | null;
 };
 
 type SponsorTalent = {
@@ -244,6 +251,25 @@ export default function SponsorDashboardPage() {
                 </div>
               </article>
             </div>
+
+            {profile?.applicationRecorded && (
+              <article className="rounded-3xl border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
+                <div className="flex items-start justify-between gap-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Your orientation submission</p>
+                    <h2 className="mt-2 font-montserrat text-xl font-black tracking-[-0.03em]">The details you shared with PWLIF</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#0B2E6B]/65">This private overview is visible only to your approved sponsor account and mirrors the information submitted before your orientation call.</p>
+                  </div>
+                  <FileText className="h-6 w-6 shrink-0 text-[#079432]" />
+                </div>
+                <div className="mt-5 grid gap-x-8 md:grid-cols-2">
+                  <DetailRow label="Website or LinkedIn" value={profile.orientationSubmission?.websiteOrLinkedIn} />
+                  <DetailRow label="Preferred contact window" value={profile.orientationSubmission?.preferredContactWindow} />
+                  <DetailRow label="About your organization" value={profile.orientationSubmission?.organizationDescription} />
+                  <DetailRow label="How you hope to support" value={profile.orientationSubmission?.supportIntent} />
+                </div>
+              </article>
+            )}
 
             <article className="rounded-3xl border border-[#0B2E6B]/10 bg-white p-6 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-7">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

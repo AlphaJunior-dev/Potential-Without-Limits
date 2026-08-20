@@ -110,7 +110,7 @@ test("public Talent retrieval applies the strict sanitizer after a server-only c
   assert.match(adminLibrary, /if \(!record \|\| !record\.visibility\.profileVisible\) return null/);
 });
 
-test("sponsor access is issued by post-call passwordless invitation rather than displayed credentials", async () => {
+test("sponsor access is issued by post-call verified invitation with sponsor-chosen credentials, never displayed credentials", async () => {
   const [adminPage, provider, adminRoute, loginPage, bookCall, pendingPage] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
@@ -128,9 +128,10 @@ test("sponsor access is issued by post-call passwordless invitation rather than 
   assert.match(provider, /postCallConfirmed: true/);
   assert.match(adminRoute, /body\.action === "sendSponsorInvitation"/);
   assert.match(loginPage, /signInWithEmailLink/);
+  assert.match(loginPage, /createUserWithEmailAndPassword|updatePassword/);
   assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);
   assert.match(bookCall, /\/api\/orientation/);
-  assert.match(pendingPage, /passwordless(?: sign-in)? invitation/i);
+  assert.match(pendingPage, /create your own dashboard password/i);
 
   for (const source of [adminPage, loginPage, bookCall, pendingPage]) {
     assert.doesNotMatch(source, /Temporary Token Password|Temporary Access Password|Generate Credentials|Credentials Token/i);
