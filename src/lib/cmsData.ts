@@ -135,7 +135,7 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
   {
     id: "faq-4",
     question: "How do I begin a Sponsor Talent conversation?",
-    answer: "Prospective sponsors submit an orientation request at /book-a-call and then schedule a private conversation. Sponsor access is considered only after that call and manual approval; approved sponsors receive a secure passwordless email-link invitation.",
+    answer: "Prospective sponsors submit an orientation request at /book-a-call and then schedule a private conversation. Sponsor access is considered only after that call and manual approval; approved sponsors receive a one-time email-link invitation to create their own password.",
     category: "General",
     order: 4,
   },
@@ -242,7 +242,7 @@ export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
 
 1. Controlled Publication: Sponsor Talent records and team information use field-level publication controls, so information can be reviewed, published, edited, or withdrawn as appropriate.
 
-2. Passwordless Sponsor Access: Sponsors receive secure email-link invitations only after an orientation call and manual approval. No sponsor passwords are generated or displayed by the portal.
+2. Sponsor Password Access: Sponsors receive a secure one-time email-link invitation only after an orientation call and manual approval. The invitation lets each sponsor create their own password; no passwords are generated, displayed, or stored by the portal.
 
 3. Administrative Accountability: Authorised administrative actions, including application reviews, invitations, and content updates, are recorded through protected server-side workflows.`,
   lastUpdated: "2026-08-01",

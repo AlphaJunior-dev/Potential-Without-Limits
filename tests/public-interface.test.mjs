@@ -111,11 +111,12 @@ test("public Talent retrieval applies the strict sanitizer after a server-only c
 });
 
 test("sponsor access is issued by post-call verified invitation with sponsor-chosen credentials, never displayed credentials", async () => {
-  const [adminPage, provider, adminRoute, loginPage, bookCall, orientationForm, orientationRoute, sponsorRoute, publicRoute, pendingPage, adminLibrary] = await Promise.all([
+  const [adminPage, provider, adminRoute, loginPage, sponsorSetupPage, bookCall, orientationForm, orientationRoute, sponsorRoute, publicRoute, pendingPage, adminLibrary] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/api/admin/route.ts"),
     readSource("src/app/login/page.tsx"),
+    readSource("src/app/sponsor/setup/page.tsx"),
     readSource("src/app/book-a-call/page.tsx"),
     readSource("src/components/OrientationForm.tsx"),
     readSource("src/app/api/orientation/route.ts"),
@@ -142,8 +143,14 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.doesNotMatch(adminPage, /Vetting Call Status|Call Scheduled|Revoke &amp; Delete Sponsor/);
   assert.match(provider, /revokeSponsorAccess/);
   assert.match(adminLibrary, /account\.data\(\)\?\.accessStatus === "revoked"/);
-  assert.match(loginPage, /signInWithEmailLink/);
-  assert.match(loginPage, /createUserWithEmailAndPassword|updatePassword/);
+  assert.match(loginPage, /login\(email, password\)/);
+  assert.match(provider, /signInWithEmailAndPassword/);
+  assert.match(loginPage, /\/sponsor\/setup/);
+  assert.doesNotMatch(loginPage, /updatePassword|signInWithEmailLink/);
+  assert.match(sponsorSetupPage, /isSignInWithEmailLink/);
+  assert.match(sponsorSetupPage, /signInWithEmailLink/);
+  assert.match(sponsorSetupPage, /updatePassword/);
+  assert.match(adminRoute, /new URL\("\/sponsor\/setup", configuredContinueUrl\)/);
   assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);
   assert.match(bookCall, /\/api\/orientation/);
   assert.match(bookCall, /type="url"/);
@@ -163,9 +170,11 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
 });
 
 test("the redesigned sponsor dashboard uses a dedicated portal header and separates approved-sponsor pipeline access from public visibility controls", async () => {
-  const [dashboard, sponsorRoute, adminLibrary, navbar] = await Promise.all([
+  const [dashboard, sponsorRoute, sponsorTalentRoute, sponsorTalentPage, adminLibrary, navbar] = await Promise.all([
     readSource("src/app/sponsor/dashboard/page.tsx"),
     readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/app/api/sponsor/talent/[id]/route.ts"),
+    readSource("src/app/sponsor/talent/[id]/page.tsx"),
     readSource("src/lib/admin.ts"),
     readSource("src/components/Navbar.tsx"),
   ]);
@@ -175,6 +184,8 @@ test("the redesigned sponsor dashboard uses a dedicated portal header and separa
   assert.match(dashboard, /Partnership, with purpose\./);
   assert.match(dashboard, /Notifications/);
   assert.match(dashboard, /Private Sponsor Talent directory/);
+  assert.match(dashboard, /\/sponsor\/talent\/\$\{record\.id\}/);
+  assert.match(dashboard, /updatePassword/);
   assert.match(dashboard, /onClick=\{\(\) => logout\(\)\}/);
   assert.doesNotMatch(dashboard, /-mt-7/);
   assert.doesNotMatch(dashboard, /pendingSponsors|PWLIF Partner|Focus Track Interests|Tier:/);
@@ -184,6 +195,12 @@ test("the redesigned sponsor dashboard uses a dedicated portal header and separa
   assert.match(sponsorRoute, /collection\("sponsor_talent_records"\)/);
   assert.match(sponsorRoute, /toSponsorTalentCard/);
   assert.doesNotMatch(sponsorRoute, /visibility\.profileVisible/);
+  assert.match(sponsorTalentRoute, /requireApprovedSponsor\(request\)/);
+  assert.match(sponsorTalentRoute, /collection\("sponsor_talent_records"\)\.doc\(id\)/);
+  assert.match(sponsorTalentRoute, /toSponsorTalentCard/);
+  assert.match(sponsorTalentRoute, /Cache-Control": "private, no-store"/);
+  assert.match(sponsorTalentPage, /\/api\/sponsor\/talent\/\$\{encodeURIComponent\(id\)\}/);
+  assert.match(sponsorTalentPage, /Approved sponsor access/);
   assert.match(adminLibrary, /export function toPublicTalentCard/);
   assert.match(adminLibrary, /export function toSponsorTalentCard/);
   assert.match(navbar, /pathname\?\.startsWith\("\/sponsor\/"\)/);

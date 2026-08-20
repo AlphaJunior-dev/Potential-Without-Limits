@@ -104,3 +104,6 @@
 - [x] Expand the private Sponsor Vetting overview to show the full orientation submission without exposing it publicly.
 - [ ] Complete a controlled inbox-receipt test of the Firebase invitation email after this Preview is available; the portal now records only Firebase request acceptance and reports initiation failures honestly.
 - [x] Replace the vetting-call status control with a non-destructive revoke-access action that disables the sponsor dashboard while retaining the sponsor record and delete control.
+- [x] Make each approved sponsor Talent card open a server-authorized full private Talent detail view.
+- [x] Replace the public Sponsor Login destination with ordinary email-and-password sign-in that routes approved users to their dashboard.
+- [x] Restrict password creation to the Firebase invitation-link continuation flow and keep password changes within the authenticated sponsor account area.

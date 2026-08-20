@@ -36,8 +36,14 @@ async function appendAudit(action: string, entityType: string, entityId: string,
 
 async function requestSponsorSetupEmail(email: string) {
   const apiKey = process.env.FIREBASE_WEB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-  const continueUrl = process.env.FIREBASE_EMAIL_LINK_CONTINUE_URL;
-  if (!apiKey || !continueUrl) throw new Error("Sponsor invitation delivery is not configured.");
+  const configuredContinueUrl = process.env.FIREBASE_EMAIL_LINK_CONTINUE_URL;
+  if (!apiKey || !configuredContinueUrl) throw new Error("Sponsor invitation delivery is not configured.");
+  let continueUrl: string;
+  try {
+    continueUrl = new URL("/sponsor/setup", configuredContinueUrl).toString();
+  } catch {
+    throw new Error("Sponsor invitation delivery is not configured with a valid continue URL.");
+  }
 
   const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${encodeURIComponent(apiKey)}`, {
     method: "POST",

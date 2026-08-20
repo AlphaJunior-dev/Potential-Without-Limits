@@ -4,7 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 import { TalentPhoto } from "@/components/TalentPhoto";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import {
   ArrowRight,
   Bell,
@@ -82,12 +84,47 @@ export default function SponsorDashboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [feedCategory, setFeedCategory] = useState("All");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [nextPassword, setNextPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   useEffect(() => {
     if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") {
       router.replace("/login");
     }
   }, [router, userStatus]);
+
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPasswordMessage("");
+    if (!user?.email || !auth.currentUser) {
+      setPasswordMessage("Your active sponsor session could not be verified. Please sign in again.");
+      return;
+    }
+    if (nextPassword.length < 10) {
+      setPasswordMessage("Choose a new password with at least 10 characters.");
+      return;
+    }
+    if (nextPassword !== passwordConfirmation) {
+      setPasswordMessage("Your new password confirmation does not match.");
+      return;
+    }
+    setIsUpdatingPassword(true);
+    try {
+      await reauthenticateWithCredential(auth.currentUser, EmailAuthProvider.credential(user.email, currentPassword));
+      await updatePassword(auth.currentUser, nextPassword);
+      setCurrentPassword("");
+      setNextPassword("");
+      setPasswordConfirmation("");
+      setPasswordMessage("Your password has been updated.");
+    } catch (passwordError) {
+      setPasswordMessage(passwordError instanceof Error ? passwordError.message : "Your password could not be updated. Please try again.");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   useEffect(() => {
     if (!user || userStatus !== "approved") return;
@@ -347,7 +384,7 @@ export default function SponsorDashboardPage() {
                               ))}
                             </div>
                           ) : <span className="text-[11px] font-semibold text-[#0B2E6B]/45">No shared media</span>}
-                          <button type="button" onClick={() => setActiveTab("partnership")} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#079432] hover:text-[#14B84A]">Discuss <ArrowRight className="h-3.5 w-3.5" /></button>
+                          <Link href={`/sponsor/talent/${record.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#079432] hover:text-[#14B84A]">View full record <ArrowRight className="h-3.5 w-3.5" /></Link>
                         </div>
                       </div>
                     </article>
@@ -382,21 +419,15 @@ export default function SponsorDashboardPage() {
           <section className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <article className="rounded-3xl bg-[#0B2E6B] p-7 text-white shadow-[0_16px_38px_rgba(5,24,54,0.18)] sm:p-8">
               <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-[#F7B500]"><LockKeyhole className="h-5 w-5" /></div>
-              <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.16em] text-white/60">Passwordless sign-in</p>
-              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Your access is linked to your email.</h2>
-              <p className="mt-4 text-sm leading-6 text-white/70">PWLIF uses email-link access for approved sponsors. No password is created, stored, or shown in this portal.</p>
+              <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.16em] text-white/60">Account security</p>
+              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Your access is protected by your password.</h2>
+              <p className="mt-4 text-sm leading-6 text-white/70">You create your password once through the private invitation link. You can update it here whenever you need to.</p>
               <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white/85"><CheckCircle2 className="h-3.5 w-3.5 text-[#F7B500]" /> Access active</div>
             </article>
             <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Approved profile</p>
-              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Your recorded details</h2>
-              <div className="mt-5">
-                <DetailRow label="Representative" value={profile?.name} />
-                <DetailRow label="Organization" value={profile?.organization} />
-                <DetailRow label="Role" value={profile?.roleTitle} />
-                <DetailRow label="Email" value={profile?.email} />
-              </div>
-              <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#F5F6F0] p-4 text-xs leading-5 text-[#0B2E6B]/70"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#079432]" /><span>To request a change to approved sponsor details, please use the Partnership Desk to arrange a conversation with the foundation.</span></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Change password</p>
+              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Update your sign-in details</h2>
+              <form onSubmit={handlePasswordChange} className="mt-5 space-y-3"><input aria-label="Current password" type="password" required autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><input aria-label="New password" type="password" required minLength={10} autoComplete="new-password" value={nextPassword} onChange={(event) => setNextPassword(event.target.value)} placeholder="New password — at least 10 characters" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><input aria-label="Confirm new password" type="password" required minLength={10} autoComplete="new-password" value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} placeholder="Confirm new password" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><button type="submit" disabled={isUpdatingPassword} className="rounded-xl bg-[#079432] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A] disabled:opacity-50">{isUpdatingPassword ? "Updating password…" : "Update password"}</button></form>{passwordMessage && <p className="mt-4 text-xs leading-5 text-[#0B2E6B]/70">{passwordMessage}</p>}<div className="mt-6 border-t border-[#0B2E6B]/10 pt-5"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Approved profile</p><div className="mt-3"><DetailRow label="Representative" value={profile?.name} /><DetailRow label="Organization" value={profile?.organization} /><DetailRow label="Role" value={profile?.roleTitle} /><DetailRow label="Email" value={profile?.email} /></div><div className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F5F6F0] p-4 text-xs leading-5 text-[#0B2E6B]/70"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#079432]" /><span>To request a change to approved sponsor details, please use the Partnership Desk to arrange a conversation with the foundation.</span></div></div>
             </article>
           </section>
         )}
