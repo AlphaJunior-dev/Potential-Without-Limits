@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { TalentPhoto } from "@/components/TalentPhoto";
 import {
   ArrowRight,
   Bell,
@@ -303,7 +304,7 @@ export default function SponsorDashboardPage() {
                   {filteredTalent.map((record) => (
                     <article key={record.id} className="group overflow-hidden rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] shadow-[0_10px_25px_rgba(5,24,54,0.07)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(5,24,54,0.13)]">
                       {record.photoUrl ? (
-                        <img src={record.photoUrl} alt="" className="h-44 w-full object-cover" />
+                        <TalentPhoto src={record.photoUrl} alt="" className="h-44 w-full object-cover" />
                       ) : (
                         <div className="relative flex h-44 items-end overflow-hidden bg-[#0B2E6B] p-5">
                           <div className="absolute right-[-20px] top-[-45px] h-40 w-40 rounded-full border border-white/10" />

@@ -72,6 +72,11 @@ function isTemporaryMissionCopy(value: unknown) {
 
 const safeLegal: LegalSecurityConfig = { termsContent: "", privacyContent: "", securityStandardsContent: "", lastUpdated: "" };
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const internalTalentPhotoPattern = /^\/api\/talent-photo\/[A-Za-z0-9_-]{8,80}$/;
+
+function isSafeTalentPhotoUrl(value: unknown) {
+  return typeof value === "string" && (/^https:\/\//i.test(value) || internalTalentPhotoPattern.test(value));
+}
 
 function noClientAuthority() {
   throw new Error("This control requires a secured server operation.");
@@ -162,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const mediaUrls = Array.isArray(record.mediaUrls)
         ? record.mediaUrls.filter((url: unknown): url is string => typeof url === "string" && /^https:\/\//i.test(url))
         : [];
-      const photoUrl = typeof record.photoUrl === "string" && /^https:\/\//i.test(record.photoUrl)
+      const photoUrl = isSafeTalentPhotoUrl(record.photoUrl)
         ? record.photoUrl
         : "/pwlif-logo.png";
       const summary = typeof record.summary === "string" ? record.summary : "";
@@ -269,7 +274,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: form,
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok || typeof result?.url !== "string" || !/^https:\/\//i.test(result.url)) {
+    if (!response.ok || !isSafeTalentPhotoUrl(result?.url)) {
       throw new Error(typeof result?.error === "string" ? result.error : "The Talent photo could not be stored.");
     }
     return result.url;
@@ -332,7 +337,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const profileVisible = requestedVisibility?.profileVisible ?? profile.featuredOnHomepage === true;
     const visibility = {
       profileVisible,
-      photoVisible: profileVisible && requestedVisibility?.photoVisible === true && /^https:\/\//i.test(profile.coverPhoto || ""),
+      photoVisible: profileVisible && requestedVisibility?.photoVisible === true && isSafeTalentPhotoUrl(profile.coverPhoto),
       mediaVisible: profileVisible && requestedVisibility?.mediaVisible === true && Array.isArray(profile.galleryVideos) && profile.galleryVideos.some((url) => /^https:\/\//i.test(url)),
       summaryVisible: profileVisible && requestedVisibility?.summaryVisible === true,
     };
@@ -342,7 +347,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         displayTitle: title,
         summary,
         supportArea,
-        photoUrl: /^https:\/\//i.test(profile.coverPhoto || "") ? profile.coverPhoto : "",
+        photoUrl: isSafeTalentPhotoUrl(profile.coverPhoto) ? profile.coverPhoto : "",
         mediaUrls: (profile.galleryVideos || []).filter((url) => /^https:\/\//i.test(url)),
         displayOrder: 0,
         visibility,

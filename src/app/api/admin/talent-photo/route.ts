@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminStorage, requireAdministrator } from "@/lib/admin";
+import { adminDb, requireAdministrator } from "@/lib/admin";
 
 export const runtime = "nodejs";
 
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+// Firestore has a 1 MiB document limit. Keeping each photo below 192 KiB leaves
+// material room for metadata and makes this a deliberately small, no-cost
+// fallback—not a general-purpose file storage system.
+const MAX_IMAGE_BYTES = 192 * 1024;
 
 function imageTypeFromBytes(bytes: Uint8Array) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
@@ -51,32 +54,13 @@ function errorResponse(error: unknown) {
 
   if (message === "UNAUTHENTICATED") return NextResponse.json({ error: "Sign in as an administrator before uploading a photo." }, { status: 401 });
   if (message === "FORBIDDEN") return NextResponse.json({ error: "Administrator access is required to upload a photo." }, { status: 403 });
-  if (/specified bucket does not exist|bucket.+not found|not.?found/i.test(message)) {
-    return NextResponse.json(
-      {
-        error: "Firebase Storage has not been initialized for this Foundation project yet. In Firebase Console, open Storage, select Get started, and create the default bucket. No photo was saved.",
-        code: "STORAGE_BUCKET_NOT_READY",
-      },
-      { status: 503 },
-    );
-  }
-  if (/storage\.objects\.create|permission.?denied|insufficient.?permission/i.test(message)) {
-    return NextResponse.json(
-      {
-        error: "The Foundation server is not authorized to save photos to Firebase Storage. An administrator must grant the Firebase Admin service account write access to the configured Storage bucket. No photo was saved.",
-        code: "STORAGE_WRITE_NOT_AUTHORIZED",
-      },
-      { status: 503 },
-    );
-  }
   return NextResponse.json({ error: "The image could not be stored. Please try again." }, { status: 500 });
 }
 
 /**
- * Stores one selected Talent photo only after the Firebase administrator claim
- * has been verified server-side. The client receives an HTTPS download URL that
- * the existing Talent sanitizer can safely persist and later control via the
- * profile and photo visibility switches.
+ * Stores a small, validated Talent photo only after the Firebase administrator
+ * claim has been verified server-side. The raw bytes are never returned in
+ * public CMS data and are served only by dedicated visibility-aware routes.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -89,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (photo.size === 0 || photo.size > MAX_IMAGE_BYTES) {
-      return NextResponse.json({ error: "Each Talent photo must be between 1 byte and 4 MB." }, { status: 400 });
+      return NextResponse.json({ error: "Each Talent photo must be between 1 byte and 192 KB for the Foundation's no-cost image service." }, { status: 400 });
     }
 
     const bytes = new Uint8Array(await photo.arrayBuffer());
@@ -98,25 +82,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Only JPEG, PNG, and WebP Talent photos are accepted." }, { status: 400 });
     }
 
-    const bucket = adminStorage();
-    const downloadToken = crypto.randomUUID();
-    const objectName = `talent-photos/${administrator.uid}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${image.extension}`;
-    const object = bucket.file(objectName);
-
-    await object.save(Buffer.from(bytes), {
-      resumable: false,
-      validation: "crc32c",
-      metadata: {
-        contentType: image.contentType,
-        cacheControl: "private, max-age=0, no-store",
-        metadata: {
-          uploadedBy: administrator.uid,
-          firebaseStorageDownloadTokens: downloadToken,
-        },
-      },
+    const asset = adminDb().collection("talent_photo_assets").doc();
+    await asset.set({
+      bytes: Buffer.from(bytes),
+      contentType: image.contentType,
+      uploadedBy: administrator.uid,
+      createdAt: new Date(),
     });
 
-    const url = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucket.name)}/o/${encodeURIComponent(objectName)}?alt=media&token=${downloadToken}`;
+    const url = `/api/talent-photo/${asset.id}`;
     return NextResponse.json({ url }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     return errorResponse(error);

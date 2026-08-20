@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth, PendingSponsor } from "@/context/AuthContext";
+import { TalentPhoto } from "@/components/TalentPhoto";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
 import { INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, TeamMember } from "@/lib/cmsData";
@@ -1199,7 +1200,7 @@ export default function AdminDashboardPage() {
                       <div className="grid grid-cols-4 gap-2 pt-2">
                         {uploadedImages.map((img, idx) => (
                           <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-[#0B2E6B]/20 group">
-                            <Image src={img} alt="Preview" fill className="object-cover" />
+                          <TalentPhoto src={img} alt="Preview" fill className="object-cover" />
                             <button
                               type="button"
                               onClick={() => setCoverPhoto(img)}
@@ -1350,7 +1351,7 @@ export default function AdminDashboardPage() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-14 h-14 rounded-xl relative overflow-hidden bg-[#0B2E6B]/10 shrink-0">
-                          <Image src={p.coverPhoto} alt={p.name} fill className="object-cover" />
+                          <TalentPhoto src={p.coverPhoto} alt={p.name} fill className="object-cover" />
                         </div>
                         <div>
                           <h3 className="font-montserrat font-bold text-sm text-[#0B2E6B]">

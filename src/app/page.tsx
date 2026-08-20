@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import { TalentPhoto } from "@/components/TalentPhoto";
 import {
   Search,
   Sparkles,
@@ -244,7 +245,7 @@ export default function HomePage() {
             >
               <div>
                 <div className="relative aspect-video w-full bg-[#0B2E6B]">
-                  <Image
+                  <TalentPhoto
                     src={profile.coverPhoto}
                     alt={profile.name}
                     fill
