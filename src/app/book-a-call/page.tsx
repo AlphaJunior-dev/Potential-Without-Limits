@@ -68,36 +68,30 @@ export default function BookACallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
-      <div className="max-w-5xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto space-y-10 px-5 sm:px-8 lg:px-10">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <Link href="/" className="inline-block mb-2">
-            <img
-              src="/pwlif-logo.png"
-              alt="Potential Without Limits International Foundation"
-              className="h-16 w-auto mx-auto object-contain"
-            />
-          </Link>
-
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#079432]/10 border border-[#079432]/20 text-[#079432] text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-[#079432]" />
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#061D45] px-7 py-12 text-center text-white shadow-2xl sm:px-12 sm:py-16">
+          <div className="pwlif-motion-field" aria-hidden="true" />
+          <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#14B84A]/30 bg-white/8 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#A9F1C3]">
+            <Sparkles className="w-3.5 h-3.5 text-[#F7B500]" />
             <span>Sponsor Orientation &amp; Foundation Inquiry</span>
           </div>
 
-          <h1 className="font-montserrat text-3xl sm:text-5xl font-black tracking-tight text-[#0B2E6B]">
+          <h1 className="mt-5 font-montserrat text-4xl sm:text-6xl font-black tracking-[-0.05em] text-white">
             Schedule a Sponsor Orientation
           </h1>
-          <p className="font-inter text-base text-[#0B2E6B]/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-inter text-base text-white/70 max-w-2xl mx-auto leading-relaxed">
             Potential Without Limits International Foundation (PWLIF) connects prospective sponsors with carefully published Sponsor Talent information. Submit an orientation request, then schedule a private conversation with our foundation team.
           </p>
-
+          </div>
         </div>
 
         {/* 3-Step Journey */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-inter">
-          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-7 rounded-[1.6rem] border border-[#0B2E6B]/10 shadow-[0_14px_40px_rgba(11,46,107,0.08)] relative">
+            <div className="w-9 h-9 rounded-full bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-5">
               01
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
@@ -108,8 +102,8 @@ export default function BookACallPage() {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-7 rounded-[1.6rem] border border-[#0B2E6B]/10 shadow-[0_14px_40px_rgba(11,46,107,0.08)] relative">
+            <div className="w-9 h-9 rounded-full bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-5">
               02
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
@@ -120,8 +114,8 @@ export default function BookACallPage() {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-[#0B2E6B]/10 shadow-xl relative">
-            <div className="w-8 h-8 rounded-lg bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-3">
+          <div className="bg-white p-7 rounded-[1.6rem] border border-[#0B2E6B]/10 shadow-[0_14px_40px_rgba(11,46,107,0.08)] relative">
+            <div className="w-9 h-9 rounded-full bg-[#079432]/10 text-[#079432] border border-[#079432]/20 flex items-center justify-center font-montserrat font-bold text-xs mb-5">
               03
             </div>
             <h4 className="font-montserrat font-bold text-sm text-[#0B2E6B] mb-1">
@@ -134,7 +128,7 @@ export default function BookACallPage() {
         </div>
 
         {/* Direct Orientation Form */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#0B2E6B]/10 shadow-2xl">
+        <div className="bg-white rounded-[2rem] p-6 sm:p-10 border border-[#0B2E6B]/10 shadow-[0_20px_60px_rgba(11,46,107,0.1)]">
             {submitted ? (
               <div className="py-12 text-center space-y-4">
                 <div className="inline-flex p-4 rounded-full bg-emerald-50 text-[#079432] mb-2 border border-[#079432]/20">

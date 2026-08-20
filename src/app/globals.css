@@ -86,3 +86,59 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(11, 46, 107, 0.08);
 }
+
+.pwlif-motion-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(10, 140, 245, 0.18), transparent 20rem),
+    radial-gradient(circle at 5% 90%, rgba(183, 21, 200, 0.15), transparent 22rem),
+    linear-gradient(112deg, transparent 25%, rgba(20, 184, 74, 0.10) 25.1%, transparent 25.5%),
+    linear-gradient(68deg, transparent 70%, rgba(247, 181, 0, 0.12) 70.1%, transparent 70.45%);
+}
+
+.pwlif-motion-field::before,
+.pwlif-motion-field::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px solid rgba(20, 184, 74, 0.42);
+  opacity: 0.7;
+}
+
+.pwlif-motion-field::before {
+  width: min(54vw, 760px);
+  height: min(54vw, 760px);
+  top: -42%;
+  right: -12%;
+  box-shadow: 0 0 0 46px rgba(10, 140, 245, 0.06), 0 0 0 92px rgba(247, 181, 0, 0.035);
+}
+
+.pwlif-motion-field::after {
+  width: min(42vw, 560px);
+  height: min(42vw, 560px);
+  bottom: -48%;
+  left: -10%;
+  border-color: rgba(183, 21, 200, 0.35);
+  box-shadow: 0 0 0 32px rgba(20, 184, 74, 0.055);
+}
+
+.pwlif-editorial-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(6, 29, 69, 0.04) 25%, rgba(6, 29, 69, 0.72) 100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pwlif-motion-field::before { animation: pwlif-drift 18s ease-in-out infinite alternate; }
+  .pwlif-motion-field::after { animation: pwlif-drift 24s ease-in-out -8s infinite alternate-reverse; }
+}
+
+@keyframes pwlif-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(-4%, 3%, 0) rotate(8deg); }
+}

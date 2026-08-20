@@ -73,3 +73,9 @@
 - [x] Repair the Preview visibility handoff so administrator-enabled public profile, photo, summary, and media settings are reflected on the corresponding public Talent profile.
 - [x] Prevent legacy Firestore query failures from replacing published Sponsor Talent records with generic public fallback cards.
 - [x] Remove the remaining legacy public-card Firestore filter and ordering query that can cause the complete public reader to fall back despite valid published Talent records.
+- [x] Prepare a PWLIF-specific UI direction informed by the Allan Children Foundation’s visual qualities, for user approval before implementation.
+- [x] Implement the user-approved public-interface refresh while preserving PWLIF’s brand, content safeguards, and authorization boundaries.
+- [ ] Replace the browser-only local video preview with a bounded, server-authorized persistent media workflow before treating video upload as a live feature.
+- [x] Map every reference-site public page to an original PWLIF public route and document the approved structural translation.
+- [x] Rebuild the complete PWLIF public route set with the approved high-media structural rhythm, without copying reference-site assets, content, or code.
+- [x] Preserve the existing Admin Portal and Sponsor Dashboard layouts and all authorization boundaries during the public-site refresh.

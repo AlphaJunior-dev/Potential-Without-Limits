@@ -34,33 +34,28 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-12 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
-      <div className="max-w-4xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto space-y-10 px-5 sm:px-8 lg:px-10">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <Link href="/" className="inline-block mb-2">
-            <img
-              src="/pwlif-logo.png"
-              alt="Potential Without Limits International Foundation"
-              className="h-16 w-auto mx-auto object-contain"
-            />
-          </Link>
-
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#079432]/10 border border-[#079432]/20 text-[#079432] text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-[#079432]" />
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#061D45] px-7 py-12 text-center text-white shadow-2xl sm:px-12 sm:py-16">
+          <div className="pwlif-motion-field" aria-hidden="true" />
+          <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#14B84A]/30 bg-white/8 px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#A9F1C3]">
+            <Sparkles className="w-3.5 h-3.5 text-[#F7B500]" />
             <span>Dedicated Foundation Assistance</span>
           </div>
 
-          <h1 className="font-montserrat text-3xl sm:text-5xl font-black tracking-tight text-[#0B2E6B]">
+          <h1 className="mt-5 font-montserrat text-4xl sm:text-6xl font-black tracking-[-0.05em] text-white">
             PWLIF Support Concierge
           </h1>
-          <p className="font-inter text-base text-[#0B2E6B]/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-inter text-base text-white/70 max-w-2xl mx-auto leading-relaxed">
             Have questions about Sponsor Talent, the orientation process, or appropriate partnership conversations? Send a message to the foundation office.
           </p>
+          </div>
         </div>
 
         {/* Support Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#0B2E6B]/10 shadow-2xl">
+        <div className="bg-white rounded-[2rem] p-6 sm:p-10 border border-[#0B2E6B]/10 shadow-[0_20px_60px_rgba(11,46,107,0.1)]">
           {submitted ? (
             <div className="py-12 text-center space-y-4">
               <div className="inline-flex p-4 rounded-full bg-emerald-50 text-[#079432] mb-2 border border-[#079432]/20">
@@ -85,7 +80,7 @@ export default function SupportPage() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Information Side Panel */}
-              <div className="lg:col-span-5 bg-[#F8FAFC] p-6 rounded-2xl border border-[#0B2E6B]/10 flex flex-col justify-between space-y-6">
+              <div className="lg:col-span-5 bg-[#EAF7EF] p-7 rounded-[1.5rem] border border-[#079432]/15 flex flex-col justify-between space-y-6">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#079432] mb-3">
                     <Headset className="w-4 h-4" />

@@ -53,8 +53,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center bg-[#FCFCFA] px-4 py-12 bg-foundation-pattern">
-      <div className="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl border border-[#0B2E6B]/10 text-left">
+    <div className="relative flex min-h-[85vh] items-center justify-center overflow-hidden bg-[#061D45] px-5 py-16">
+      <div className="pwlif-motion-field" aria-hidden="true" />
+      <div className="relative bg-white max-w-md w-full p-8 rounded-[2rem] shadow-2xl border border-white/20 text-left sm:p-10">
         <div className="flex flex-col items-center text-center mb-8">
           <Link href="/" className="mb-4">
             <img
@@ -63,7 +64,8 @@ export default function LoginPage() {
               className="h-16 w-auto object-contain"
             />
           </Link>
-          <h1 className="font-montserrat text-2xl font-black text-[#0B2E6B]">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Private PWLIF pathway</p>
+          <h1 className="font-montserrat text-3xl font-black tracking-[-0.04em] text-[#0B2E6B]">
             Sponsor Access
           </h1>
           <p className="font-inter text-xs text-[#0B2E6B]/70 mt-1">

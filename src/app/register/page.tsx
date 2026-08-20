@@ -6,8 +6,9 @@ import { Calendar, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-[85vh] flex items-center justify-center bg-[#FCFCFA] px-4 py-16 bg-foundation-pattern">
-      <div className="bg-white max-w-lg w-full p-8 sm:p-10 rounded-3xl shadow-2xl border border-[#0B2E6B]/10 text-center space-y-6">
+    <div className="relative flex min-h-[85vh] items-center justify-center overflow-hidden bg-[#061D45] px-5 py-16">
+      <div className="pwlif-motion-field" aria-hidden="true" />
+      <div className="relative bg-white max-w-lg w-full p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/20 text-center space-y-6">
         <Link href="/" className="inline-block mb-2">
           <img
             src="/pwlif-logo.png"
@@ -20,7 +21,8 @@ export default function RegisterPage() {
           <Calendar className="w-6 h-6 text-[#079432]" />
         </div>
 
-        <h1 className="font-montserrat text-2xl font-black text-[#0B2E6B]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Private sponsor pathway</p>
+        <h1 className="font-montserrat text-3xl font-black tracking-[-0.04em] text-[#0B2E6B]">
           Orientation Call Required
         </h1>
 

@@ -1,126 +1,15 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ArrowUpRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { Globe, Mail, ShieldCheck, ArrowRight, Sparkles } from "lucide-react";
+import { PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
 
 export default function MeetTheTeamPage() {
   const { teamMembers } = useAuth();
-
-  return (
-    <div className="min-h-screen bg-[#FCFCFA] font-inter text-[#0B2E6B] py-16 px-4 sm:px-6 lg:px-8 bg-foundation-pattern">
-      <div className="max-w-6xl mx-auto space-y-16">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <Link href="/" className="inline-block mb-2">
-            <img
-              src="/pwlif-logo.png"
-              alt="Potential Without Limits International Foundation"
-              className="h-16 w-auto mx-auto object-contain"
-            />
-          </Link>
-
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#079432]/10 border border-[#079432]/20 text-[#079432] text-xs font-semibold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-[#F7B500]" />
-            <span>Executive Leadership &amp; Advisory Council</span>
-          </div>
-
-          <h1 className="font-montserrat text-4xl sm:text-6xl font-black tracking-tight text-[#0B2E6B]">
-            Meet Our Leadership Team
-          </h1>
-          <p className="font-inter text-base sm:text-lg text-[#0B2E6B]/70 max-w-2xl mx-auto leading-relaxed">
-            The dedicated team of youth advocates, educators, and community mentors driving Potential Without Limits International Foundation (PWLIF).
-          </p>
-        </div>
-
-        {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member) => (
-            <div
-              key={member.id}
-              className="bg-white rounded-3xl overflow-hidden border border-[#0B2E6B]/10 shadow-xl hover:shadow-2xl hover:border-[#079432]/40 transition-all flex flex-col justify-between group"
-            >
-              <div>
-                {member.visibility?.showPhoto !== false ? (
-                  <div className="relative aspect-square w-full bg-[#F8FAFC] overflow-hidden">
-                    <Image
-                      src={member.photoUrl}
-                      alt={member.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  </div>
-                ) : (
-                  <div className="aspect-square w-full bg-[#079432]/5 flex items-center justify-center text-[#079432]/45">
-                    <ShieldCheck className="w-12 h-12" aria-label="Leadership profile" />
-                  </div>
-                )}
-
-                <div className="p-6 space-y-3">
-                  <div>
-                    <h3 className="font-montserrat font-bold text-lg text-[#0B2E6B]">
-                      {member.name}
-                    </h3>
-                    {member.role && (
-                      <p className="text-xs font-bold text-[#079432] mt-0.5 uppercase tracking-wider">
-                        {member.role}
-                      </p>
-                    )}
-                  </div>
-
-                  {member.bio && (
-                    <p className="text-xs text-[#0B2E6B]/70 leading-relaxed line-clamp-5">
-                      {member.bio}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-6 pt-0 flex items-center justify-between border-t border-[#0B2E6B]/10 pt-4">
-                <span className="text-[10px] font-mono text-[#079432] font-bold uppercase tracking-wider flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Verified Leadership
-                </span>
-
-                <div className="flex items-center gap-2 text-[#0B2E6B]/40">
-                  {member.linkedinUrl && (
-                    <a
-                      href={member.linkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-[#079432] transition"
-                      aria-label={`${member.name} LinkedIn`}
-                    >
-                      <Globe className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Advisory Banner */}
-        <div className="bg-white rounded-3xl p-8 sm:p-10 border border-[#079432]/20 text-center space-y-4 shadow-2xl">
-          <h3 className="font-montserrat text-xl font-bold text-[#0B2E6B]">
-            Interested in joining our Advisory Board or Mentor Network?
-          </h3>
-          <p className="text-xs text-[#0B2E6B]/70 max-w-xl mx-auto leading-relaxed">
-            We are continuously expanding our institutional advisory network with educators, technical mentors, and corporate CSR partners.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/volunteer"
-              className="bg-[#079432] hover:bg-[#14B84A] text-white border border-[#079432] px-6 py-3 rounded-xl text-xs font-bold transition inline-flex items-center gap-2 shadow-md cursor-pointer uppercase tracking-wider"
-            >
-              <span>Join Volunteer &amp; Advisory Network</span>
-              <ArrowRight className="w-3.5 h-3.5 text-white" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="bg-[#FCFCFA]">
+    <PublicHero dark eyebrow="Leadership and advisory" title="The people holding space for potential." intro="A growing community of youth advocates, educators, mentors, and foundation leaders guides the work of Potential Without Limits International Foundation." primaryAction={{ href: "/volunteer", label: "Explore volunteer pathways" }} />
+    <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10"><div className="mx-auto max-w-7xl"><SectionHeading eyebrow="The people behind the work" title="Leadership, expertise, and a shared sense of responsibility." intro="Profile details and photographs are displayed only when they have been approved for public visibility." /><div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{teamMembers.map((member, index) => <article key={member.id} className="group overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_44px_rgba(11,46,107,0.09)]"><div className="relative aspect-square overflow-hidden bg-[#0B2E6B]">{member.visibility?.showPhoto !== false && member.photoUrl ? <img src={member.photoUrl} alt={member.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_20%_20%,rgba(20,184,74,0.36),transparent_30%),linear-gradient(135deg,#061D45,#0B2E6B)]"><ShieldCheck className="h-12 w-12 text-white/70" /></div>}<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#061D45]/78 to-transparent p-5"><span className="font-montserrat text-4xl font-black text-white/55">{String(index + 1).padStart(2, "0")}</span></div></div><div className="p-6"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#079432]">{member.role || "Foundation leadership"}</p><h2 className="mt-3 font-montserrat text-2xl font-black tracking-[-0.035em] text-[#0B2E6B]">{member.name}</h2>{member.bio && <p className="mt-4 line-clamp-4 text-sm leading-6 text-[#0B2E6B]/65">{member.bio}</p>}{member.linkedinUrl && <a href={member.linkedinUrl} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#079432] hover:text-[#14B84A]">Professional profile <ArrowUpRight className="h-4 w-4" /></a>}</div></article>)}</div>{teamMembers.length === 0 && <div className="mt-10 rounded-[1.75rem] border border-dashed border-[#0B2E6B]/18 p-10 text-sm text-[#0B2E6B]/64">Leadership profiles will appear here when they are approved for public display by a PWLIF administrator.</div>}</div></section>
+    <PublicCtaBand eyebrow="Share your expertise" title="Interested in supporting a considered foundation journey?" intro="PWLIF can discuss appropriate volunteer, mentorship, and advisory pathways through a private orientation conversation." action={{ href: "/volunteer", label: "Explore volunteer pathways" }} />
+  </div>;
 }

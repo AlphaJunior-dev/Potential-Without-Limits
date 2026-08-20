@@ -5,14 +5,14 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const readSource = (path) => readFile(new URL(path, root), "utf8");
 
-test("homepage retains its original section sequence while avoiding hard-coded profile fallbacks", async () => {
+test("homepage uses the approved Potential in Motion sequence while avoiding hard-coded profile fallbacks", async () => {
   const page = await readSource("src/app/page.tsx");
 
   for (const marker of [
-    "Foundation Introduction & Impact",
-    "Explore Sponsor Talent",
-    "From Potential to Purpose",
-    "Accountability & Stewardship",
+    "Potential moves when possibility has a pathway.",
+    "A glimpse of potential—shared with care.",
+    "An invitation to understand the work before taking part.",
+    "From initial interest to an appropriate private connection.",
   ]) {
     assert.match(page, new RegExp(marker));
   }

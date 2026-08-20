@@ -42,11 +42,11 @@ export function Navbar() {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 font-inter ${
         isScrolled
-          ? "bg-[#FCFCFA]/95 backdrop-blur-md border-b border-[#0B2E6B]/10 shadow-md py-1"
-          : "bg-[#FCFCFA] border-b border-[#0B2E6B]/10 shadow-xs py-1"
+          ? "bg-[#FCFCFA]/95 backdrop-blur-xl border-b border-[#0B2E6B]/10 shadow-sm"
+          : "bg-[#FCFCFA]/92 backdrop-blur-md border-b border-[#0B2E6B]/8"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-[92rem] mx-auto px-5 sm:px-8 lg:px-10 h-[4.85rem] flex items-center justify-between">
         {/* Brand Logo & Title */}
         <Link
           href="/"
@@ -56,25 +56,25 @@ export function Navbar() {
           <img
             src="/pwlif-logo.png"
             alt="Potential Without Limits International Foundation Logo"
-            className="h-14 sm:h-16 w-auto object-contain"
+            className="h-11 sm:h-[3.15rem] w-auto object-contain"
           />
         </Link>
 
         {/* Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#0B2E6B]/80">
-          <Link href="/talents" className="hover:text-[#079432] transition">
+        <div className="hidden lg:flex items-center gap-7 text-[10px] font-bold uppercase tracking-[0.13em] text-[#0B2E6B]/72">
+          <Link href="/talents" className="hover:text-[#079432] transition-colors">
             Sponsor a Dream
           </Link>
-          <Link href="/mission-vision" className="hover:text-[#079432] transition">
+          <Link href="/mission-vision" className="hover:text-[#079432] transition-colors">
             Mission &amp; Vision
           </Link>
-          <Link href="/meet-the-team" className="hover:text-[#079432] transition">
+          <Link href="/meet-the-team" className="hover:text-[#079432] transition-colors">
             Meet the Team
           </Link>
-          <Link href="/security-standards" className="hover:text-[#079432] transition">
+          <Link href="/security-standards" className="hover:text-[#079432] transition-colors">
             Security &amp; Consent
           </Link>
-          <Link href="/faq" className="hover:text-[#079432] transition">
+          <Link href="/faq" className="hover:text-[#079432] transition-colors">
             FAQ
           </Link>
         </div>
@@ -85,7 +85,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/admin"
-                className="bg-[#0B2E6B] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#082657] transition shadow-xs inline-flex items-center gap-2"
+                className="bg-[#0B2E6B] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[10px] uppercase tracking-[0.12em] hover:bg-[#082657] transition shadow-xs inline-flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4 text-[#F7B500]" />
                 <span>Admin Portal</span>
@@ -103,7 +103,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/sponsor/dashboard"
-                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-xl font-montserrat font-bold text-xs uppercase tracking-wider hover:bg-[#14B84A] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[10px] uppercase tracking-[0.12em] hover:bg-[#14B84A] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
               >
                 <LayoutDashboard className="w-4 h-4 text-white" />
                 <span>My Dashboard</span>
@@ -139,14 +139,14 @@ export function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/book-a-call"
-                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-xl font-inter font-bold text-xs sm:text-sm hover:bg-[#14B84A] transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[10px] sm:text-[11px] uppercase tracking-[0.1em] hover:bg-[#14B84A] transition shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-white" />
                 <span>Book Orientation Call</span>
               </Link>
               <Link
                 href="/login"
-                className="bg-[#0B2E6B] text-white border border-[#0B2E6B] px-4 sm:px-5 py-2.5 rounded-xl font-inter font-semibold text-xs sm:text-sm hover:bg-[#082657] transition shadow-2xs"
+                className="border border-[#0B2E6B]/18 px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[10px] sm:text-[11px] uppercase tracking-[0.1em] text-[#0B2E6B] hover:bg-[#0B2E6B] hover:text-white transition shadow-2xs"
               >
                 Sponsor Login
               </Link>
@@ -159,7 +159,7 @@ export function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle navigation menu"
-            className="p-2 rounded-xl text-[#0B2E6B] hover:bg-[#0B2E6B]/10 transition cursor-pointer"
+            className="p-2 rounded-full text-[#0B2E6B] hover:bg-[#0B2E6B]/10 transition cursor-pointer"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -168,7 +168,7 @@ export function Navbar() {
 
       {/* Mobile Slide-Over Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-20 bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+        <div className="lg:hidden fixed inset-x-0 top-[4.85rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
           <nav className="flex flex-col space-y-4 text-sm font-semibold text-[#0B2E6B]">
             <Link
               href="/talents"
