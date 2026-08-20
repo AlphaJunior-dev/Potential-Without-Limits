@@ -244,10 +244,24 @@ export function sanitizeTalentRecord(input: unknown) {
   if (!displayTitle || !summary || !supportArea) return null;
   const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
   const rawMedia = Array.isArray(item.mediaUrls) ? item.mediaUrls : [];
+  const skills = Array.isArray(item.skills)
+    ? Array.from(new Set(item.skills.map((skill) => safePublicText(skill, 48)).filter((skill): skill is string => Boolean(skill)))).slice(0, 12)
+    : [];
   return {
     displayTitle,
     summary,
     supportArea,
+    ageBand: safePublicText(item.ageBand, 40) || "",
+    region: safePublicText(item.region, 120) || "",
+    story: safePublicText(item.story, 2_000) || "",
+    aspiration: safePublicText(item.aspiration, 600) || "",
+    supportPathway: safePublicText(item.supportPathway, 800) || "",
+    skills,
+    consent: {
+      reference: safePublicText((item.consent as Record<string, unknown> | undefined)?.reference, 120) || "",
+      reviewedAt: safePublicText((item.consent as Record<string, unknown> | undefined)?.reviewedAt, 40) || "",
+      reviewDueAt: safePublicText((item.consent as Record<string, unknown> | undefined)?.reviewDueAt, 40) || "",
+    },
     photoUrl: safeAssetUrl(item.photoUrl) || "",
     mediaUrls: rawMedia.map(safeAssetUrl).filter((url): url is string => Boolean(url)).slice(0, 4),
     displayOrder: Math.max(1, Math.min(999, Number.isFinite(item.displayOrder) ? Math.trunc(item.displayOrder as number) : 999)),
@@ -256,8 +270,28 @@ export function sanitizeTalentRecord(input: unknown) {
       photoVisible: rawVisibility.photoVisible === true,
       mediaVisible: rawVisibility.mediaVisible === true,
       summaryVisible: rawVisibility.summaryVisible === true,
+      ageBandVisible: rawVisibility.ageBandVisible === true,
+      regionVisible: rawVisibility.regionVisible === true,
+      skillsVisible: rawVisibility.skillsVisible === true,
+      storyVisible: rawVisibility.storyVisible === true,
+      aspirationVisible: rawVisibility.aspirationVisible === true,
+      supportPathwayVisible: rawVisibility.supportPathwayVisible === true,
     },
   };
+}
+
+export function sanitizeTalentTagLibrary(input: unknown) {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  return input.map((entry) => {
+    const item = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+    const name = safePublicText(item.name, 48);
+    if (!name) return null;
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 56);
+    if (!id || seen.has(id)) return null;
+    seen.add(id);
+    return { id, name, status: item.status === "retired" ? "retired" as const : "active" as const };
+  }).filter((entry): entry is { id: string; name: string; status: "active" | "retired" } => Boolean(entry)).slice(0, 80);
 }
 
 export function toPublicTalentCard(id: string, input: unknown) {
@@ -270,11 +304,23 @@ export function toPublicTalentCard(id: string, input: unknown) {
     title: record.displayTitle,
     summary: record.visibility.summaryVisible ? record.summary : "Information is shared through an appropriate private orientation conversation.",
     supportArea: record.supportArea,
+    ...(record.visibility.ageBandVisible && record.ageBand ? { ageBand: record.ageBand } : {}),
+    ...(record.visibility.regionVisible && record.region ? { region: record.region } : {}),
+    ...(record.visibility.skillsVisible && record.skills.length ? { skills: record.skills } : {}),
+    ...(record.visibility.storyVisible && record.story ? { story: record.story } : {}),
+    ...(record.visibility.aspirationVisible && record.aspiration ? { aspiration: record.aspiration } : {}),
+    ...(record.visibility.supportPathwayVisible && record.supportPathway ? { supportPathway: record.supportPathway } : {}),
     visibility: {
       profileVisible: true,
       photoVisible,
       mediaVisible,
       summaryVisible: record.visibility.summaryVisible,
+      ageBandVisible: record.visibility.ageBandVisible,
+      regionVisible: record.visibility.regionVisible,
+      skillsVisible: record.visibility.skillsVisible,
+      storyVisible: record.visibility.storyVisible,
+      aspirationVisible: record.visibility.aspirationVisible,
+      supportPathwayVisible: record.visibility.supportPathwayVisible,
     },
     ...(photoVisible ? { photoUrl: record.photoUrl } : {}),
     ...(mediaVisible ? { mediaUrls: record.mediaUrls } : {}),
@@ -296,6 +342,12 @@ export function toSponsorTalentCard(id: string, input: unknown) {
     title: record.displayTitle,
     summary: record.summary,
     supportArea: record.supportArea,
+    ageBand: record.ageBand,
+    region: record.region,
+    skills: record.skills,
+    story: record.story,
+    aspiration: record.aspiration,
+    supportPathway: record.supportPathway,
     ...(record.photoUrl ? { photoUrl: record.photoUrl } : {}),
     ...(record.mediaUrls.length ? { mediaUrls: record.mediaUrls } : {}),
     displayOrder: record.displayOrder,
@@ -375,6 +427,7 @@ export async function readPublicSite() {
     ]);
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
     const branding = sanitizePublicBranding(values?.branding);
+    const talentTags = sanitizeTalentTagLibrary(values?.talentTags);
     const publishedCards = cardsSnapshot.docs.map((document) => {
       const card = document.data();
       if (card.status !== "published") return null;
@@ -398,14 +451,17 @@ export async function readPublicSite() {
       heroTitle: typeof values?.heroTitle === "string" ? sponsorTalentWording(values.heroTitle) : branding.heroHeadline || safePublicDefaults.heroTitle,
       heroText: typeof values?.heroText === "string" ? sponsorTalentWording(values.heroText) : branding.heroSubheadline || safePublicDefaults.heroText,
       bookingUrl: typeof values?.bookingUrl === "string" ? values.bookingUrl : safePublicDefaults.bookingUrl,
-      pilotCards: publishedTalentCards.length ? publishedTalentCards : (publishedCards.length ? publishedCards : safePublicDefaults.pilotCards),
+      // The public Talent Showcase never substitutes generic or sample cards for
+      // real people. It remains empty until a reviewed Talent record is released.
+      pilotCards: publishedTalentCards,
       branding,
+      talentTags,
       missionVision: sanitizePublicMissionVision(values?.missionVision),
       teamMembers: sanitizePublicTeam(values?.teamMembers),
       legalSecurity: sanitizePublicLegal(values?.legalSecurity),
       foundationVideos: sanitizePublicVideos(values?.foundationVideos),
     };
   } catch {
-    return { ...safePublicDefaults, branding: {}, missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [] };
+    return { ...safePublicDefaults, branding: {}, talentTags: [], missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [] };
   }
 }

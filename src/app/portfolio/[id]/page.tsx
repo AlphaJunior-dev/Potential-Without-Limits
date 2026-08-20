@@ -27,6 +27,10 @@ export default function PortfolioDetailPage() {
   const firstVideo = profile.galleryVideos?.[0] ?? "";
   const hasVisibleMedia = canSeePhoto || canSeeVideo;
   const hasApprovedSponsorAccess = userStatus === "approved" && profile.privateSponsorAccess === true;
+  const canSeeSkills = hasPrivateAccess || profile.publicVisibility?.skillsVisible === true;
+  const canSeeStory = hasPrivateAccess || profile.publicVisibility?.storyVisible === true;
+  const canSeeAspiration = hasPrivateAccess || profile.publicVisibility?.aspirationVisible === true;
+  const canSeeSupportPathway = hasPrivateAccess || profile.publicVisibility?.supportPathwayVisible === true;
 
   const handleSendInquiry = (event: React.FormEvent) => { event.preventDefault(); if (!message.trim()) return; setSent(true); setTimeout(() => router.push("/book-a-call"), 700); };
 

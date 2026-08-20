@@ -10,6 +10,7 @@ import {
   sanitizePublicMissionVision,
   sanitizePublicVideos,
   sanitizeTalentRecord,
+  sanitizeTalentTagLibrary,
 } from "@/lib/admin";
 
 export const runtime = "nodejs";
@@ -116,6 +117,11 @@ export async function PATCH(request: NextRequest) {
       await db.collection("public_site_content").doc("main").set({ foundationVideos, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
       await appendAudit("updateFoundationVideos", "site_content", "main", administrator.uid);
       return NextResponse.json({ ok: true, foundationVideos });
+    } else if (body.action === "updateTalentTagLibrary") {
+      const talentTags = sanitizeTalentTagLibrary(body.talentTags);
+      await db.collection("public_site_content").doc("main").set({ talentTags, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await appendAudit("updateTalentTagLibrary", "site_content", "main", administrator.uid, { activeTags: talentTags.filter((tag) => tag.status === "active").length });
+      return NextResponse.json({ ok: true, talentTags });
     } else if (body.action === "reviewApplication" && typeof body.applicationId === "string") {
       if (typeof body.status !== "string" || !reviewStatuses.has(body.status)) return NextResponse.json({ error: "Invalid review status." }, { status: 400 });
       const reviewNote = typeof body.reviewNote === "string" ? body.reviewNote.trim().slice(0, 2_000) : "";

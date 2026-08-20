@@ -85,3 +85,9 @@
 - [x] Remove the redundant public pre-header strapline above the PWLIF navigation.
 - [x] Make desktop public dropdown menus open on hover while retaining click, keyboard, touch, and mobile-drawer access.
 - [x] Increase public-header typography size and contrast for faster scanning without changing the approved menu behavior.
+- [x] Design and implement a founder-approved, consent-controlled public Talent Showcase with granular field and media publication controls.
+- [x] Add Foundation-managed skills and interests tags with reusable suggested tags plus the ability for admins to create, edit, reuse, and retire custom tags.
+- [x] Extend the server-authorized Talent record model with reviewed public story, aspiration, support-pathway, consent-reference, and per-field release controls.
+- [x] Replace fixed public Talent category filters with active Foundation-managed tags and add safe empty states.
+- [x] Upgrade public Talent detail pages to present only explicitly released profile content and route interest through sponsor orientation.
+- [x] Add regression coverage for private-by-default Talent fields, media, and flexible tags.

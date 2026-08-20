@@ -87,6 +87,8 @@ export default function AdminDashboardPage() {
     addFoundationVideo,
     deleteFoundationVideo,
     uploadTalentPhoto,
+    talentTags,
+    updateTalentTags,
     logout
   } = useAuth();
 
@@ -135,6 +137,34 @@ export default function AdminDashboardPage() {
     setTimeout(() => setToastNotice(null), 4000);
   };
 
+  const addCustomSkill = async () => {
+    const name = customSkill.trim().replace(/\s+/g, " ");
+    if (!name) return;
+    const existing = talentTags.find((tag) => tag.name.toLowerCase() === name.toLowerCase());
+    const tag = existing || { id: `tag-${Date.now()}`, name, status: "active" as const };
+    if (!existing) await updateTalentTags([...talentTags, tag]);
+    setSelectedSkills((current) => current.includes(tag.name) ? current : [...current, tag.name]);
+    setCustomSkill("");
+  };
+
+  const toggleSkill = (name: string) => setSelectedSkills((current) => current.includes(name) ? current.filter((skill) => skill !== name) : [...current, name]);
+
+  const renameTalentTag = async (id: string) => {
+    const current = talentTags.find((tag) => tag.id === id);
+    if (!current) return;
+    const requestedName = window.prompt("Rename this Foundation tag", current.name)?.trim().replace(/\s+/g, " ");
+    if (!requestedName || requestedName === current.name || talentTags.some((tag) => tag.id !== id && tag.name.toLowerCase() === requestedName.toLowerCase())) return;
+    await updateTalentTags(talentTags.map((tag) => tag.id === id ? { ...tag, name: requestedName } : tag));
+    setSelectedSkills((skills) => skills.map((skill) => skill === current.name ? requestedName : skill));
+  };
+
+  const retireTalentTag = async (id: string) => {
+    const current = talentTags.find((tag) => tag.id === id);
+    if (!current || !window.confirm(`Retire “${current.name}” from future Talent profiles? Existing profiles will keep their saved history.`)) return;
+    await updateTalentTags(talentTags.map((tag) => tag.id === id ? { ...tag, status: "retired" as const } : tag));
+    setSelectedSkills((skills) => skills.filter((skill) => skill !== current.name));
+  };
+
   // Branding CMS Form State
   const [brandingForm, setBrandingForm] = useState(branding);
   const [brandingNotice, setBrandingNotice] = useState(false);
@@ -166,7 +196,15 @@ export default function AdminDashboardPage() {
   const [rawMediaUrl, setRawMediaUrl] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
-  const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
+  const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [customSkill, setCustomSkill] = useState("");
+  const [story, setStory] = useState("");
+  const [aspiration, setAspiration] = useState("");
+  const [supportPathway, setSupportPathway] = useState("");
+  const [consentReference, setConsentReference] = useState("");
+  const [consentReviewedAt, setConsentReviewedAt] = useState("");
+  const [consentReviewDueAt, setConsentReviewDueAt] = useState("");
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
@@ -264,11 +302,18 @@ export default function AdminDashboardPage() {
             progress: progress || existing.progress,
             current_needs: currentNeeds || existing.current_needs,
             country_community: countryCommunity || existing.country_community,
+            skills: selectedSkills,
+            story,
+            aspiration,
+            supportPathway,
             consentRecord: {
               parentalConsent: true,
               mediaReleasePermission: mediaReleasePermission,
               signedDate: existing.consentRecord?.signedDate || "2026-01-10",
               guardianName: existing.consentRecord?.guardianName || "Parent/Guardian",
+              reference: consentReference,
+              reviewedAt: consentReviewedAt,
+              reviewDueAt: consentReviewDueAt,
             }
           });
         }
@@ -294,11 +339,18 @@ export default function AdminDashboardPage() {
           progress: progress || "Actively participating in local community youth labs.",
           current_needs: currentNeeds || "Educational grant & laptop hardware",
           country_community: countryCommunity || location,
+          skills: selectedSkills,
+          story,
+          aspiration,
+          supportPathway,
           consentRecord: {
             parentalConsent: true,
             mediaReleasePermission: mediaReleasePermission,
             signedDate: "2026-01-10",
             guardianName: "Parent/Guardian",
+            reference: consentReference,
+            reviewedAt: consentReviewedAt,
+            reviewDueAt: consentReviewDueAt,
           }
         };
         await addProfile(newProfile);
@@ -312,7 +364,14 @@ export default function AdminDashboardPage() {
       setRawMediaUrl("");
       setUploadedImages([]);
       setUploadedVideos([]);
-      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
+      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
+      setSelectedSkills([]);
+      setStory("");
+      setAspiration("");
+      setSupportPathway("");
+      setConsentReference("");
+      setConsentReviewedAt("");
+      setConsentReviewDueAt("");
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
     }
@@ -329,7 +388,14 @@ export default function AdminDashboardPage() {
     setRawMediaUrl(p.rawMediaUrl || "");
     setUploadedImages(p.galleryImages || []);
     setUploadedVideos(p.galleryVideos || []);
-    setTalentVisibility(p.publicVisibility || { profileVisible: p.featuredOnHomepage === true, photoVisible: p.featuredOnHomepage === true, mediaVisible: p.featuredOnHomepage === true, summaryVisible: p.featuredOnHomepage === true });
+    setTalentVisibility({ profileVisible: p.publicVisibility?.profileVisible ?? p.featuredOnHomepage === true, photoVisible: p.publicVisibility?.photoVisible ?? p.featuredOnHomepage === true, mediaVisible: p.publicVisibility?.mediaVisible ?? p.featuredOnHomepage === true, summaryVisible: p.publicVisibility?.summaryVisible ?? p.featuredOnHomepage === true, ageBandVisible: p.publicVisibility?.ageBandVisible ?? false, regionVisible: p.publicVisibility?.regionVisible ?? false, skillsVisible: p.publicVisibility?.skillsVisible ?? false, storyVisible: p.publicVisibility?.storyVisible ?? false, aspirationVisible: p.publicVisibility?.aspirationVisible ?? false, supportPathwayVisible: p.publicVisibility?.supportPathwayVisible ?? false });
+    setSelectedSkills(p.skills || []);
+    setStory(p.story || p.current_situation || "");
+    setAspiration(p.aspiration || p.dream || "");
+    setSupportPathway(p.supportPathway || p.current_needs || "");
+    setConsentReference(p.consentRecord?.reference || "");
+    setConsentReviewedAt(p.consentRecord?.reviewedAt || "");
+    setConsentReviewDueAt(p.consentRecord?.reviewDueAt || "");
   };
 
   const handleDeleteTalent = async (id: string) => {
@@ -1092,7 +1158,7 @@ export default function AdminDashboardPage() {
                       setBio("Add an approved, non-identifying summary of the talent and their support pathway.");
                       setCoverPhoto("");
                       setRawMediaUrl("");
-                      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
+                      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
                     }}
                     className="text-[11px] font-bold text-[#079432] hover:underline flex items-center gap-1 cursor-pointer bg-[#079432]/10 px-2.5 py-1 rounded-md border border-[#079432]/20"
                   >
@@ -1157,18 +1223,31 @@ export default function AdminDashboardPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved Non-identifying Summary</label>
+	                  <div>
+	                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved Non-identifying Summary</label>
                     <textarea
                       rows={3}
                       required
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
-                    />
-                  </div>
+	                    />
+	                  </div>
 
-                  {/* Persistent server-authorized Talent photo uploads */}
+	                  <div className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-3">
+	                    <div className="flex items-center justify-between gap-3"><label className="font-semibold text-[#0B2E6B]">Skills &amp; interests</label><span className="text-[10px] text-[#0B2E6B]/55">Select or create a reusable tag</span></div>
+	                    <div className="flex flex-wrap gap-1.5">{talentTags.filter((tag) => tag.status === "active").map((tag) => <button key={tag.id} type="button" onClick={() => toggleSkill(tag.name)} className={`rounded-full border px-2 py-1 text-[10px] font-bold transition ${selectedSkills.includes(tag.name) ? "border-[#079432] bg-[#079432] text-white" : "border-[#0B2E6B]/15 bg-white text-[#0B2E6B]/70 hover:border-[#079432]"}`}>{tag.name}</button>)}</div>
+	                    <div className="flex gap-2"><input value={customSkill} onChange={(event) => setCustomSkill(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addCustomSkill(); } }} placeholder="Add a new skill or interest" className="min-w-0 flex-1 rounded-lg border border-[#0B2E6B]/15 bg-white p-2 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /><button type="button" onClick={() => void addCustomSkill()} className="rounded-lg bg-[#0B2E6B] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#079432]">Add tag</button></div>
+	                    <div className="border-t border-[#0B2E6B]/10 pt-2"><p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#0B2E6B]/55">Manage tag library</p><div className="mt-1.5 flex flex-wrap gap-1.5">{talentTags.filter((tag) => tag.status === "active").map((tag) => <span key={`manage-${tag.id}`} className="inline-flex items-center gap-1 rounded-full border border-[#0B2E6B]/12 bg-white py-1 pl-2 pr-1 text-[9px] font-bold text-[#0B2E6B]"><span>{tag.name}</span><button type="button" onClick={() => void renameTalentTag(tag.id)} aria-label={`Rename ${tag.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-[#EAF7EF] hover:text-[#079432]">Edit</button><button type="button" onClick={() => void retireTalentTag(tag.id)} aria-label={`Retire ${tag.name}`} className="rounded px-1 text-[#0B2E6B]/55 hover:bg-red-50 hover:text-red-600">Retire</button></span>)}</div></div>
+	                  </div>
+
+	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved story</label><textarea rows={3} value={story} onChange={(event) => setStory(event.target.value)} placeholder="Focus on learning, effort, and interests — never private family, school, health, or financial details." className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
+	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Where they are heading</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved learning or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
+	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">What support could unlock</label><input value={supportPathway} onChange={(event) => setSupportPathway(event.target.value)} placeholder="Examples: mentoring, equipment, training, creative materials" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
+
+	                  <div className="space-y-2 rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent record — never public</p><input value={consentReference} onChange={(event) => setConsentReference(event.target.value)} placeholder="Consent reference / internal file ID" className="w-full rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><div className="grid grid-cols-2 gap-2"><input type="date" value={consentReviewedAt} onChange={(event) => setConsentReviewedAt(event.target.value)} className="rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><input type="date" value={consentReviewDueAt} onChange={(event) => setConsentReviewDueAt(event.target.value)} className="rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /></div></div>
+
+	                  {/* Persistent server-authorized Talent photo uploads */}
                   <div className="p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-[#0B2E6B] flex items-center gap-1.5 text-xs">
@@ -1304,6 +1383,12 @@ export default function AdminDashboardPage() {
                       ["summaryVisible", "Show the approved summary"],
                       ["photoVisible", "Show the approved cover photo"],
                       ["mediaVisible", "Show approved media"],
+                      ["skillsVisible", "Show approved skills and interests"],
+                      ["storyVisible", "Show the approved story"],
+                      ["aspirationVisible", "Show where they are heading"],
+                      ["supportPathwayVisible", "Show what support could unlock"],
+                      ["regionVisible", "Show broad region / community"],
+                      ["ageBandVisible", "Show approved age band"],
                     ].map(([field, label]) => (
                       <label key={field} className="flex items-center gap-2 text-[11px] text-[#0B2E6B] cursor-pointer">
                         <input

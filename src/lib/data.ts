@@ -12,6 +12,9 @@ export interface ConsentRecord {
   mediaReleasePermission: boolean;
   signedDate: string;
   guardianName: string;
+  reference?: string;
+  reviewedAt?: string;
+  reviewDueAt?: string;
 }
 
 export interface YouthProfile {
@@ -36,6 +39,12 @@ export interface YouthProfile {
     photoVisible: boolean;
     mediaVisible: boolean;
     summaryVisible: boolean;
+    ageBandVisible?: boolean;
+    regionVisible?: boolean;
+    skillsVisible?: boolean;
+    storyVisible?: boolean;
+    aspirationVisible?: boolean;
+    supportPathwayVisible?: boolean;
   };
   
   // PWLIF Foundation Specific Fields
@@ -45,6 +54,17 @@ export interface YouthProfile {
   current_needs: string;
   country_community: string;
   consentRecord: ConsentRecord;
+  ageBand?: string;
+  region?: string;
+  story?: string;
+  aspiration?: string;
+  supportPathway?: string;
+}
+
+export interface TalentTag {
+  id: string;
+  name: string;
+  status: "active" | "retired";
 }
 
 export interface SponsorDream {

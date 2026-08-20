@@ -182,7 +182,7 @@ test("approved sponsors automatically receive the private Talent pipeline on sha
   assert.match(provider, /authenticatedUser\.getIdToken\(true\)/);
   assert.match(provider, /privateSponsorAccess: true/);
   assert.match(provider, /setSponsorProfiles\(\[\]\)/);
-  assert.match(provider, /location: record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"/);
+  assert.match(provider, /location: record\.region \|\| \(record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"\)/);
   assert.match(homepage, /hasApprovedSponsorAccess/);
   assert.match(talentsPage, /hasApprovedSponsorAccess/);
   assert.match(detailPage, /profile\.privateSponsorAccess === true/);
@@ -281,4 +281,22 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /event\.key === "Escape"/);
   assert.match(navbar, /top-\[4\.85rem\]/);
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
+});
+
+test("the public Talent Showcase uses managed tags and remains empty until a reviewed Talent record is released", async () => {
+  const [adminLibrary, adminPage, talentsPage, publicRoute] = await Promise.all([
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/app/talents/page.tsx"),
+    readSource("src/app/api/public/route.ts"),
+  ]);
+
+  assert.match(adminLibrary, /pilotCards: publishedTalentCards/);
+  assert.match(adminLibrary, /sanitizeTalentTagLibrary/);
+  assert.match(adminLibrary, /skillsVisible/);
+  assert.match(adminPage, /updateTalentTags/);
+  assert.match(adminPage, /Add a new skill or interest/);
+  assert.match(adminPage, /consentReference/);
+  assert.match(talentsPage, /talentTags\.filter/);
+  assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
 });

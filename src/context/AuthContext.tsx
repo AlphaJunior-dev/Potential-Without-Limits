@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import type { YouthProfile } from "@/lib/data";
+import type { TalentTag, YouthProfile } from "@/lib/data";
 import type { BrandingConfig, LegalSecurityConfig, MissionVisionData, TeamMember } from "@/lib/cmsData";
 
 type UserStatus = "logged_out" | "pending" | "admin" | "approved";
@@ -27,6 +27,7 @@ type AuthContextType = {
   auditLogs: FlexibleRecord[];
   transparencyReports: FlexibleRecord[];
   foundationVideos: FlexibleRecord[];
+  talentTags: TalentTag[];
   sponsorDreams: FlexibleRecord[];
   mfaVerified: boolean;
   adminRole: AdminRole;
@@ -108,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [faqItems, setFaqItems] = useState<FlexibleRecord[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [foundationVideos, setFoundationVideos] = useState<FlexibleRecord[]>([]);
+  const [talentTags, setTalentTags] = useState<TalentTag[]>([]);
   const [pendingSponsors, setPendingSponsors] = useState<PendingSponsor[]>([]);
   const [inquiries, setInquiries] = useState<FlexibleRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<FlexibleRecord[]>([]);
@@ -140,13 +142,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })));
     setInquiries([]);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
+    setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
     const records = Array.isArray(data.talentRecords) ? data.talentRecords : [];
     setAdminProfiles(records.map((record: FlexibleRecord) => ({
       id: record.id,
       name: record.displayTitle,
       age: 0,
       category: record.supportArea,
-      location: record.visibility?.profileVisible === true ? "Publicly displayed" : "Not publicly displayed",
+      location: record.region || (record.visibility?.profileVisible === true ? "Publicly displayed" : "Not publicly displayed"),
       bio: record.summary,
       coverPhoto: record.photoUrl || "/pwlif-logo.png",
       rawMediaUrl: Array.isArray(record.mediaUrls) ? record.mediaUrls[0] || "" : "",
@@ -158,15 +161,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         photoVisible: record.visibility?.photoVisible === true,
         mediaVisible: record.visibility?.mediaVisible === true,
         summaryVisible: record.visibility?.summaryVisible === true,
+        ageBandVisible: record.visibility?.ageBandVisible === true,
+        regionVisible: record.visibility?.regionVisible === true,
+        skillsVisible: record.visibility?.skillsVisible === true,
+        storyVisible: record.visibility?.storyVisible === true,
+        aspirationVisible: record.visibility?.aspirationVisible === true,
+        supportPathwayVisible: record.visibility?.supportPathwayVisible === true,
       },
       status: "active",
       inquiriesCount: 0,
-      dream: "",
-      current_situation: "",
+      skills: Array.isArray(record.skills) ? record.skills : [],
+      dream: record.aspiration || "",
+      current_situation: record.story || "",
       progress: "",
-      current_needs: "",
+      current_needs: record.supportPathway || "",
       country_community: "",
-      consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" },
+      consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "", ...(record.consent || {}) },
+      ageBand: record.ageBand || "",
+      region: record.region || "",
+      story: record.story || "",
+      aspiration: record.aspiration || "",
+      supportPathway: record.supportPathway || "",
     })) as YouthProfile[]);
   };
 
@@ -216,6 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data?.branding) setBranding(data.branding);
       if (data?.missionVision && !isTemporaryMissionCopy(data.missionVision)) setMissionVision(data.missionVision);
       if (data?.legalSecurity) setLegalSecurity(data.legalSecurity);
+      if (Array.isArray(data?.talentTags)) setTalentTags(data.talentTags);
       if (Array.isArray(data?.profiles)) setPublicProfiles(data.profiles);
       if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
       if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
@@ -314,6 +330,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (Array.isArray(result.foundationVideos)) setFoundationVideos(result.foundationVideos as FlexibleRecord[]);
   };
 
+  const updateTalentTags = async (nextTalentTags: TalentTag[]) => {
+    const result = await updatePublicContent("updateTalentTagLibrary", { talentTags: nextTalentTags });
+    if (Array.isArray(result.talentTags)) setTalentTags(result.talentTags as TalentTag[]);
+  };
+
   const runOperationalAction = async (action: string, payload: FlexibleRecord = {}) => {
     const result = await updatePublicContent(action, payload);
     if (user) await loadAdminData(user);
@@ -354,6 +375,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       photoVisible: profileVisible && requestedVisibility?.photoVisible === true && isSafeTalentPhotoUrl(profile.coverPhoto),
       mediaVisible: profileVisible && requestedVisibility?.mediaVisible === true && Array.isArray(profile.galleryVideos) && profile.galleryVideos.some((url) => /^https:\/\//i.test(url)),
       summaryVisible: profileVisible && requestedVisibility?.summaryVisible === true,
+      ageBandVisible: profileVisible && requestedVisibility?.ageBandVisible === true,
+      regionVisible: profileVisible && requestedVisibility?.regionVisible === true,
+      skillsVisible: profileVisible && requestedVisibility?.skillsVisible === true,
+      storyVisible: profileVisible && requestedVisibility?.storyVisible === true,
+      aspirationVisible: profileVisible && requestedVisibility?.aspirationVisible === true,
+      supportPathwayVisible: profileVisible && requestedVisibility?.supportPathwayVisible === true,
     };
     return runOperationalAction(id ? "updateTalentRecord" : "createTalentRecord", {
       ...(id ? { talentId: id } : {}),
@@ -361,6 +388,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         displayTitle: title,
         summary,
         supportArea,
+        ageBand: profile.ageBand || "",
+        region: profile.region || "",
+        skills: profile.skills || [],
+        story: profile.story || profile.current_situation || "",
+        aspiration: profile.aspiration || profile.dream || "",
+        supportPathway: profile.supportPathway || profile.current_needs || "",
+        consent: { reference: profile.consentRecord?.reference || "", reviewedAt: profile.consentRecord?.reviewedAt || "", reviewDueAt: profile.consentRecord?.reviewDueAt || "" },
         photoUrl: isSafeTalentPhotoUrl(profile.coverPhoto) ? profile.coverPhoto : "",
         mediaUrls: (profile.galleryVideos || []).filter((url) => /^https:\/\//i.test(url)),
         displayOrder: 0,
@@ -370,7 +404,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo<AuthContextType>(() => ({
-    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin",
+    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin", talentTags,
     pendingSponsors, inquiries, supportInquiries: [], faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
@@ -381,8 +415,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
-  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, teamMembers, user, userStatus]);
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
