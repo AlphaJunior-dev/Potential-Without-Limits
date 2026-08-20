@@ -258,6 +258,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result as FlexibleRecord;
   };
 
+  const uploadTalentPhoto = async (photo: File) => {
+    if (!user || userStatus !== "admin") throw new Error("Administrator access is required to upload a Talent photo.");
+    const token = await user.getIdToken(true);
+    const form = new FormData();
+    form.append("photo", photo);
+    const response = await fetch("/api/admin/talent-photo", {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` },
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || typeof result?.url !== "string" || !/^https:\/\//i.test(result.url)) {
+      throw new Error(typeof result?.error === "string" ? result.error : "The Talent photo could not be stored.");
+    }
+    return result.url;
+  };
+
   const updateMissionVision = async (nextMissionVision: MissionVisionData) => {
     const result = await updatePublicContent("updateMissionVision", { missionVision: nextMissionVision });
     if (result.missionVision && typeof result.missionVision === "object") setMissionVision(result.missionVision as MissionVisionData);
@@ -345,7 +362,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor: noClientAuthority, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateCallStatus, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
   }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

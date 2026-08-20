@@ -85,6 +85,7 @@ export default function AdminDashboardPage() {
     deleteTransparencyReport,
     addFoundationVideo,
     deleteFoundationVideo,
+    uploadTalentPhoto,
     logout
   } = useAuth();
 
@@ -165,6 +166,8 @@ export default function AdminDashboardPage() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
   const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false });
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   // CMS State: Mission & Vision
   const [missionText, setMissionText] = useState(missionVision?.mission || INITIAL_MISSION_VISION.mission);
@@ -198,22 +201,30 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Local Picture Upload Handler (Unlimited)
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Persistent Talent photo upload: browser files are stored only after the
+  // server verifies the Firebase administrator claim and returns an HTTPS URL.
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+    setImageUploadError(null);
+    setIsImageUploading(true);
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const resultStr = event.target.result as string;
-          setUploadedImages((prev) => [...prev, resultStr]);
-          if (!coverPhoto) setCoverPhoto(resultStr);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const photoUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        photoUrls.push(await uploadTalentPhoto(file));
+      }
+      setUploadedImages((current) => [...current, ...photoUrls]);
+      setCoverPhoto((current) => current || photoUrls[0] || "");
+      triggerToast("✓ Photo Stored", `${photoUrls.length} Talent photo${photoUrls.length === 1 ? "" : "s"} is ready to save.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The Talent photo could not be stored.";
+      setImageUploadError(message);
+      triggerToast("✗ Photo Not Stored", message);
+    } finally {
+      setIsImageUploading(false);
+      e.target.value = "";
+    }
   };
 
   // Local Video Upload Handler (Unlimited)
@@ -490,7 +501,7 @@ export default function AdminDashboardPage() {
       <aside
         className={`${
           isMobileSidebarOpen ? "block" : "hidden md:flex"
-        } w-full md:w-64 bg-white border-r border-[#0B2E6B]/10 shrink-0 flex-col justify-between p-4 md:p-6 space-y-8 min-h-screen z-30`}
+        } w-full md:w-64 bg-white border-r border-[#0B2E6B]/10 shrink-0 flex-col justify-between p-4 md:p-6 space-y-8 min-h-screen md:min-h-0 md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto z-30`}
       >
         <div className="space-y-6">
           {/* Brand Header */}
@@ -1156,25 +1167,32 @@ export default function AdminDashboardPage() {
                     />
                   </div>
 
-                  {/* UNLIMITED LOCAL FILE UPLOADS: PICTURES */}
+                  {/* Persistent server-authorized Talent photo uploads */}
                   <div className="p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-[#0B2E6B] flex items-center gap-1.5 text-xs">
                         <ImageIcon className="w-3.5 h-3.5 text-[#079432]" />
-                        <span>Upload Local Pictures (Unlimited)</span>
+                        <span>Upload Talent Photos</span>
                       </label>
                       <span className="text-[10px] text-[#0B2E6B]/40 font-mono">
-                        {uploadedImages.length} Uploaded
+                        {isImageUploading ? "Storing…" : `${uploadedImages.length} Stored`}
                       </span>
                     </div>
+
+                    <p className="text-[10px] leading-relaxed text-[#0B2E6B]/60">
+                      JPEG, PNG, or WebP only, up to 4 MB per photo. Each selected file is stored securely before it can be saved to this Sponsor Talent record.
+                    </p>
 
                     <input
                       type="file"
                       multiple
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       onChange={handleImageUpload}
-                      className="w-full text-[11px] text-[#0B2E6B]/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#079432] file:text-white hover:file:brightness-110 cursor-pointer"
+                      disabled={isImageUploading}
+                      className="w-full text-[11px] text-[#0B2E6B]/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#079432] file:text-white hover:file:brightness-110 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     />
+
+                    {imageUploadError && <p role="alert" className="text-[10px] text-red-600">{imageUploadError}</p>}
 
                     {/* Image Previews */}
                     {uploadedImages.length > 0 && (
@@ -1278,7 +1296,7 @@ export default function AdminDashboardPage() {
 
                   <fieldset className="rounded-xl border border-[#079432]/25 bg-[#079432]/5 p-3 space-y-2">
                     <legend className="px-1 text-[11px] font-bold text-[#079432]">Public visibility controls</legend>
-                    <p className="text-[10px] text-[#0B2E6B]/60">All public fields are hidden by default. You can edit these choices after publishing.</p>
+                    <p className="text-[10px] text-[#0B2E6B]/60">All public fields are hidden by default. A photo appears publicly only when both the profile and its cover-photo setting are enabled. You can edit these choices after publishing.</p>
                     {[
                       ["profileVisible", "Publish this Sponsor Talent profile"],
                       ["summaryVisible", "Show the approved summary"],
@@ -1300,9 +1318,10 @@ export default function AdminDashboardPage() {
                   <div className="pt-2 flex gap-2">
                     <button
                       type="submit"
-                      className="flex-1 bg-[#079432] hover:brightness-110 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md cursor-pointer"
+                      disabled={isImageUploading}
+                      className="flex-1 bg-[#079432] hover:brightness-110 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {editingId ? "Update Sponsor Talent" : "Save Sponsor Talent"}
+                      {isImageUploading ? "Storing Photo…" : editingId ? "Update Sponsor Talent" : "Save Sponsor Talent"}
                     </button>
                     {editingId && (
                       <button

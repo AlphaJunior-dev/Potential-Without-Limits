@@ -195,3 +195,37 @@ test("the Talent design preview is administrator-only and never seeds mock recor
   assert.doesNotMatch(sponsorRoute, /layout-sample-|Technology pathway|Creative practice/);
   assert.doesNotMatch(publicRoute, /layout-sample-|Technology pathway|Creative practice/);
 });
+
+test("Talent photo uploads use a verified administrator server boundary and preserve the two deliberate public-photo opt-ins", async () => {
+  const [adminPage, provider, uploadRoute, adminLibrary, imageConfig] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/talent-photo/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("next.config.ts"),
+  ]);
+
+  assert.match(adminPage, /uploadTalentPhoto/);
+  assert.match(adminPage, /isImageUploading/);
+  assert.match(adminPage, /A photo appears publicly only when both the profile and its cover-photo setting are enabled/);
+  assert.match(adminPage, /md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto/);
+  const talentImageHandler = adminPage.slice(
+    adminPage.indexOf("const handleImageUpload"),
+    adminPage.indexOf("const handleVideoUpload"),
+  );
+  assert.doesNotMatch(talentImageHandler, /FileReader|readAsDataURL/);
+
+  assert.match(provider, /new FormData\(\)/);
+  assert.match(provider, /form\.append\("photo", photo\)/);
+  assert.match(provider, /fetch\("\/api\/admin\/talent-photo"/);
+  assert.match(provider, /getIdToken\(true\)/);
+
+  assert.match(uploadRoute, /requireAdministrator\(request\)/);
+  assert.match(uploadRoute, /MAX_IMAGE_BYTES/);
+  assert.match(uploadRoute, /imageTypeFromBytes/);
+  assert.match(uploadRoute, /firebaseStorageDownloadTokens/);
+  assert.match(uploadRoute, /talent-photos\//);
+  assert.doesNotMatch(uploadRoute, /setPublic\(/);
+  assert.match(adminLibrary, /firebase-admin\/storage/);
+  assert.match(imageConfig, /firebasestorage\.googleapis\.com/);
+});

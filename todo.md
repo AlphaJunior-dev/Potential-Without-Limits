@@ -54,3 +54,8 @@
 - [x] Replace shared PWLIF logo references with the supplied official logo asset, including accessible alternative text and appropriate compact-header treatments.
 - [x] Apply a cohesive accessible visual system derived from the supplied logo’s navy, green, blue, gold, and restrained magenta colors across shared brand tokens and primary interface surfaces.
 - [x] Verify the logo and palette update does not affect sponsor authorization, public data filtering, or passwordless invitation workflows.
+- [x] Clarify the Sponsor Talent publication interface so administrators can distinguish record publication from each opt-in public visibility setting, especially public photo/media visibility.
+- [x] Preserve private-by-default visibility controls and verify that a photo appears publicly only after both the profile and photo are explicitly approved for public display.
+- [x] Replace the Talent editor’s browser-only local photo picker with a persistent server-authorized image-upload workflow and truthful upload-state feedback.
+- [x] Make the Admin Portal left navigation fixed on larger screens, responsive on smaller screens, and keep homepage return and administrator sign-out controls accessible without scrolling the page body.
+- [x] Add regression coverage for administrator-only image uploads and preserve the existing public-profile and public-photo opt-in requirements.

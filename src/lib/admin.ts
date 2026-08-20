@@ -11,6 +11,8 @@ const { cert, getApps, initializeApp } = require("firebase-admin/app") as typeof
 const { getAuth } = require("firebase-admin/auth") as typeof import("firebase-admin/auth");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getFirestore } = require("firebase-admin/firestore") as typeof import("firebase-admin/firestore");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getStorage } = require("firebase-admin/storage") as typeof import("firebase-admin/storage");
 
 function adminApp() {
   if (getApps().length) return getApps()[0]!;
@@ -31,6 +33,12 @@ export function adminDb() {
 
 export function adminAuth() {
   return getAuth(adminApp());
+}
+
+export function adminStorage() {
+  return getStorage(adminApp()).bucket(
+    process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  );
 }
 
 export async function requireAdministrator(request: NextRequest) {
