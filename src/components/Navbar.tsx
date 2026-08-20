@@ -70,7 +70,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop navigation opens on hover, while retaining click and keyboard controls. */}
-        <nav aria-label="Foundation navigation" className="hidden xl:flex items-center gap-4 text-[9px] font-bold uppercase tracking-[0.11em] text-[#0B2E6B]/72 2xl:gap-5">
+        <nav aria-label="Foundation navigation" className="hidden xl:flex items-center gap-4 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#0B2E6B]/90 2xl:gap-5 2xl:text-[11px]">
           <Link href="/" className="whitespace-nowrap hover:text-[#079432] transition-colors">Home</Link>
           {publicMenus.map((menu) => {
             const menuId = `desktop-menu-${menu.label.toLowerCase().replace(/\s+/g, "-")}`;
@@ -112,7 +112,7 @@ export function Navbar() {
                   }`}
                 >
                   <div className="rounded-2xl border border-[#0B2E6B]/10 bg-[#061D45] p-2.5 shadow-[0_18px_46px_rgba(6,29,69,0.22)]">
-                    {menu.items.map((item) => <Link key={item.href} href={item.href} onClick={() => setActiveDesktopMenu(null)} className="block rounded-xl px-3 py-2.5 text-[10px] font-bold normal-case tracking-normal text-white/84 transition hover:bg-white/10 hover:text-[#A9F1C3] focus-visible:bg-white/10 focus-visible:text-[#A9F1C3] focus-visible:outline-none">{item.label}</Link>)}
+                    {menu.items.map((item) => <Link key={item.href} href={item.href} onClick={() => setActiveDesktopMenu(null)} className="block rounded-xl px-3 py-2.5 text-[11px] font-bold normal-case tracking-normal text-white/90 transition hover:bg-white/10 hover:text-[#A9F1C3] focus-visible:bg-white/10 focus-visible:text-[#A9F1C3] focus-visible:outline-none">{item.label}</Link>)}
                   </div>
                 </div>
               </div>
@@ -127,7 +127,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/admin"
-                className="bg-[#0B2E6B] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[10px] uppercase tracking-[0.12em] hover:bg-[#082657] transition shadow-xs inline-flex items-center gap-2"
+                className="bg-[#0B2E6B] text-white border border-white/20 px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[11px] uppercase tracking-[0.1em] hover:bg-[#082657] transition shadow-xs inline-flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4 text-[#F7B500]" />
                 <span>Admin Portal</span>
@@ -145,7 +145,7 @@ export function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/sponsor/dashboard"
-                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[10px] uppercase tracking-[0.12em] hover:bg-[#14B84A] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-montserrat font-bold text-[11px] uppercase tracking-[0.1em] hover:bg-[#14B84A] transition shadow-xs inline-flex items-center gap-2 cursor-pointer"
               >
                 <LayoutDashboard className="w-4 h-4 text-white" />
                 <span>My Dashboard</span>
@@ -181,14 +181,14 @@ export function Navbar() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/book-a-call"
-                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[10px] sm:text-[11px] uppercase tracking-[0.1em] hover:bg-[#14B84A] transition shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="bg-[#079432] text-white px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[11px] sm:text-[12px] uppercase tracking-[0.08em] hover:bg-[#14B84A] transition shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Calendar className="w-4 h-4 text-white" />
                 <span>Book Orientation Call</span>
               </Link>
               <Link
                 href="/login"
-                className="border border-[#0B2E6B]/18 px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[10px] sm:text-[11px] uppercase tracking-[0.1em] text-[#0B2E6B] hover:bg-[#0B2E6B] hover:text-white transition shadow-2xs"
+                className="border border-[#0B2E6B]/18 px-4 sm:px-5 py-2.5 rounded-full font-inter font-bold text-[11px] sm:text-[12px] uppercase tracking-[0.08em] text-[#0B2E6B] hover:bg-[#0B2E6B] hover:text-white transition shadow-2xs"
               >
                 Sponsor Login
               </Link>

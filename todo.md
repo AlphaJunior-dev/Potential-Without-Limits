@@ -84,3 +84,4 @@
 - [x] Add the approved truthful public pages for Foundation Updates, Stories & Learning, Media Gallery, and Press & Resources with safe empty states until real materials are published.
 - [x] Remove the redundant public pre-header strapline above the PWLIF navigation.
 - [x] Make desktop public dropdown menus open on hover while retaining click, keyboard, touch, and mobile-drawer access.
+- [x] Increase public-header typography size and contrast for faster scanning without changing the approved menu behavior.
