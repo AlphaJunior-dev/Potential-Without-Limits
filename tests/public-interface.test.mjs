@@ -269,3 +269,16 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(mediaLibrary, /allowedMimeTypes/);
   assert.match(imageConfig, /remotePatterns/);
 });
+
+test("the public header removes the redundant strapline and supports hover, click, keyboard, and mobile navigation", async () => {
+  const navbar = await readSource("src/components/Navbar.tsx");
+
+  assert.doesNotMatch(navbar, /Potential in Motion\s*<span[^>]*>\/\s*<\/span>\s*Privacy-first Talent development/);
+  assert.match(navbar, /const \[activeDesktopMenu, setActiveDesktopMenu\]/);
+  assert.match(navbar, /onMouseEnter=\{\(\) => setActiveDesktopMenu\(menu\.label\)\}/);
+  assert.match(navbar, /onMouseLeave=\{\(\) => setActiveDesktopMenu\(null\)\}/);
+  assert.match(navbar, /aria-expanded=\{isMenuOpen\}/);
+  assert.match(navbar, /event\.key === "Escape"/);
+  assert.match(navbar, /top-\[4\.85rem\]/);
+  assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
+});

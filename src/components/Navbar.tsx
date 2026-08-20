@@ -13,6 +13,7 @@ export function Navbar() {
   const { userStatus, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDesktopMenu, setActiveDesktopMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,9 +55,6 @@ export function Navbar() {
           : "bg-[#FCFCFA]/92 backdrop-blur-md border-b border-[#0B2E6B]/8"
       }`}
     >
-      <div className="border-b border-white/10 bg-[#061D45] px-5 py-1.5 text-center text-[9px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3] sm:px-8 lg:px-10">
-        Potential in Motion <span className="mx-2 text-white/30">/</span> Privacy-first Talent development
-      </div>
       <div className="max-w-[92rem] mx-auto px-5 sm:px-8 lg:px-10 h-[4.85rem] flex items-center justify-between">
         {/* Brand Logo & Title */}
         <Link
@@ -71,19 +69,55 @@ export function Navbar() {
           />
         </Link>
 
-        {/* Desktop public navigation. Native details elements keep the menus keyboard accessible. */}
+        {/* Desktop navigation opens on hover, while retaining click and keyboard controls. */}
         <nav aria-label="Foundation navigation" className="hidden xl:flex items-center gap-4 text-[9px] font-bold uppercase tracking-[0.11em] text-[#0B2E6B]/72 2xl:gap-5">
           <Link href="/" className="whitespace-nowrap hover:text-[#079432] transition-colors">Home</Link>
-          {publicMenus.map((menu) => (
-            <details key={menu.label} className="group relative">
-              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[#079432] [&::-webkit-details-marker]:hidden">
-                {menu.label}<ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="absolute left-1/2 top-[calc(100%+1.1rem)] w-52 -translate-x-1/2 rounded-2xl border border-[#0B2E6B]/10 bg-[#061D45] p-2.5 shadow-[0_18px_46px_rgba(6,29,69,0.22)]">
-                {menu.items.map((item) => <Link key={item.href} href={item.href} className="block rounded-xl px-3 py-2.5 text-[10px] font-bold normal-case tracking-normal text-white/84 transition hover:bg-white/10 hover:text-[#A9F1C3]">{item.label}</Link>)}
+          {publicMenus.map((menu) => {
+            const menuId = `desktop-menu-${menu.label.toLowerCase().replace(/\s+/g, "-")}`;
+            const isMenuOpen = activeDesktopMenu === menu.label;
+
+            return (
+              <div
+                key={menu.label}
+                className="relative"
+                onMouseEnter={() => setActiveDesktopMenu(menu.label)}
+                onMouseLeave={() => setActiveDesktopMenu(null)}
+                onFocus={() => setActiveDesktopMenu(menu.label)}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setActiveDesktopMenu(null);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  aria-expanded={isMenuOpen}
+                  aria-controls={menuId}
+                  aria-haspopup="true"
+                  onClick={() => setActiveDesktopMenu(isMenuOpen ? null : menu.label)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setActiveDesktopMenu(null);
+                      event.currentTarget.blur();
+                    }
+                  }}
+                  className="flex cursor-pointer items-center gap-1 whitespace-nowrap hover:text-[#079432] focus-visible:text-[#079432] focus-visible:outline-none"
+                >
+                  {menu.label}<ChevronDown className={`h-3 w-3 transition-transform ${isMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+                <div
+                  id={menuId}
+                  className={`absolute left-1/2 top-full z-20 w-52 -translate-x-1/2 pt-3 transition-[opacity,transform,visibility] duration-150 ease-out ${
+                    isMenuOpen ? "visible translate-y-0 opacity-100" : "pointer-events-none invisible translate-y-1 opacity-0"
+                  }`}
+                >
+                  <div className="rounded-2xl border border-[#0B2E6B]/10 bg-[#061D45] p-2.5 shadow-[0_18px_46px_rgba(6,29,69,0.22)]">
+                    {menu.items.map((item) => <Link key={item.href} href={item.href} onClick={() => setActiveDesktopMenu(null)} className="block rounded-xl px-3 py-2.5 text-[10px] font-bold normal-case tracking-normal text-white/84 transition hover:bg-white/10 hover:text-[#A9F1C3] focus-visible:bg-white/10 focus-visible:text-[#A9F1C3] focus-visible:outline-none">{item.label}</Link>)}
+                  </div>
+                </div>
               </div>
-            </details>
-          ))}
+            );
+          })}
           <Link href="/support" className="whitespace-nowrap hover:text-[#079432] transition-colors">Contact</Link>
         </nav>
 
@@ -176,7 +210,7 @@ export function Navbar() {
 
       {/* Mobile Slide-Over Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="xl:hidden fixed inset-x-0 top-[6.55rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+        <div className="xl:hidden fixed inset-x-0 top-[4.85rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
           <nav className="flex flex-col space-y-3 text-sm font-semibold text-[#0B2E6B]">
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"><span>Home</span><ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" /></Link>
             {publicMenus.map((menu) => (
