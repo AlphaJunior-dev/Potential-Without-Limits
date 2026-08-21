@@ -115,3 +115,4 @@
 - [x] Map and document which public header routes are currently editable through the Admin Portal and add controlled editing where the current CMS has a justified content model.
 - [x] Implement a private Foundation inbox for public contact, volunteer, partnership, and sponsor Talent enquiries, with source labels, administrator-only review, and sponsor dashboard message submission.
 - [ ] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
+- [x] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
