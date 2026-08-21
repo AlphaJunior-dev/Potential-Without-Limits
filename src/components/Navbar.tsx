@@ -44,7 +44,12 @@ export function Navbar() {
     { label: "Our Approach", items: [{ href: "/talents", label: "Sponsor Talent" }, { href: "/our-pilot", label: "How It Works" }] },
     { label: "News & Updates", items: [{ href: "/foundation-updates", label: "Foundation Updates" }, { href: "/stories-learning", label: "Stories & Learning" }] },
     { label: "Media & Press", items: [{ href: "/media-gallery", label: "Media Gallery" }, { href: "/press-resources", label: "Press & Resources" }] },
-    { label: "Get Involved", items: [{ href: "/book-a-call", label: "Book Orientation" }, { href: "/partnership", label: "Partner With Us" }, { href: "/volunteer", label: "Volunteer" }] },
+    {
+      label: "Get Involved",
+      items: userStatus === "approved"
+        ? [{ href: "/sponsor/dashboard", label: "Partnership Desk" }, { href: "/partnership", label: "Partner With Us" }, { href: "/volunteer", label: "Volunteer" }]
+        : [{ href: "/book-a-call", label: "Book Orientation" }, { href: "/partnership", label: "Partner With Us" }, { href: "/volunteer", label: "Volunteer" }],
+    },
   ];
 
   return (

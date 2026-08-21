@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         passwordSetupComplete: Boolean(account?.passwordSetupCompletedAt),
       };
     }));
-    setInquiries([]);
+    setInquiries(Array.isArray(data.foundationInbox) ? data.foundationInbox : []);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
     setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
     setTalentCategories(Array.isArray(data.site?.talentCategories) ? data.site.talentCategories : []);
@@ -378,6 +378,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { email: email.trim().toLowerCase(), invitationStatus: result.invitationStatus === "requested" ? "Email request accepted" : "Invitation request pending" };
   };
 
+  const sendInquiry = async (subject: string, message: string, talentId?: string) => {
+    if (!user || userStatus !== "approved") throw new Error("Approved sponsor access is required to contact the Foundation.");
+    const token = await user.getIdToken(true);
+    const response = await fetch("/api/sponsor", {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ action: "sendMessage", subject, message, ...(talentId ? { talentId } : {}) }),
+    });
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    if (!response.ok) throw new Error(payload?.error || "Your message could not be sent. Please try again.");
+    return payload;
+  };
+
   const saveTalentRecord = async (profile: YouthProfile, id?: string) => {
     const title = String(profile.name || "").trim();
     const summary = String(profile.bio || "").trim();
@@ -419,7 +432,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextType>(() => ({
     user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
-    pendingSponsors, inquiries, supportInquiries: [], faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
+    pendingSponsors, inquiries, supportInquiries: inquiries.filter((inquiry) => inquiry.type === "public"), faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
     bookVettingCall: (name: string, email: string, company: string, linkedin: string, category?: string, dreamInterest?: string) => {
@@ -429,7 +442,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: noClientAuthority, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry: noClientAuthority,
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string, itemType: "public" | "sponsor") => runOperationalAction("resolveInboxItem", { itemId, itemType }), addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
   }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -65,8 +65,7 @@ export default function AdminDashboardPage() {
     updateSponsorPassword,
     generateCredentials,
     provisionSponsorManual,
-    approveTalentAddition,
-    rejectTalentAddition,
+    resolveSupportInquiry,
     addProfile,
     updateProfile,
     deleteProfile,
@@ -655,10 +654,10 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center gap-2.5">
                 <UserPlus className="w-4 h-4" />
-                <span>Inquiries &amp; Additions</span>
+                <span>Foundation Inbox</span>
               </div>
               <span className="text-[10px] bg-[#079432]/20 text-[#0B2E6B] px-1.5 py-0.5 rounded font-mono font-bold">
-                {inquiries.filter((i) => i.status === "pending").length}
+                {inquiries.filter((i) => i.status !== "reviewed").length}
               </span>
             </button>
 
@@ -1060,82 +1059,81 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL 2: Dedicated Sponsor Inquiries & Talent Additions */}
+        {/* PANEL 2: Foundation inbox for public and approved-sponsor messages. */}
         {activeSection === "inquiries" && (
           <div className="space-y-6">
             <div>
               <h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">
-                Sponsor Inquiries &amp; Talent Sponsorship Requests
+                Foundation Inbox
               </h1>
               <p className="text-xs text-[#0B2E6B]/60 mt-0.5">
-                Review requests from verified sponsors wanting to add specific youth creators to their corporate portfolio or provide equipment grants.
+                Review public contact submissions and messages sent privately by approved sponsors. Marking an item reviewed records an audit entry; it does not create a sponsorship assignment.
               </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-[#0B2E6B]/10 overflow-hidden shadow-xl">
               {inquiries.length === 0 ? (
                 <div className="p-12 text-center text-[#0B2E6B]/50 text-xs">
-                  No active sponsor talent requests pending review.
+                  No public enquiries or sponsor messages have arrived yet.
                 </div>
               ) : (
                 <div className="divide-y divide-white/5">
-                  {inquiries.map((inq) => (
+                  {inquiries.map((inq) => {
+                    const isSponsorMessage = inq.type === "sponsor";
+                    const senderName = isSponsorMessage ? inq.sponsorName || "Approved sponsor" : inq.name || "Public visitor";
+                    const senderEmail = isSponsorMessage ? inq.sponsorEmail : inq.email;
+                    const source = isSponsorMessage ? inq.sponsorOrganization || inq.source : inq.source;
+                    const timestampValue = inq.createdAt;
+                    const seconds = typeof timestampValue === "object" && timestampValue ? (timestampValue.seconds ?? timestampValue._seconds) : undefined;
+                    const receivedAt = typeof seconds === "number" ? new Date(seconds * 1000).toLocaleString() : typeof timestampValue === "string" || typeof timestampValue === "number" ? new Date(timestampValue).toLocaleString() : "Received recently";
+                    return (
                     <div key={inq.id} className="p-6 flex flex-col md:flex-row justify-between gap-6">
                       <div className="space-y-3 max-w-2xl">
                         <div className="flex items-center gap-3">
                           <span className="font-montserrat font-bold text-base text-[#0B2E6B]">
-                            Sponsor: {inq.sponsorName} ({inq.sponsorEmail})
+                            {senderName}{senderEmail ? ` (${senderEmail})` : ""}
                           </span>
                           <span
-                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
-                              inq.status === "connected"
-                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                                : inq.status === "closed"
-                                ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                                : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                            }`}
+                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${isSponsorMessage ? "bg-[#0A8CF5]/10 text-[#0A6FBE] border border-[#0A8CF5]/25" : "bg-[#079432]/10 text-[#079432] border border-[#079432]/25"}`}
                           >
-                            {inq.status === "connected" ? "Linked to Portfolio" : inq.status}
+                            {isSponsorMessage ? "Sponsor message" : "Public enquiry"}
                           </span>
                         </div>
 
                         <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#0B2E6B]/10 text-xs text-[#0B2E6B]/80 space-y-1">
-                          <p className="font-semibold text-[#079432]">
-                            Target Creator Requested: <span className="text-[#0B2E6B] font-bold">{inq.talentName}</span>
-                          </p>
+                          <p className="font-semibold text-[#079432]">Subject: <span className="text-[#0B2E6B] font-bold">{inq.subject || "Foundation enquiry"}</span></p>
+                          {source && <p className="text-[#0B2E6B]/62">Source: {source}</p>}
+                          {inq.talentId && <p className="text-[#0B2E6B]/62">Related Sponsor Talent record: {inq.talentId}</p>}
                           <p className="text-[#0B2E6B]/70 italic">&quot;{inq.message}&quot;</p>
                           <span className="text-[10px] text-[#0B2E6B]/40 block font-mono pt-1">
-                            Submitted: {inq.createdAt}
+                            Received: {receivedAt}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex flex-col sm:flex-row md:flex-col justify-center gap-2 shrink-0">
-                        {inq.status === "pending" ? (
-                          <>
-                            <button
-                              onClick={() => approveTalentAddition(inq.id)}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
-                            >
-                              <CheckCircle2 className="w-4 h-4 text-[#0B2E6B]" />
-                              <span>Approve &amp; Link Talent</span>
-                            </button>
-                            <button
-                              onClick={() => rejectTalentAddition(inq.id)}
-                              className="bg-[#0B2E6B]/10 hover:bg-[#0B2E6B]/20 text-[#0B2E6B] font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                            >
-                              <X className="w-4 h-4 text-red-400" />
-                              <span>Decline Request</span>
-                            </button>
-                          </>
+                        {inq.status !== "reviewed" ? (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await resolveSupportInquiry(inq.id, inq.type);
+                                triggerToast("✓ Marked Reviewed", "The Foundation inbox item has been retained and marked reviewed.");
+                              } catch (err) {
+                                triggerToast("✗ Could Not Update Inbox", err instanceof Error ? err.message : "The Foundation inbox item could not be updated.");
+                              }
+                            }}
+                            className="bg-[#079432] hover:bg-[#14B84A] text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Mark Reviewed</span>
+                          </button>
                         ) : (
-                          <div className="text-right text-xs font-semibold text-[#0B2E6B]/60">
-                            Status: <span className="text-emerald-400">{inq.status}</span>
-                          </div>
+                          <div className="text-right text-xs font-semibold text-[#079432]">Reviewed</div>
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

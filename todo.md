@@ -110,3 +110,8 @@
 - [ ] Complete a release-critical end-to-end Preview audit of sponsor sign-in, invitation setup, private Talent details, dashboard revocation, and the public orientation handoff.
 - [ ] Confirm whether the account has an official affected-account notice and, if so, export a current Task Data Backup before the August 23 deadline.
 - [x] Prevent direct visits to the one-time sponsor password-setup route from displaying setup fields without a valid Firebase invitation-link action.
+- [x] Improve the approved-sponsor Talent detail page so empty or incomplete records communicate their status professionally and complete records are easy to review.
+- [x] Remove the public orientation-call call-to-action from authenticated sponsor navigation and replace it with an appropriate dashboard or message pathway.
+- [x] Map and document which public header routes are currently editable through the Admin Portal and add controlled editing where the current CMS has a justified content model.
+- [x] Implement a private Foundation inbox for public contact, volunteer, partnership, and sponsor Talent enquiries, with source labels, administrator-only review, and sponsor dashboard message submission.
+- [ ] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.

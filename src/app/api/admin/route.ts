@@ -17,6 +17,28 @@ import {
 export const runtime = "nodejs";
 
 const reviewStatuses = new Set(["new", "contacted", "call_scheduled", "approved", "declined"]);
+type FoundationInboxItem = Record<string, unknown> & {
+  id: string;
+  type: "public" | "sponsor";
+  status: string;
+  createdAt?: unknown;
+};
+
+function timestampMillis(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value && typeof value === "object" && "toMillis" in value && typeof (value as { toMillis?: unknown }).toMillis === "function") {
+    return (value as { toMillis: () => number }).toMillis();
+  }
+  if (value && typeof value === "object") {
+    const seconds = (value as { seconds?: unknown; _seconds?: unknown }).seconds ?? (value as { _seconds?: unknown })._seconds;
+    if (typeof seconds === "number") return seconds * 1_000;
+  }
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
 
 function deny(error: unknown) {
   const message = error instanceof Error ? error.message : "";
@@ -61,14 +83,20 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdministrator(request);
     const db = adminDb();
-    const [site, applications, cards, talentRecords, sponsorAccounts, audit] = await Promise.all([
+    const [site, applications, cards, talentRecords, sponsorAccounts, audit, contactRequests, sponsorMessages] = await Promise.all([
       db.collection("public_site_content").doc("main").get(),
       db.collection("sponsor_applications").orderBy("createdAt", "desc").limit(100).get(),
       db.collection("pilot_overview_cards").orderBy("displayOrder", "asc").get(),
       db.collection("sponsor_talent_records").orderBy("displayOrder", "asc").limit(100).get(),
       db.collection("sponsor_accounts").orderBy("updatedAt", "desc").limit(100).get(),
       db.collection("audit_log").orderBy("createdAt", "desc").limit(150).get(),
+      db.collection("contact_requests").orderBy("createdAt", "desc").limit(150).get(),
+      db.collection("sponsor_messages").orderBy("createdAt", "desc").limit(150).get(),
     ]);
+    const foundationInbox = ([
+      ...contactRequests.docs.map((document) => ({ id: document.id, type: "public" as const, status: "new", ...document.data() })),
+      ...sponsorMessages.docs.map((document) => ({ id: document.id, type: "sponsor" as const, status: "new", ...document.data() })),
+    ] as FoundationInboxItem[]).sort((first, second) => timestampMillis(second.createdAt) - timestampMillis(first.createdAt));
     return NextResponse.json({
       site: site.exists ? site.data() : {},
       applications: applications.docs.map((document) => ({ id: document.id, ...document.data() })),
@@ -76,6 +104,7 @@ export async function GET(request: NextRequest) {
       talentRecords: talentRecords.docs.map((document) => ({ id: document.id, ...document.data() })),
       sponsorAccounts: sponsorAccounts.docs.map((document) => ({ id: document.id, ...document.data() })),
       audit: audit.docs.map((document) => ({ id: document.id, ...document.data() })),
+      foundationInbox,
     });
   } catch (error) {
     return deny(error);
@@ -89,7 +118,17 @@ export async function PATCH(request: NextRequest) {
     if (!body || typeof body !== "object") return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     const db = adminDb();
 
-    if (body.action === "updateSite") {
+    if (body.action === "resolveInboxItem") {
+      const itemId = typeof body.itemId === "string" ? body.itemId.trim() : "";
+      const itemType = body.itemType === "public" || body.itemType === "sponsor" ? body.itemType : "";
+      if (!itemId || !itemType) return NextResponse.json({ error: "A valid Foundation inbox item is required." }, { status: 400 });
+      const collection = itemType === "public" ? "contact_requests" : "sponsor_messages";
+      const item = await db.collection(collection).doc(itemId).get();
+      if (!item.exists) return NextResponse.json({ error: "Foundation inbox item not found." }, { status: 404 });
+      await item.ref.set({ status: "reviewed", reviewedAt: FieldValue.serverTimestamp(), reviewedBy: administrator.uid, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      await appendAudit("resolveInboxItem", "foundation_inbox", `${itemType}:${itemId}`, administrator.uid, { itemType });
+      return NextResponse.json({ ok: true });
+    } else if (body.action === "updateSite") {
       await db.collection("public_site_content").doc("main").set({
         heroTitle: String(body.heroTitle ?? "").trim().slice(0, 160),
         heroText: String(body.heroText ?? "").trim().slice(0, 700),

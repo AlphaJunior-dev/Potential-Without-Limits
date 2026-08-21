@@ -345,3 +345,48 @@ test("the public Talent Showcase uses managed tags and remains empty until a rev
   assert.match(talentsPage, /talentTags\.filter/);
   assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
 });
+
+test("Foundation inbox accepts only server-authorized sponsor messages and approved sessions no longer receive orientation prompts", async () => {
+  const [adminRoute, sponsorRoute, provider, dashboard, navbar, homepage, supportModal, privateTalent, adminPage] = await Promise.all([
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/sponsor/dashboard/page.tsx"),
+    readSource("src/components/Navbar.tsx"),
+    readSource("src/app/page.tsx"),
+    readSource("src/components/SupportModal.tsx"),
+    readSource("src/app/sponsor/talent/[id]/page.tsx"),
+    readSource("src/app/admin/page.tsx"),
+  ]);
+
+  assert.match(sponsorRoute, /requireApprovedSponsor\(request\)/);
+  assert.match(sponsorRoute, /body\.action === "sendMessage"/);
+  assert.match(sponsorRoute, /subject\.length > 200/);
+  assert.match(sponsorRoute, /message\.length > 2_000/);
+  assert.match(sponsorRoute, /collection\("sponsor_messages"\)\.add/);
+  assert.match(sponsorRoute, /sponsorUid: sponsor\.uid/);
+  assert.match(sponsorRoute, /sponsorEmail/);
+  assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
+
+  assert.match(adminRoute, /collection\("contact_requests"\)/);
+  assert.match(adminRoute, /collection\("sponsor_messages"\)/);
+  assert.match(adminRoute, /foundationInbox/);
+  assert.match(adminRoute, /body\.action === "resolveInboxItem"/);
+  assert.match(adminRoute, /reviewedBy: administrator\.uid/);
+  assert.match(provider, /setInquiries\(Array\.isArray\(data\.foundationInbox\)/);
+  assert.match(provider, /const sendInquiry = async/);
+  assert.match(provider, /action: "sendMessage"/);
+  assert.match(adminPage, /Foundation Inbox/);
+  assert.match(adminPage, /Mark Reviewed/);
+
+  assert.match(supportModal, /fetch\("\/api\/contact"/);
+  assert.match(dashboard, /handleFoundationMessage/);
+  assert.match(dashboard, /sendInquiry\(messageSubject, messageBody\)/);
+  assert.match(privateTalent, /Not yet available in this record/);
+  assert.match(privateTalent, /action: "sendMessage"/);
+  assert.doesNotMatch(privateTalent, /if \(!body\) return null/);
+
+  assert.match(navbar, /userStatus === "approved"[\s\S]*?Partnership Desk/);
+  assert.match(homepage, /hasApprovedSponsorAccess \? "\/sponsor\/dashboard" : "\/book-a-call"/);
+  assert.match(homepage, /hasApprovedSponsorAccess \? `\/sponsor\/talent\/\$\{profile\.id\}` : `\/portfolio\/\$\{profile\.id\}`/);
+});

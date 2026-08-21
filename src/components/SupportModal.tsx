@@ -10,6 +10,8 @@ interface SupportModalProps {
 
 export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,14 +21,29 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      onClose();
-      setFormData({ name: "", email: "", subject: "Child Sponsorship & Grants", message: "" });
-    }, 2500);
+    setSubmitError("");
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...formData, source: "Support Concierge" }),
+      });
+      const payload = await response.json().catch(() => null) as { error?: string } | null;
+      if (!response.ok) throw new Error(payload?.error || "Your message could not be sent. Please try again.");
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        onClose();
+        setFormData({ name: "", email: "", subject: "Child Sponsorship & Grants", message: "" });
+      }, 2500);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Your message could not be sent. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,7 +77,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
               </div>
               <h4 className="font-montserrat font-bold text-xl text-[#0B2E6B]">Inquiry Received</h4>
               <p className="text-xs text-[#0B2E6B]/70 max-w-xs mx-auto leading-relaxed">
-                Thank you for contacting our foundation desk. A representative will respond to your email within 24 hours.
+                Thank you for contacting our foundation desk. Your message has been saved to the Foundation inbox for review.
               </p>
             </div>
           ) : (
@@ -121,12 +138,14 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
                 </span>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="bg-[#079432] hover:bg-[#14B84A] text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md cursor-pointer"
                 >
-                  <span>Send Message</span>
+                  <span>{isSubmitting ? "Sending…" : "Send Message"}</span>
                   <Send className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>
+              {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{submitError}</p>}
             </form>
           )}
         </div>

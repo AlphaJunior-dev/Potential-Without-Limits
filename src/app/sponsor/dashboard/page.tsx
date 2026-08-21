@@ -77,7 +77,7 @@ function DetailRow({ label, value }: { label: string; value?: string }) {
 }
 
 export default function SponsorDashboardPage() {
-  const { user, userStatus, logout } = useAuth();
+  const { user, userStatus, logout, sendInquiry } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -89,6 +89,10 @@ export default function SponsorDashboardPage() {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageBody, setMessageBody] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   useEffect(() => {
     if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") {
@@ -123,6 +127,26 @@ export default function SponsorDashboardPage() {
       setPasswordMessage(passwordError instanceof Error ? passwordError.message : "Your password could not be updated. Please try again.");
     } finally {
       setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleFoundationMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessageStatus("");
+    if (!messageSubject.trim() || !messageBody.trim()) {
+      setMessageStatus("Please add both a subject and a message for the Foundation team.");
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      await sendInquiry(messageSubject, messageBody);
+      setMessageSubject("");
+      setMessageBody("");
+      setMessageStatus("Your message has been securely delivered to the Foundation inbox.");
+    } catch (error) {
+      setMessageStatus(error instanceof Error ? error.message : "Your message could not be sent. Please try again.");
+    } finally {
+      setIsSendingMessage(false);
     }
   };
 
@@ -400,16 +424,23 @@ export default function SponsorDashboardPage() {
             <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Partnership Desk</p>
               <h2 className="mt-2 max-w-xl font-montserrat text-3xl font-black tracking-[-0.04em]">Coordinate the next conversation with care.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#0B2E6B]/65">Individual sponsorship assignments and sensitive partnership information are not displayed in this portal. The foundation coordinates appropriate next steps after a private conversation and safeguarding review.</p>
-              <Link href="/book-a-call" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#079432] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A]">Book a partnership call <ArrowRight className="h-4 w-4" /></Link>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#0B2E6B]/65">Individual sponsorship assignments and sensitive partnership information are not displayed in this portal. Send a focused message and the Foundation team can coordinate the appropriate next conversation after a safeguarding review.</p>
+              <form onSubmit={handleFoundationMessage} className="mt-7 max-w-xl space-y-3">
+                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#0B2E6B]/55" htmlFor="partnership-message-subject">Message subject</label>
+                <input id="partnership-message-subject" value={messageSubject} maxLength={200} onChange={(event) => setMessageSubject(event.target.value)} placeholder="How can the Foundation help?" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" />
+                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#0B2E6B]/55" htmlFor="partnership-message-body">Your message</label>
+                <textarea id="partnership-message-body" value={messageBody} maxLength={2000} rows={5} onChange={(event) => setMessageBody(event.target.value)} placeholder="Share the context for your question or partnership conversation." className="w-full resize-y rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm leading-6 text-[#0B2E6B] outline-none focus:border-[#079432]" />
+                <button type="submit" disabled={isSendingMessage} className="inline-flex items-center gap-2 rounded-xl bg-[#079432] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A] disabled:cursor-not-allowed disabled:opacity-60">{isSendingMessage ? "Sending message…" : "Send to Foundation"} <ArrowRight className="h-4 w-4" /></button>
+                {messageStatus && <p role="status" className="text-xs leading-5 text-[#0B2E6B]/70">{messageStatus}</p>}
+              </form>
             </article>
             <aside className="rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
               <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#F7B500]/20 text-[#0B2E6B]"><MessageCircle className="h-5 w-5" /></div>
               <h3 className="mt-5 font-montserrat text-xl font-black">What to expect</h3>
               <ol className="mt-5 space-y-4 text-sm text-[#0B2E6B]/70">
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">01</span><span>Choose a suitable time for a conversation.</span></li>
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">02</span><span>The partnership team reviews the appropriate context with you.</span></li>
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">03</span><span>Any agreed follow-up is coordinated privately.</span></li>
+                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">01</span><span>Share a focused question or the context for a partnership conversation.</span></li>
+                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">02</span><span>The Foundation team reviews the appropriate context privately.</span></li>
+                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">03</span><span>Any agreed follow-up is coordinated through the Foundation.</span></li>
               </ol>
             </aside>
           </section>

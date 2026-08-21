@@ -69,15 +69,46 @@ export async function POST(request: NextRequest) {
   try {
     const sponsor = await requireApprovedSponsor(request);
     const body = await request.json().catch(() => null);
-    if (!body || body.action !== "completePasswordSetup") {
+    if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Unsupported sponsor action." }, { status: 400 });
     }
-    await adminDb().collection("sponsor_accounts").doc(sponsor.uid).set({
-      passwordSetupRequired: false,
-      passwordSetupCompletedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
-    return NextResponse.json({ ok: true });
+    const db = adminDb();
+    if (body.action === "completePasswordSetup") {
+      await db.collection("sponsor_accounts").doc(sponsor.uid).set({
+        passwordSetupRequired: false,
+        passwordSetupCompletedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return NextResponse.json({ ok: true });
+    }
+    if (body.action === "sendMessage") {
+      const subject = typeof body.subject === "string" ? body.subject.trim() : "";
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      const talentId = optionalText(body.talentId, 120);
+      if (!subject || subject.length > 200 || !message || message.length > 2_000) {
+        return NextResponse.json({ error: "Provide a subject of up to 200 characters and a message of up to 2,000 characters." }, { status: 400 });
+      }
+      const accountSnapshot = await db.collection("sponsor_accounts").doc(sponsor.uid).get();
+      const account = accountSnapshot.exists ? accountSnapshot.data() : undefined;
+      const applicationId = optionalText(account?.applicationId, 120);
+      const applicationSnapshot = applicationId ? await db.collection("sponsor_applications").doc(applicationId).get() : null;
+      const application = applicationSnapshot?.exists ? applicationSnapshot.data() : undefined;
+      await db.collection("sponsor_messages").add({
+        sponsorUid: sponsor.uid,
+        sponsorEmail: optionalText(sponsor.email, 320) || optionalText(application?.email, 320) || "",
+        sponsorName: optionalText(application?.fullName, 120) || "Approved sponsor",
+        sponsorOrganization: optionalText(application?.organization, 160) || "",
+        subject,
+        message,
+        ...(talentId ? { talentId } : {}),
+        source: "Sponsor Dashboard",
+        status: "new",
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      return NextResponse.json({ ok: true });
+    }
+    return NextResponse.json({ error: "Unsupported sponsor action." }, { status: 400 });
   } catch (error) {
     return accessDenied(error);
   }
