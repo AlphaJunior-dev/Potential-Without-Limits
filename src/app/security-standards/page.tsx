@@ -8,7 +8,7 @@ import { PublicCtaBand, PublicHero } from "@/components/PublicStory";
 export default function SecurityStandardsPage() {
   const { legalSecurity } = useAuth();
   const principles = [
-    ["01", "Controlled publication", legalSecurity.securityStandardsContent, FileCheck],
+    ["01", "Controlled publication", legalSecurity.securityStandardsContent || "PWLIF has not yet published detailed security standards. Please contact the foundation for current safeguarding information.", FileCheck],
     ["02", "Respectful representation", "PWLIF does not publish sensationalized or unnecessary personal information. Sponsor Talent information is shared only when it is appropriate, respectful, and explicitly enabled through field-level publication controls.", Eye],
     ["03", "Zero direct unmonitored contact", "The public site does not expose direct contact channels, private addresses, or unnecessary identifying details. Sponsor access is considered only after orientation, manual approval, and a secure email-link invitation.", Lock],
     ["04", "Data minimisation", "PWLIF limits public information to the minimum appropriate Sponsor Talent details. Individual record visibility can be reviewed, edited, or withdrawn by authorised administrators at any time.", Users],

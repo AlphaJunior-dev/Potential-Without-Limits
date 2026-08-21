@@ -49,9 +49,27 @@ type SponsorTalent = {
   displayOrder: number;
 };
 
+type ConversationEntry = {
+  id: string;
+  sender?: "sponsor" | "foundation";
+  senderName?: string;
+  message?: string;
+  createdAt?: unknown;
+};
+
+type SponsorConversation = {
+  id: string;
+  subject: string;
+  talentId?: string;
+  status?: string;
+  message?: string;
+  thread?: ConversationEntry[];
+};
+
 type DashboardData = {
   sponsor: SponsorProfile;
   talent: SponsorTalent[];
+  conversations?: SponsorConversation[];
 };
 
 const tabs: Array<{ id: DashboardTab; label: string; icon: React.ElementType }> = [
@@ -76,8 +94,16 @@ function DetailRow({ label, value }: { label: string; value?: string }) {
   );
 }
 
+function conversationTime(value: unknown) {
+  if (typeof value === "number") return new Date(value).toLocaleString();
+  if (value && typeof value === "object" && "toMillis" in value && typeof (value as { toMillis?: unknown }).toMillis === "function") {
+    return new Date((value as { toMillis: () => number }).toMillis()).toLocaleString();
+  }
+  return "Just now";
+}
+
 export default function SponsorDashboardPage() {
-  const { user, userStatus, logout, sendInquiry } = useAuth();
+  const { user, userStatus, logout, sendInquiry, replyToFoundationConversation } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -93,6 +119,9 @@ export default function SponsorDashboardPage() {
   const [messageBody, setMessageBody] = useState("");
   const [messageStatus, setMessageStatus] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [replyBodies, setReplyBodies] = useState<Record<string, string>>({});
+  const [replyStatus, setReplyStatus] = useState<Record<string, string>>({});
+  const [replyingConversation, setReplyingConversation] = useState<string | null>(null);
 
   useEffect(() => {
     if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") {
@@ -139,14 +168,56 @@ export default function SponsorDashboardPage() {
     }
     setIsSendingMessage(true);
     try {
-      await sendInquiry(messageSubject, messageBody);
+      const created = await sendInquiry(messageSubject, messageBody) as { conversationId?: unknown } | null;
+      const createdId = typeof created?.conversationId === "string" ? created.conversationId : "";
+      if (createdId) {
+        const message = messageBody.trim();
+        const subject = messageSubject.trim();
+        setDashboard((current) => current ? {
+          ...current,
+          conversations: [{
+            id: createdId,
+            subject,
+            status: "new",
+            thread: [{ id: "sent", sender: "sponsor", senderName: current.sponsor.name || "Approved sponsor", message, createdAt: Date.now() }],
+          }, ...(current.conversations || [])],
+        } : current);
+      }
       setMessageSubject("");
       setMessageBody("");
-      setMessageStatus("Your message has been securely delivered to the Foundation inbox.");
+      setMessageStatus("Your message has been sent to the Foundation team. You can continue the conversation below when they reply.");
     } catch (error) {
       setMessageStatus(error instanceof Error ? error.message : "Your message could not be sent. Please try again.");
     } finally {
       setIsSendingMessage(false);
+    }
+  };
+
+  const handleConversationReply = async (event: React.FormEvent, conversationId: string) => {
+    event.preventDefault();
+    const message = (replyBodies[conversationId] || "").trim();
+    if (!message) {
+      setReplyStatus((current) => ({ ...current, [conversationId]: "Write a message before sending your reply." }));
+      return;
+    }
+    setReplyingConversation(conversationId);
+    setReplyStatus((current) => ({ ...current, [conversationId]: "" }));
+    try {
+      await replyToFoundationConversation(conversationId, message);
+      setDashboard((current) => current ? {
+        ...current,
+        conversations: (current.conversations || []).map((conversation) => conversation.id === conversationId ? {
+          ...conversation,
+          status: "new",
+          thread: [...(conversation.thread || []), { id: `reply-${Date.now()}`, sender: "sponsor", senderName: current.sponsor.name || "Approved sponsor", message, createdAt: Date.now() }],
+        } : conversation),
+      } : current);
+      setReplyBodies((current) => ({ ...current, [conversationId]: "" }));
+      setReplyStatus((current) => ({ ...current, [conversationId]: "Your reply has been sent to the Foundation team." }));
+    } catch (error) {
+      setReplyStatus((current) => ({ ...current, [conversationId]: error instanceof Error ? error.message : "Your reply could not be sent. Please try again." }));
+    } finally {
+      setReplyingConversation(null);
     }
   };
 
@@ -424,7 +495,7 @@ export default function SponsorDashboardPage() {
             <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Partnership Desk</p>
               <h2 className="mt-2 max-w-xl font-montserrat text-3xl font-black tracking-[-0.04em]">Coordinate the next conversation with care.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[#0B2E6B]/65">Individual sponsorship assignments and sensitive partnership information are not displayed in this portal. Send a focused message and the Foundation team can coordinate the appropriate next conversation after a safeguarding review.</p>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#0B2E6B]/65">Individual sponsorship assignments and sensitive partnership information are not displayed in this portal. Start a focused conversation, then continue privately with the Foundation team after they reply.</p>
               <form onSubmit={handleFoundationMessage} className="mt-7 max-w-xl space-y-3">
                 <label className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#0B2E6B]/55" htmlFor="partnership-message-subject">Message subject</label>
                 <input id="partnership-message-subject" value={messageSubject} maxLength={200} onChange={(event) => setMessageSubject(event.target.value)} placeholder="How can the Foundation help?" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" />
@@ -434,14 +505,28 @@ export default function SponsorDashboardPage() {
                 {messageStatus && <p role="status" className="text-xs leading-5 text-[#0B2E6B]/70">{messageStatus}</p>}
               </form>
             </article>
-            <aside className="rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#F7B500]/20 text-[#0B2E6B]"><MessageCircle className="h-5 w-5" /></div>
-              <h3 className="mt-5 font-montserrat text-xl font-black">What to expect</h3>
-              <ol className="mt-5 space-y-4 text-sm text-[#0B2E6B]/70">
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">01</span><span>Share a focused question or the context for a partnership conversation.</span></li>
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">02</span><span>The Foundation team reviews the appropriate context privately.</span></li>
-                <li className="flex gap-3"><span className="font-montserrat font-black text-[#079432]">03</span><span>Any agreed follow-up is coordinated through the Foundation.</span></li>
-              </ol>
+            <aside className="max-h-[620px] overflow-y-auto rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#F7B500]/20 text-[#0B2E6B]"><MessageCircle className="h-5 w-5" /></div>
+                <span className="rounded-full bg-[#079432]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#079432]">Private conversation</span>
+              </div>
+              <h3 className="mt-5 font-montserrat text-xl font-black">Your conversations</h3>
+              {!dashboard?.conversations?.length ? (
+                <p className="mt-4 text-sm leading-6 text-[#0B2E6B]/65">No Foundation conversations yet. Send a focused message to begin one.</p>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  {dashboard.conversations.map((conversation) => {
+                    const entries = conversation.thread?.length ? conversation.thread : conversation.message ? [{ id: "first-message", sender: "sponsor" as const, message: conversation.message }] : [];
+                    return <article key={conversation.id} className="rounded-2xl border border-[#0B2E6B]/10 bg-white p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-bold text-[#0B2E6B]">{conversation.subject}</h4><span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${conversation.status === "replied" ? "bg-[#079432]/10 text-[#079432]" : "bg-[#F7B500]/15 text-[#0B2E6B]"}`}>{conversation.status === "replied" ? "Foundation replied" : "Awaiting Foundation"}</span></div>
+                      <div className="mt-4 space-y-3">
+                        {entries.map((entry) => <div key={entry.id} className={`rounded-xl px-3 py-2.5 text-xs leading-5 ${entry.sender === "foundation" ? "bg-[#0B2E6B] text-white" : "bg-[#F5F6F0] text-[#0B2E6B]"}`}><p className={`text-[9px] font-bold uppercase tracking-[0.12em] ${entry.sender === "foundation" ? "text-white/65" : "text-[#079432]"}`}>{entry.sender === "foundation" ? "PWLIF Foundation Team" : "You"}</p><p className="mt-1 whitespace-pre-wrap">{entry.message}</p><p className={`mt-1 text-[9px] ${entry.sender === "foundation" ? "text-white/50" : "text-[#0B2E6B]/45"}`}>{conversationTime(entry.createdAt)}</p></div>)}
+                      </div>
+                      <form onSubmit={(event) => handleConversationReply(event, conversation.id)} className="mt-4 space-y-2"><label className="sr-only" htmlFor={`conversation-reply-${conversation.id}`}>Reply to Foundation</label><textarea id={`conversation-reply-${conversation.id}`} value={replyBodies[conversation.id] || ""} maxLength={2000} rows={3} onChange={(event) => setReplyBodies((current) => ({ ...current, [conversation.id]: event.target.value }))} placeholder="Continue this private conversation…" className="w-full resize-y rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-3 py-2.5 text-xs leading-5 text-[#0B2E6B] outline-none focus:border-[#079432]" /><button type="submit" disabled={replyingConversation === conversation.id} className="rounded-lg border border-[#079432]/30 px-3 py-2 text-[10px] font-bold text-[#079432] transition hover:bg-[#079432] hover:text-white disabled:opacity-50">{replyingConversation === conversation.id ? "Sending…" : "Send reply"}</button>{replyStatus[conversation.id] && <p role="status" className="text-[11px] leading-5 text-[#0B2E6B]/65">{replyStatus[conversation.id]}</p>}</form>
+                    </article>;
+                  })}
+                </div>
+              )}
             </aside>
           </section>
         )}

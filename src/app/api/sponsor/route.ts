@@ -37,12 +37,29 @@ export async function GET(request: NextRequest) {
       : null;
     const application = applicationSnapshot?.exists ? applicationSnapshot.data() : undefined;
 
-    const talentSnapshot = await db.collection("sponsor_talent_records").limit(100).get();
+    const [talentSnapshot, conversationSnapshot] = await Promise.all([
+      db.collection("sponsor_talent_records").limit(100).get(),
+      db.collection("sponsor_messages").where("sponsorUid", "==", sponsor.uid).orderBy("updatedAt", "desc").limit(100).get(),
+    ]);
 
     const talent = talentSnapshot.docs
       .map((document) => toSponsorTalentCard(document.id, document.data()))
       .filter((record): record is NonNullable<typeof record> => Boolean(record))
       .sort((first, second) => first.displayOrder - second.displayOrder);
+
+    const conversations = await Promise.all(conversationSnapshot.docs.map(async (document) => {
+      const messages = await document.ref.collection("thread").orderBy("createdAt", "asc").limit(200).get();
+      const data = document.data();
+      return {
+        id: document.id,
+        subject: optionalText(data.subject, 200) || "Foundation conversation",
+        talentId: optionalText(data.talentId, 120),
+        status: optionalText(data.status, 32) || "new",
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        thread: messages.docs.map((message) => ({ id: message.id, ...message.data() })),
+      };
+    }));
 
     return NextResponse.json({
       sponsor: {
@@ -59,6 +76,7 @@ export async function GET(request: NextRequest) {
         passwordSetupComplete: account?.passwordSetupRequired !== true || Boolean(account?.passwordSetupCompletedAt),
       },
       talent,
+      conversations,
     });
   } catch (error) {
     return accessDenied(error);
@@ -93,11 +111,16 @@ export async function POST(request: NextRequest) {
       const applicationId = optionalText(account?.applicationId, 120);
       const applicationSnapshot = applicationId ? await db.collection("sponsor_applications").doc(applicationId).get() : null;
       const application = applicationSnapshot?.exists ? applicationSnapshot.data() : undefined;
-      await db.collection("sponsor_messages").add({
+      const conversation = db.collection("sponsor_messages").doc();
+      const sponsorEmail = optionalText(sponsor.email, 320) || optionalText(application?.email, 320) || "";
+      const sponsorName = optionalText(application?.fullName, 120) || "Approved sponsor";
+      const sponsorOrganization = optionalText(application?.organization, 160) || "";
+      const batch = db.batch();
+      batch.set(conversation, {
         sponsorUid: sponsor.uid,
-        sponsorEmail: optionalText(sponsor.email, 320) || optionalText(application?.email, 320) || "",
-        sponsorName: optionalText(application?.fullName, 120) || "Approved sponsor",
-        sponsorOrganization: optionalText(application?.organization, 160) || "",
+        sponsorEmail,
+        sponsorName,
+        sponsorOrganization,
         subject,
         message,
         ...(talentId ? { talentId } : {}),
@@ -106,6 +129,36 @@ export async function POST(request: NextRequest) {
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
+      batch.set(conversation.collection("thread").doc(), {
+        sender: "sponsor",
+        senderUid: sponsor.uid,
+        senderName: sponsorName,
+        message,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      await batch.commit();
+      return NextResponse.json({ ok: true, conversationId: conversation.id });
+    }
+    if (body.action === "replyToConversation") {
+      const conversationId = optionalText(body.conversationId, 120);
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      if (!conversationId || !message || message.length > 2_000) {
+        return NextResponse.json({ error: "Provide a reply of up to 2,000 characters." }, { status: 400 });
+      }
+      const conversation = await db.collection("sponsor_messages").doc(conversationId).get();
+      if (!conversation.exists || conversation.data()?.sponsorUid !== sponsor.uid) {
+        return NextResponse.json({ error: "That Foundation conversation is not available." }, { status: 404 });
+      }
+      const batch = db.batch();
+      batch.set(conversation.ref.collection("thread").doc(), {
+        sender: "sponsor",
+        senderUid: sponsor.uid,
+        senderName: optionalText(sponsor.email, 320) || "Approved sponsor",
+        message,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      batch.set(conversation.ref, { status: "new", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      await batch.commit();
       return NextResponse.json({ ok: true });
     }
     return NextResponse.json({ error: "Unsupported sponsor action." }, { status: 400 });

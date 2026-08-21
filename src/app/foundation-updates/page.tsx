@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { ArrowUpRight, BellRing, CheckCircle2, Clock3 } from "lucide-react";
 import { PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
+import { readPublicSite } from "@/lib/admin";
 
-export default function FoundationUpdatesPage() {
+export default async function FoundationUpdatesPage() {
+  const site = await readPublicSite();
+  const editorial = site.editorialPages.foundationUpdates;
+  const hasPublishedEditorial = editorial.status === "published" && Boolean(editorial.title || editorial.introduction || editorial.body);
   return (
     <main className="overflow-x-hidden bg-[#FCFCFA] text-[#0B2E6B]">
       <PublicHero
         dark
         eyebrow="News & updates"
-        title="Foundation updates, shared with care."
-        intro="This is PWLIF’s place for verified operational updates, programme notices, and announcements that the foundation has approved for public release."
+        title={hasPublishedEditorial && editorial.title ? editorial.title : "Foundation updates, shared with care."}
+        intro={hasPublishedEditorial && editorial.introduction ? editorial.introduction : "This is PWLIF’s place for verified operational updates, programme notices, and announcements that the foundation has approved for public release."}
         primaryAction={{ href: "/book-a-call", label: "Book Sponsor Orientation" }}
         secondaryAction={{ href: "/support", label: "Contact PWLIF" }}
       >
@@ -22,14 +26,7 @@ export default function FoundationUpdatesPage() {
 
       <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading eyebrow="Current notices" title="No public updates have been published yet." intro="PWLIF will add updates here when there is information that is appropriate, accurate, and ready to share publicly." />
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {[
-              ["Foundation notices", "Operational announcements and public milestones, once approved."],
-              ["Programme context", "High-level learning and approach updates that do not identify any young person."],
-              ["Community information", "Time-sensitive public information only where the foundation can verify it."],
-            ].map(([title, copy], index) => <article key={title} className="rounded-[1.7rem] border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_14px_40px_rgba(11,46,107,0.06)]"><span className="font-montserrat text-4xl font-black text-[#14B84A]">0{index + 1}</span><h2 className="mt-9 font-montserrat text-2xl font-black tracking-[-0.04em]">{title}</h2><p className="mt-3 text-sm leading-7 text-[#0B2E6B]/70">{copy}</p></article>)}
-          </div>
+          {hasPublishedEditorial ? <div className="max-w-4xl rounded-[1.7rem] border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_14px_40px_rgba(11,46,107,0.06)]"><SectionHeading eyebrow="Current notice" title={editorial.title || "Foundation update"} intro={editorial.introduction || ""} />{editorial.body && <p className="mt-8 whitespace-pre-wrap text-sm leading-8 text-[#0B2E6B]/72">{editorial.body}</p>}</div> : <><SectionHeading eyebrow="Current notices" title="No public updates have been published yet." intro="PWLIF will add updates here when there is information that is appropriate, accurate, and ready to share publicly." /><div className="mt-12 grid gap-5 md:grid-cols-3">{[["Foundation notices", "Operational announcements and public milestones, once approved."], ["Programme context", "High-level learning and approach updates that do not identify any young person."], ["Community information", "Time-sensitive public information only where the foundation can verify it."]].map(([title, copy], index) => <article key={title} className="rounded-[1.7rem] border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_14px_40px_rgba(11,46,107,0.06)]"><span className="font-montserrat text-4xl font-black text-[#14B84A]">0{index + 1}</span><h2 className="mt-9 font-montserrat text-2xl font-black tracking-[-0.04em]">{title}</h2><p className="mt-3 text-sm leading-7 text-[#0B2E6B]/70">{copy}</p></article>)}</div></>}
         </div>
       </section>
 

@@ -83,6 +83,24 @@ export interface LegalSecurityConfig {
   lastUpdated: string;
 }
 
+export type EditorialPageKey = "howItWorks" | "foundationUpdates" | "mediaPress";
+
+export interface EditorialPageContent {
+  title: string;
+  introduction: string;
+  body: string;
+  status: "draft" | "published";
+  updatedAt: string;
+}
+
+export type EditorialPagesConfig = Record<EditorialPageKey, EditorialPageContent>;
+
+export const INITIAL_EDITORIAL_PAGES: EditorialPagesConfig = {
+  howItWorks: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+  foundationUpdates: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+  mediaPress: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+};
+
 export interface AuditLogEntry {
   id: string;
   timestamp: string;

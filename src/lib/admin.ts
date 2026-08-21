@@ -368,6 +368,23 @@ export function sanitizePublicLegal(input: unknown) {
   };
 }
 
+export function sanitizeEditorialPages(input: unknown, includeDrafts = false) {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const keys = ["howItWorks", "foundationUpdates", "mediaPress"] as const;
+  return Object.fromEntries(keys.map((key) => {
+    const candidate = source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) ? source[key] as Record<string, unknown> : {};
+    const status = candidate.status === "published" ? "published" : "draft";
+    const page = {
+      title: safePublicText(candidate.title, 160),
+      introduction: safePublicText(candidate.introduction, 1_000),
+      body: safePublicText(candidate.body, 20_000),
+      status,
+      updatedAt: typeof candidate.updatedAt === "string" ? candidate.updatedAt.slice(0, 32) : "",
+    };
+    return [key, includeDrafts || status === "published" ? page : { title: "", introduction: "", body: "", status: "draft", updatedAt: "" }];
+  })) as Record<typeof keys[number], { title: string; introduction: string; body: string; status: "draft" | "published"; updatedAt: string }>;
+}
+
 export function sanitizePublicVideos(input: unknown) {
   if (!Array.isArray(input)) return [];
   const categories = new Set(["Foundation Intro", "Impact Story", "Transformational Journey"]);
@@ -464,8 +481,9 @@ export async function readPublicSite() {
       teamMembers: sanitizePublicTeam(values?.teamMembers),
       legalSecurity: sanitizePublicLegal(values?.legalSecurity),
       foundationVideos: sanitizePublicVideos(values?.foundationVideos),
+      editorialPages: sanitizeEditorialPages(values?.editorialPages),
     };
   } catch {
-    return { ...safePublicDefaults, branding: {}, talentTags: [], missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [] };
+    return { ...safePublicDefaults, branding: {}, talentTags: [], missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [], editorialPages: sanitizeEditorialPages({}) };
   }
 }

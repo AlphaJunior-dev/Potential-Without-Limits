@@ -5,6 +5,7 @@ import {
   adminDb,
   requireAdministrator,
   sanitizeAdminTeam,
+  sanitizeEditorialPages,
   sanitizePublicBranding,
   sanitizePublicLegal,
   sanitizePublicMissionVision,
@@ -83,20 +84,26 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdministrator(request);
     const db = adminDb();
-    const [site, applications, cards, talentRecords, sponsorAccounts, audit, contactRequests, sponsorMessages] = await Promise.all([
+    const [site, applications, cards, talentRecords, sponsorAccounts, audit, publicSubmissions, sponsorMessages] = await Promise.all([
       db.collection("public_site_content").doc("main").get(),
       db.collection("sponsor_applications").orderBy("createdAt", "desc").limit(100).get(),
       db.collection("pilot_overview_cards").orderBy("displayOrder", "asc").get(),
       db.collection("sponsor_talent_records").orderBy("displayOrder", "asc").limit(100).get(),
       db.collection("sponsor_accounts").orderBy("updatedAt", "desc").limit(100).get(),
       db.collection("audit_log").orderBy("createdAt", "desc").limit(150).get(),
-      db.collection("contact_requests").orderBy("createdAt", "desc").limit(150).get(),
+      db.collection("public_form_submissions").orderBy("createdAt", "desc").limit(150).get(),
       db.collection("sponsor_messages").orderBy("createdAt", "desc").limit(150).get(),
     ]);
-    const foundationInbox = ([
-      ...contactRequests.docs.map((document) => ({ id: document.id, type: "public" as const, status: "new", ...document.data() })),
-      ...sponsorMessages.docs.map((document) => ({ id: document.id, type: "sponsor" as const, status: "new", ...document.data() })),
-    ] as FoundationInboxItem[]).sort((first, second) => timestampMillis(second.createdAt) - timestampMillis(first.createdAt));
+    const foundationInbox = (await Promise.all(sponsorMessages.docs.map(async (document) => {
+      const thread = await document.ref.collection("thread").orderBy("createdAt", "asc").limit(200).get();
+      return {
+        id: document.id,
+        type: "sponsor" as const,
+        status: "new",
+        ...document.data(),
+        thread: thread.docs.map((message) => ({ id: message.id, ...message.data() })),
+      } as FoundationInboxItem;
+    }))).sort((first, second) => timestampMillis(second.createdAt) - timestampMillis(first.createdAt));
     return NextResponse.json({
       site: site.exists ? site.data() : {},
       applications: applications.docs.map((document) => ({ id: document.id, ...document.data() })),
@@ -105,6 +112,7 @@ export async function GET(request: NextRequest) {
       sponsorAccounts: sponsorAccounts.docs.map((document) => ({ id: document.id, ...document.data() })),
       audit: audit.docs.map((document) => ({ id: document.id, ...document.data() })),
       foundationInbox,
+      publicSubmissions: publicSubmissions.docs.map((document) => ({ id: document.id, type: "public" as const, status: "new", ...document.data() })),
     });
   } catch (error) {
     return deny(error);
@@ -120,13 +128,37 @@ export async function PATCH(request: NextRequest) {
 
     if (body.action === "resolveInboxItem") {
       const itemId = typeof body.itemId === "string" ? body.itemId.trim() : "";
-      const itemType = body.itemType === "public" || body.itemType === "sponsor" ? body.itemType : "";
-      if (!itemId || !itemType) return NextResponse.json({ error: "A valid Foundation inbox item is required." }, { status: 400 });
-      const collection = itemType === "public" ? "contact_requests" : "sponsor_messages";
-      const item = await db.collection(collection).doc(itemId).get();
+      if (!itemId) return NextResponse.json({ error: "A valid sponsor conversation is required." }, { status: 400 });
+      const item = await db.collection("sponsor_messages").doc(itemId).get();
       if (!item.exists) return NextResponse.json({ error: "Foundation inbox item not found." }, { status: 404 });
       await item.ref.set({ status: "reviewed", reviewedAt: FieldValue.serverTimestamp(), reviewedBy: administrator.uid, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-      await appendAudit("resolveInboxItem", "foundation_inbox", `${itemType}:${itemId}`, administrator.uid, { itemType });
+      await appendAudit("resolveInboxItem", "sponsor_conversation", itemId, administrator.uid);
+      return NextResponse.json({ ok: true });
+    } else if (body.action === "resolvePublicSubmission") {
+      const submissionId = typeof body.submissionId === "string" ? body.submissionId.trim() : "";
+      if (!submissionId) return NextResponse.json({ error: "A valid public form submission is required." }, { status: 400 });
+      const submission = await db.collection("public_form_submissions").doc(submissionId).get();
+      if (!submission.exists) return NextResponse.json({ error: "Public form submission not found." }, { status: 404 });
+      await submission.ref.set({ status: "reviewed", reviewedAt: FieldValue.serverTimestamp(), reviewedBy: administrator.uid, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      await appendAudit("resolvePublicSubmission", "public_form_submission", submissionId, administrator.uid);
+      return NextResponse.json({ ok: true });
+    } else if (body.action === "replyToSponsorConversation") {
+      const conversationId = typeof body.conversationId === "string" ? body.conversationId.trim() : "";
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      if (!conversationId || !message || message.length > 2_000) return NextResponse.json({ error: "Provide a reply of up to 2,000 characters." }, { status: 400 });
+      const conversation = await db.collection("sponsor_messages").doc(conversationId).get();
+      if (!conversation.exists) return NextResponse.json({ error: "Sponsor conversation not found." }, { status: 404 });
+      const batch = db.batch();
+      batch.set(conversation.ref.collection("thread").doc(), {
+        sender: "foundation",
+        senderUid: administrator.uid,
+        senderName: "PWLIF Foundation Team",
+        message,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      batch.set(conversation.ref, { status: "replied", repliedAt: FieldValue.serverTimestamp(), repliedBy: administrator.uid, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      await batch.commit();
+      await appendAudit("replyToSponsorConversation", "sponsor_conversation", conversationId, administrator.uid);
       return NextResponse.json({ ok: true });
     } else if (body.action === "updateSite") {
       await db.collection("public_site_content").doc("main").set({
@@ -162,6 +194,15 @@ export async function PATCH(request: NextRequest) {
       await db.collection("public_site_content").doc("main").set({ legalSecurity, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
       await appendAudit("updateLegalSecurity", "site_content", "main", administrator.uid);
       return NextResponse.json({ ok: true, legalSecurity });
+    } else if (body.action === "updateEditorialPages") {
+      const editorialPages = sanitizeEditorialPages(body.editorialPages, true);
+      const hasInvalidPublishedPage = Object.values(editorialPages).some((page) => page.status === "published" && (!page.title || !page.introduction || !page.body));
+      if (hasInvalidPublishedPage) return NextResponse.json({ error: "A published page requires a title, introduction, and body." }, { status: 400 });
+      const updatedAt = new Date().toISOString().slice(0, 10);
+      const datedPages = Object.fromEntries(Object.entries(editorialPages).map(([key, page]) => [key, { ...page, updatedAt }])) as typeof editorialPages;
+      await db.collection("public_site_content").doc("main").set({ editorialPages: datedPages, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await appendAudit("updateEditorialPages", "site_content", "main", administrator.uid);
+      return NextResponse.json({ ok: true, editorialPages: datedPages });
     } else if (body.action === "updateFoundationVideos") {
       const foundationVideos = sanitizePublicVideos(body.foundationVideos);
       await db.collection("public_site_content").doc("main").set({ foundationVideos, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });

@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import type { TalentTag, YouthProfile } from "@/lib/data";
-import type { BrandingConfig, LegalSecurityConfig, MissionVisionData, TeamMember } from "@/lib/cmsData";
+import { INITIAL_EDITORIAL_PAGES, type BrandingConfig, type EditorialPagesConfig, type LegalSecurityConfig, type MissionVisionData, type TeamMember } from "@/lib/cmsData";
 
 type UserStatus = "logged_out" | "pending" | "admin" | "approved";
 type AdminRole = "Super Admin" | "Vetting Officer" | "Curator";
@@ -18,10 +18,13 @@ type AuthContextType = {
   profiles: YouthProfile[];
   branding: BrandingConfig;
   legalSecurity: LegalSecurityConfig;
+  editorialPages: EditorialPagesConfig;
   missionVision: MissionVisionData;
   pendingSponsors: PendingSponsor[];
   inquiries: FlexibleRecord[];
   supportInquiries: FlexibleRecord[];
+  publicSubmissions: FlexibleRecord[];
+  sponsorConversations: FlexibleRecord[];
   faqItems: FlexibleRecord[];
   teamMembers: TeamMember[];
   auditLogs: FlexibleRecord[];
@@ -108,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [branding, setBranding] = useState<BrandingConfig>(safeBranding);
   const [missionVision, setMissionVision] = useState<MissionVisionData>(safeMission);
   const [legalSecurity, setLegalSecurity] = useState<LegalSecurityConfig>(safeLegal);
+  const [editorialPages, setEditorialPages] = useState<EditorialPagesConfig>(INITIAL_EDITORIAL_PAGES);
   const [faqItems, setFaqItems] = useState<FlexibleRecord[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [foundationVideos, setFoundationVideos] = useState<FlexibleRecord[]>([]);
@@ -115,6 +119,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [talentCategories, setTalentCategories] = useState<TalentTag[]>([]);
   const [pendingSponsors, setPendingSponsors] = useState<PendingSponsor[]>([]);
   const [inquiries, setInquiries] = useState<FlexibleRecord[]>([]);
+  const [publicSubmissions, setPublicSubmissions] = useState<FlexibleRecord[]>([]);
+  const [sponsorConversations, setSponsorConversations] = useState<FlexibleRecord[]>([]);
   const [auditLogs, setAuditLogs] = useState<FlexibleRecord[]>([]);
   const [adminRole, setAdminRole] = useState<AdminRole>("Super Admin");
   const profiles = userStatus === "approved"
@@ -148,9 +154,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }));
     setInquiries(Array.isArray(data.foundationInbox) ? data.foundationInbox : []);
+    setPublicSubmissions(Array.isArray(data.publicSubmissions) ? data.publicSubmissions : []);
     setAuditLogs(Array.isArray(data.audit) ? data.audit : []);
     setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
     setTalentCategories(Array.isArray(data.site?.talentCategories) ? data.site.talentCategories : []);
+    setEditorialPages({ ...INITIAL_EDITORIAL_PAGES, ...(data.site?.editorialPages && typeof data.site.editorialPages === "object" ? data.site.editorialPages : {}) } as EditorialPagesConfig);
     const records = Array.isArray(data.talentRecords) ? data.talentRecords : [];
     setAdminProfiles(records.map((record: FlexibleRecord) => ({
       id: record.id,
@@ -203,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!response.ok) throw new Error("Could not load the approved Sponsor Talent pipeline.");
     const data = await response.json() as FlexibleRecord;
     const talent = Array.isArray(data.talent) ? data.talent : [];
+    setSponsorConversations(Array.isArray(data.conversations) ? data.conversations : []);
     setSponsorProfiles(talent.map((record: FlexibleRecord) => {
       const mediaUrls = Array.isArray(record.mediaUrls)
         ? record.mediaUrls.filter((url: unknown): url is string => typeof url === "string" && /^https:\/\//i.test(url))
@@ -248,12 +257,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
       if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
       if (Array.isArray(data?.foundationVideos)) setFoundationVideos(data.foundationVideos);
+      if (data?.editorialPages && typeof data.editorialPages === "object") {
+        setEditorialPages({ ...INITIAL_EDITORIAL_PAGES, ...data.editorialPages } as EditorialPagesConfig);
+      }
     }).catch(() => undefined);
 
     return onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
         setSponsorProfiles([]);
+        setSponsorConversations([]);
         setStatus("logged_out");
         setLoading(false);
         return;
@@ -337,6 +350,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (result.legalSecurity && typeof result.legalSecurity === "object") setLegalSecurity(result.legalSecurity as LegalSecurityConfig);
   };
 
+  const updateEditorialPages = async (nextEditorialPages: EditorialPagesConfig) => {
+    const result = await updatePublicContent("updateEditorialPages", { editorialPages: nextEditorialPages });
+    if (result.editorialPages && typeof result.editorialPages === "object") setEditorialPages(result.editorialPages as EditorialPagesConfig);
+  };
+
   const updateFoundationVideos = async (nextFoundationVideos: FlexibleRecord[]) => {
     const result = await updatePublicContent("updateFoundationVideos", { foundationVideos: nextFoundationVideos });
     if (Array.isArray(result.foundationVideos)) setFoundationVideos(result.foundationVideos as FlexibleRecord[]);
@@ -391,6 +409,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return payload;
   };
 
+  const replyToFoundationConversation = async (conversationId: string, message: string) => {
+    if (!user || userStatus !== "approved") throw new Error("Approved sponsor access is required to reply to the Foundation.");
+    const token = await user.getIdToken(true);
+    const response = await fetch("/api/sponsor", {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ action: "replyToConversation", conversationId, message }),
+    });
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    if (!response.ok) throw new Error(payload?.error || "Your reply could not be sent. Please try again.");
+    await loadApprovedSponsorProfiles(user);
+    return payload;
+  };
+
+  const replyToSponsorConversation = async (conversationId: string, message: string) => {
+    const result = await runOperationalAction("replyToSponsorConversation", { conversationId, message });
+    return result;
+  };
+
   const saveTalentRecord = async (profile: YouthProfile, id?: string) => {
     const title = String(profile.name || "").trim();
     const summary = String(profile.bio || "").trim();
@@ -431,8 +468,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo<AuthContextType>(() => ({
-    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
-    pendingSponsors, inquiries, supportInquiries: inquiries.filter((inquiry) => inquiry.type === "public"), faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
+    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, editorialPages, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
+    pendingSponsors, inquiries, supportInquiries: publicSubmissions, publicSubmissions, sponsorConversations, faqItems, teamMembers, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
     bookVettingCall: (name: string, email: string, company: string, linkedin: string, category?: string, dreamInterest?: string) => {
@@ -442,8 +479,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string, itemType: "public" | "sponsor") => runOperationalAction("resolveInboxItem", { itemId, itemType }), addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
-  }), [adminRole, adminProfiles, auditLogs, branding, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateEditorialPages, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string) => runOperationalAction("resolvePublicSubmission", { submissionId: itemId }), resolveSponsorConversation: (itemId: string) => runOperationalAction("resolveInboxItem", { itemId }), replyToSponsorConversation, replyToFoundationConversation, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
+  }), [adminRole, adminProfiles, auditLogs, branding, editorialPages, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, publicSubmissions, sponsorConversations, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

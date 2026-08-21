@@ -346,7 +346,7 @@ test("the public Talent Showcase uses managed tags and remains empty until a rev
   assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
 });
 
-test("Foundation inbox accepts only server-authorized sponsor messages and approved sessions no longer receive orientation prompts", async () => {
+test("Foundation conversations accept only server-authorized sponsor messages and approved sessions no longer receive orientation prompts", async () => {
   const [adminRoute, sponsorRoute, provider, dashboard, navbar, homepage, supportModal, privateTalent, adminPage] = await Promise.all([
     readSource("src/app/api/admin/route.ts"),
     readSource("src/app/api/sponsor/route.ts"),
@@ -363,20 +363,23 @@ test("Foundation inbox accepts only server-authorized sponsor messages and appro
   assert.match(sponsorRoute, /body\.action === "sendMessage"/);
   assert.match(sponsorRoute, /subject\.length > 200/);
   assert.match(sponsorRoute, /message\.length > 2_000/);
-  assert.match(sponsorRoute, /collection\("sponsor_messages"\)\.add/);
+  assert.match(sponsorRoute, /collection\("sponsor_messages"\)\.doc\(\)/);
+  assert.match(sponsorRoute, /collection\("thread"\)\.doc\(\)/);
+  assert.match(sponsorRoute, /body\.action === "replyToConversation"/);
   assert.match(sponsorRoute, /sponsorUid: sponsor\.uid/);
   assert.match(sponsorRoute, /sponsorEmail/);
   assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
 
-  assert.match(adminRoute, /collection\("contact_requests"\)/);
   assert.match(adminRoute, /collection\("sponsor_messages"\)/);
   assert.match(adminRoute, /foundationInbox/);
   assert.match(adminRoute, /body\.action === "resolveInboxItem"/);
+  assert.match(adminRoute, /body\.action === "replyToSponsorConversation"/);
   assert.match(adminRoute, /reviewedBy: administrator\.uid/);
   assert.match(provider, /setInquiries\(Array\.isArray\(data\.foundationInbox\)/);
   assert.match(provider, /const sendInquiry = async/);
   assert.match(provider, /action: "sendMessage"/);
-  assert.match(adminPage, /Foundation Inbox/);
+  assert.match(adminPage, /Foundation Conversations/);
+  assert.match(adminPage, /Reply to sponsor/);
   assert.match(adminPage, /Mark Reviewed/);
 
   assert.match(supportModal, /fetch\("\/api\/contact"/);
@@ -389,4 +392,77 @@ test("Foundation inbox accepts only server-authorized sponsor messages and appro
   assert.match(navbar, /userStatus === "approved"[\s\S]*?Partnership Desk/);
   assert.match(homepage, /hasApprovedSponsorAccess \? "\/sponsor\/dashboard" : "\/book-a-call"/);
   assert.match(homepage, /hasApprovedSponsorAccess \? `\/sponsor\/talent\/\$\{profile\.id\}` : `\/portfolio\/\$\{profile\.id\}`/);
+});
+
+test("public forms stay separate from sponsor conversations and preserve their approved contextual fields", async () => {
+  const [contactRoute, adminRoute, adminPage, volunteerPage, partnershipPage, enquiryForm] = await Promise.all([
+    readSource("src/app/api/contact/route.ts"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/app/volunteer/page.tsx"),
+    readSource("src/app/partnership/page.tsx"),
+    readSource("src/components/PublicEnquiryForm.tsx"),
+  ]);
+
+  assert.match(contactRoute, /collection\("public_form_submissions"\)\.add/);
+  assert.match(contactRoute, /source/);
+  assert.match(contactRoute, /details/);
+  assert.doesNotMatch(contactRoute, /sponsor_messages/);
+  assert.match(adminRoute, /collection\("public_form_submissions"\)/);
+  assert.match(adminRoute, /body\.action === "resolvePublicSubmission"/);
+  assert.match(adminPage, /Public Form Submissions/);
+  assert.match(adminPage, /resolveSupportInquiry\(submission\.id, "public"\)/);
+  assert.match(volunteerPage, /PublicEnquiryForm/);
+  assert.match(partnershipPage, /PublicEnquiryForm/);
+  assert.match(enquiryForm, /fetch\("\/api\/contact"/);
+  assert.match(enquiryForm, /source/);
+  assert.match(enquiryForm, /details: interest/);
+});
+
+test("Team publishing uses persistent administrator-authorized media and the requested public pages use controlled CMS data", async () => {
+  const [adminPage, teamUpload, teamDelivery, mediaLibrary, adminRoute, adminLibrary, cmsData, howItWorks, updates, press, gallery, terms, privacy, security] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/app/api/admin/team-headshot/route.ts"),
+    readSource("src/app/api/team-headshot/[id]/route.ts"),
+    readSource("src/lib/supabase-media.ts"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/lib/cmsData.ts"),
+    readSource("src/app/our-pilot/page.tsx"),
+    readSource("src/app/foundation-updates/page.tsx"),
+    readSource("src/app/press-resources/page.tsx"),
+    readSource("src/app/media-gallery/page.tsx"),
+    readSource("src/app/terms/page.tsx"),
+    readSource("src/app/privacy/page.tsx"),
+    readSource("src/app/security-standards/page.tsx"),
+  ]);
+
+  assert.match(adminPage, /handleTeamHeadshotUpload/);
+  assert.match(adminPage, /fetch\("\/api\/admin\/team-headshot"/);
+  assert.doesNotMatch(adminPage.slice(adminPage.indexOf("const handleTeamHeadshotUpload"), adminPage.indexOf("const handleImageUpload")), /FileReader|readAsDataURL/);
+  assert.match(teamUpload, /requireAdministrator\(request\)/);
+  assert.match(teamUpload, /storeTeamHeadshot/);
+  assert.match(teamDelivery, /visibility\?\.isPublic === true/);
+  assert.match(teamDelivery, /visibility\?\.showPhoto === true/);
+  assert.match(mediaLibrary, /storeTeamHeadshot/);
+
+  assert.match(cmsData, /EditorialPagesConfig/);
+  assert.match(cmsData, /INITIAL_EDITORIAL_PAGES/);
+  assert.match(adminRoute, /body\.action === "updateEditorialPages"/);
+  assert.match(adminLibrary, /sanitizeEditorialPages/);
+  assert.match(adminLibrary, /status === "published"/);
+  for (const page of [howItWorks, updates, press, gallery]) assert.match(page, /editorialPages/);
+  assert.match(terms, /legalSecurity\?\.termsContent \|\|/);
+  assert.match(privacy, /legalSecurity\?\.privacyContent \|\|/);
+  assert.match(security, /legalSecurity\.securityStandardsContent \|\|/);
+});
+
+test("administrative controls contain no financial CMS and audit rendering is operational and read-only", async () => {
+  const adminPage = await readSource("src/app/admin/page.tsx");
+
+  assert.doesNotMatch(adminPage, /Transparency Financial CMS/);
+  assert.doesNotMatch(adminPage, /activeSection === "transparency"/);
+  assert.doesNotMatch(adminPage, /Financial and transparency workflows are unavailable/);
+  assert.match(adminPage, /Operational Audit Trail/);
+  assert.match(adminPage, /Read-only record of protected administrator operations/);
 });

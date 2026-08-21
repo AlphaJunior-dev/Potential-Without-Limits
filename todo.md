@@ -114,5 +114,13 @@
 - [x] Remove the public orientation-call call-to-action from authenticated sponsor navigation and replace it with an appropriate dashboard or message pathway.
 - [x] Map and document which public header routes are currently editable through the Admin Portal and add controlled editing where the current CMS has a justified content model.
 - [x] Implement a private Foundation inbox for public contact, volunteer, partnership, and sponsor Talent enquiries, with source labels, administrator-only review, and sponsor dashboard message submission.
-- [ ] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
 - [x] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
+- [x] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
+- [x] Restrict the Foundation Inbox to approved-sponsor conversations and add secure administrator replies that are visible to the corresponding sponsor in a private conversation thread.
+- [x] Route Volunteer, Partnership, Contact/Support, and every other non-orientation public form to a separate administrator-only Public Form Submissions inbox retaining the complete validated submission, source, timestamp, and review status.
+- [x] Diagnose and repair the Meet the Team CMS save failure, including persistent administrator-authorized headshot upload and verified public visibility propagation.
+- [x] Remove the disabled Transparency Financial CMS and all related finance or transparency controls from the Admin Portal and application routes.
+- [x] Diagnose and repair the Metrics & Audit Trail page-load failure while retaining only a read-only operational audit view with no fabricated performance metrics.
+- [x] Ensure Terms, Privacy, and Security Standards have dedicated public pages that render current administrator-published legal content.
+- [x] Add server-authorized draft and publish controls for How It Works, News & Updates, and Media & Press pages, using truthful empty states until real Foundation content is supplied.
+- [ ] Add automated coverage and preview verification for sponsor conversations, public-form submissions, Team publishing, legal propagation, editorial CMS publishing, audit access, and finance-control removal.

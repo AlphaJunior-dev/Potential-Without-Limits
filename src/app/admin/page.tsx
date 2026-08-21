@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth, PendingSponsor } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
-import { INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, TeamMember } from "@/lib/cmsData";
+import { INITIAL_EDITORIAL_PAGES, INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, type EditorialPageKey, TeamMember } from "@/lib/cmsData";
 import { 
   ShieldCheck, 
   ShieldAlert, 
@@ -47,12 +47,16 @@ import {
 
 export default function AdminDashboardPage() {
   const { 
+    user,
     userStatus, 
     pendingSponsors, 
     inquiries, 
+    publicSubmissions,
+    sponsorConversations,
     profiles,
     branding,
     legalSecurity,
+    editorialPages,
     auditLogs,
     mfaVerified, 
     adminRole, 
@@ -66,11 +70,14 @@ export default function AdminDashboardPage() {
     generateCredentials,
     provisionSponsorManual,
     resolveSupportInquiry,
+    resolveSponsorConversation,
+    replyToSponsorConversation,
     addProfile,
     updateProfile,
     deleteProfile,
     updateBranding,
     updateLegalSecurity,
+    updateEditorialPages,
     missionVision,
     updateMissionVision,
     faqItems,
@@ -79,10 +86,7 @@ export default function AdminDashboardPage() {
     deleteFaqItem,
     teamMembers,
     updateTeamMembers,
-    transparencyReports,
     foundationVideos,
-    addTransparencyReport,
-    deleteTransparencyReport,
     addFoundationVideo,
     deleteFoundationVideo,
     uploadTalentPhoto,
@@ -101,14 +105,6 @@ export default function AdminDashboardPage() {
   const [countryCommunity, setCountryCommunity] = useState("");
   const [mediaReleasePermission, setMediaReleasePermission] = useState(true);
 
-  // CMS State: Transparency Financial Reports Form
-  const [transparencyTitle, setTransparencyTitle] = useState("");
-  const [transparencyAuditDate, setTransparencyAuditDate] = useState("2026-01-15");
-  const [transparencyTotalFunded, setTransparencyTotalFunded] = useState("$250,000");
-  const [transparencyChildrenImpacted, setTransparencyChildrenImpacted] = useState(120);
-  const [transparencyCategory, setTransparencyCategory] = useState<"Financial Audit" | "Annual Impact Report" | "Program Stewardship">("Financial Audit");
-  const [transparencyPdfUrl, setTransparencyPdfUrl] = useState("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
-
   // CMS State: Video Management Form
   const [videoTitle, setVideoTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
@@ -119,7 +115,7 @@ export default function AdminDashboardPage() {
 
   // Selected Left Sidebar Section & Mobile Sidebar State
   const [activeSection, setActiveSection] = useState<
-    "vetting" | "inquiries" | "talent" | "mission" | "team" | "branding" | "legal" | "audit" | "transparency" | "videos"
+    "vetting" | "inquiries" | "submissions" | "talent" | "mission" | "team" | "branding" | "editorial" | "legal" | "audit" | "videos"
   >("vetting");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -132,10 +128,19 @@ export default function AdminDashboardPage() {
 
   // Global Toast System State
   const [toastNotice, setToastNotice] = useState<{ title: string; message: string } | null>(null);
+  const [conversationReplies, setConversationReplies] = useState<Record<string, string>>({});
+  const [replyingConversation, setReplyingConversation] = useState<string | null>(null);
 
   const triggerToast = (title: string, message: string) => {
     setToastNotice({ title, message });
     setTimeout(() => setToastNotice(null), 4000);
+  };
+
+  const formatReceivedAt = (value: unknown) => {
+    const seconds = typeof value === "object" && value ? (value as { seconds?: unknown; _seconds?: unknown }).seconds ?? (value as { _seconds?: unknown })._seconds : undefined;
+    if (typeof seconds === "number") return new Date(seconds * 1000).toLocaleString();
+    if (typeof value === "string" || typeof value === "number") return new Date(value).toLocaleString();
+    return "Received recently";
   };
 
   const addCustomSkill = async () => {
@@ -199,6 +204,11 @@ export default function AdminDashboardPage() {
   // Legal CMS Form State
   const [legalForm, setLegalForm] = useState(legalSecurity);
   const [legalNotice, setLegalNotice] = useState(false);
+  const [editorialForm, setEditorialForm] = useState(editorialPages || INITIAL_EDITORIAL_PAGES);
+
+  useEffect(() => {
+    setEditorialForm(editorialPages || INITIAL_EDITORIAL_PAGES);
+  }, [editorialPages]);
 
   // MFA State
   const [mfaCode, setMfaCode] = useState("");
@@ -247,6 +257,7 @@ export default function AdminDashboardPage() {
   const [memberRole, setMemberRole] = useState("");
   const [memberBio, setMemberBio] = useState("");
   const [memberPhoto, setMemberPhoto] = useState("");
+  const [isUploadingMemberPhoto, setIsUploadingMemberPhoto] = useState(false);
   const [memberVisibility, setMemberVisibility] = useState({ isPublic: false, showPhoto: false, showRole: false, showBio: false, showLink: false });
 
   const handleMfaSubmit = (e: React.FormEvent) => {
@@ -489,6 +500,36 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleTeamHeadshotUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!user) {
+      triggerToast("✗ Upload Failed", "Sign in as an administrator before uploading a headshot.");
+      return;
+    }
+
+    setIsUploadingMemberPhoto(true);
+    try {
+      const token = await user.getIdToken(true);
+      const form = new FormData();
+      form.set("photo", file);
+      const response = await fetch("/api/admin/team-headshot", {
+        method: "POST",
+        headers: { authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const payload = await response.json().catch(() => null) as { url?: string; error?: string } | null;
+      if (!response.ok || !payload?.url) throw new Error(payload?.error || "The headshot could not be stored.");
+      setMemberPhoto(payload.url);
+      triggerToast("✓ Headshot Uploaded", "The image is stored privately and will only be public when its visibility controls are enabled.");
+    } catch (error) {
+      triggerToast("✗ Upload Failed", error instanceof Error ? error.message : "The headshot could not be stored.");
+    } finally {
+      setIsUploadingMemberPhoto(false);
+    }
+  };
+
   const handleEditMember = (m: TeamMember) => {
     setEditingMemberId(m.id);
     setMemberName(m.name);
@@ -654,10 +695,30 @@ export default function AdminDashboardPage() {
             >
               <div className="flex items-center gap-2.5">
                 <UserPlus className="w-4 h-4" />
-                <span>Foundation Inbox</span>
+                <span>Foundation Conversations</span>
               </div>
               <span className="text-[10px] bg-[#079432]/20 text-[#0B2E6B] px-1.5 py-0.5 rounded font-mono font-bold">
-                {inquiries.filter((i) => i.status !== "reviewed").length}
+                {sponsorConversations.filter((i) => i.status !== "reviewed" && i.status !== "closed").length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveSection("submissions");
+                setIsMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
+                activeSection === "submissions"
+                  ? "bg-[#079432] text-white font-extrabold"
+                  : "text-[#0B2E6B]/70 hover:bg-[#0B2E6B]/5 hover:text-[#0B2E6B]"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4" />
+                <span>Public Form Submissions</span>
+              </div>
+              <span className="text-[10px] bg-[#079432]/20 text-[#0B2E6B] px-1.5 py-0.5 rounded font-mono font-bold">
+                {publicSubmissions.filter((i) => i.status !== "reviewed").length}
               </span>
             </button>
 
@@ -693,22 +754,17 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={() => {
-                setActiveSection("transparency");
+                setActiveSection("editorial");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
-                activeSection === "transparency"
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
+                activeSection === "editorial"
                   ? "bg-[#079432] text-white font-extrabold"
                   : "text-[#0B2E6B]/70 hover:bg-[#0B2E6B]/5 hover:text-[#0B2E6B]"
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <FileText className="w-4 h-4 text-[#F7B500]" />
-                <span>Transparency Financial CMS</span>
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 flex items-center gap-1">
-                <Lock className="w-2.5 h-2.5 text-amber-700" /> Classified
-              </span>
+              <FileText className="w-4 h-4" />
+              <span>Public Pages CMS</span>
             </button>
 
             <button
@@ -1059,67 +1115,76 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL 2: Foundation inbox for public and approved-sponsor messages. */}
+        {/* PANEL 2: Sponsor-only Foundation conversations. */}
         {activeSection === "inquiries" && (
           <div className="space-y-6">
             <div>
               <h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">
-                Foundation Inbox
+                Foundation Conversations
               </h1>
               <p className="text-xs text-[#0B2E6B]/60 mt-0.5">
-                Review public contact submissions and messages sent privately by approved sponsors. Marking an item reviewed records an audit entry; it does not create a sponsorship assignment.
+                Private message threads with approved sponsors only. Replying here is visible only to the corresponding authenticated sponsor.
               </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-[#0B2E6B]/10 overflow-hidden shadow-xl">
-              {inquiries.length === 0 ? (
+              {sponsorConversations.length === 0 ? (
                 <div className="p-12 text-center text-[#0B2E6B]/50 text-xs">
-                  No public enquiries or sponsor messages have arrived yet.
+                  No approved-sponsor conversations have arrived yet.
                 </div>
               ) : (
                 <div className="divide-y divide-white/5">
-                  {inquiries.map((inq) => {
-                    const isSponsorMessage = inq.type === "sponsor";
-                    const senderName = isSponsorMessage ? inq.sponsorName || "Approved sponsor" : inq.name || "Public visitor";
-                    const senderEmail = isSponsorMessage ? inq.sponsorEmail : inq.email;
-                    const source = isSponsorMessage ? inq.sponsorOrganization || inq.source : inq.source;
-                    const timestampValue = inq.createdAt;
-                    const seconds = typeof timestampValue === "object" && timestampValue ? (timestampValue.seconds ?? timestampValue._seconds) : undefined;
-                    const receivedAt = typeof seconds === "number" ? new Date(seconds * 1000).toLocaleString() : typeof timestampValue === "string" || typeof timestampValue === "number" ? new Date(timestampValue).toLocaleString() : "Received recently";
+                  {sponsorConversations.map((conversation) => {
+                    const entries = Array.isArray(conversation.thread) && conversation.thread.length
+                      ? conversation.thread
+                      : conversation.message ? [{ id: "initial", sender: "sponsor", senderName: conversation.sponsorName, message: conversation.message, createdAt: conversation.createdAt }] : [];
                     return (
-                    <div key={inq.id} className="p-6 flex flex-col md:flex-row justify-between gap-6">
-                      <div className="space-y-3 max-w-2xl">
+                    <div key={conversation.id} className="p-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                      <div className="space-y-3 max-w-3xl">
                         <div className="flex items-center gap-3">
                           <span className="font-montserrat font-bold text-base text-[#0B2E6B]">
-                            {senderName}{senderEmail ? ` (${senderEmail})` : ""}
+                            {conversation.sponsorName || "Approved sponsor"}{conversation.sponsorEmail ? ` (${conversation.sponsorEmail})` : ""}
                           </span>
-                          <span
-                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${isSponsorMessage ? "bg-[#0A8CF5]/10 text-[#0A6FBE] border border-[#0A8CF5]/25" : "bg-[#079432]/10 text-[#079432] border border-[#079432]/25"}`}
-                          >
-                            {isSponsorMessage ? "Sponsor message" : "Public enquiry"}
-                          </span>
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase bg-[#0A8CF5]/10 text-[#0A6FBE] border border-[#0A8CF5]/25">Approved sponsor</span>
                         </div>
-
                         <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#0B2E6B]/10 text-xs text-[#0B2E6B]/80 space-y-1">
-                          <p className="font-semibold text-[#079432]">Subject: <span className="text-[#0B2E6B] font-bold">{inq.subject || "Foundation enquiry"}</span></p>
-                          {source && <p className="text-[#0B2E6B]/62">Source: {source}</p>}
-                          {inq.talentId && <p className="text-[#0B2E6B]/62">Related Sponsor Talent record: {inq.talentId}</p>}
-                          <p className="text-[#0B2E6B]/70 italic">&quot;{inq.message}&quot;</p>
-                          <span className="text-[10px] text-[#0B2E6B]/40 block font-mono pt-1">
-                            Received: {receivedAt}
-                          </span>
+                          <p className="font-semibold text-[#079432]">Subject: <span className="text-[#0B2E6B] font-bold">{conversation.subject || "Foundation conversation"}</span></p>
+                          {conversation.sponsorOrganization && <p className="text-[#0B2E6B]/62">Organization: {conversation.sponsorOrganization}</p>}
+                          {conversation.talentId && <p className="text-[#0B2E6B]/62">Related Sponsor Talent record: {conversation.talentId}</p>}
+                        </div>
+                        <div className="space-y-2">
+                          {entries.map((entry: { id?: string; sender?: string; senderName?: string; message?: string; createdAt?: unknown }, index: number) => <div key={entry.id || index} className={`rounded-xl px-4 py-3 text-xs leading-6 ${entry.sender === "foundation" ? "bg-[#0B2E6B] text-white" : "bg-[#F5F6F0] text-[#0B2E6B]"}`}><p className={`text-[9px] font-bold uppercase tracking-[0.12em] ${entry.sender === "foundation" ? "text-white/65" : "text-[#079432]"}`}>{entry.sender === "foundation" ? "PWLIF Foundation Team" : entry.senderName || "Approved sponsor"}</p><p className="mt-1 whitespace-pre-wrap">{entry.message}</p><p className={`mt-1 text-[9px] ${entry.sender === "foundation" ? "text-white/50" : "text-[#0B2E6B]/45"}`}>{formatReceivedAt(entry.createdAt)}</p></div>)}
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row md:flex-col justify-center gap-2 shrink-0">
-                        {inq.status !== "reviewed" ? (
+                      <div className="space-y-3">
+                        <form onSubmit={async (event) => {
+                          event.preventDefault();
+                          const message = (conversationReplies[conversation.id] || "").trim();
+                          if (!message) return triggerToast("Message needed", "Write a reply before sending it to the sponsor.");
+                          setReplyingConversation(conversation.id);
+                          try {
+                            await replyToSponsorConversation(conversation.id, message);
+                            setConversationReplies((current) => ({ ...current, [conversation.id]: "" }));
+                            triggerToast("Reply Sent", "Your secure reply is now visible in this sponsor’s private dashboard.");
+                          } catch (error) {
+                            triggerToast("Reply Failed", error instanceof Error ? error.message : "The reply could not be sent.");
+                          } finally {
+                            setReplyingConversation(null);
+                          }
+                        }} className="space-y-2 rounded-xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-3">
+                          <label className="block text-[10px] font-bold uppercase tracking-[0.12em] text-[#0B2E6B]/55" htmlFor={`reply-${conversation.id}`}>Reply to sponsor</label>
+                          <textarea id={`reply-${conversation.id}`} value={conversationReplies[conversation.id] || ""} onChange={(event) => setConversationReplies((current) => ({ ...current, [conversation.id]: event.target.value }))} maxLength={2000} rows={5} placeholder="Write a private Foundation reply…" className="w-full resize-y rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2 text-xs leading-5 outline-none focus:border-[#079432]" />
+                          <button type="submit" disabled={replyingConversation === conversation.id} className="w-full rounded-lg bg-[#0B2E6B] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#079432] disabled:opacity-60">{replyingConversation === conversation.id ? "Sending…" : "Send secure reply"}</button>
+                        </form>
+                        {conversation.status !== "reviewed" ? (
                           <button
                             onClick={async () => {
                               try {
-                                await resolveSupportInquiry(inq.id, inq.type);
-                                triggerToast("✓ Marked Reviewed", "The Foundation inbox item has been retained and marked reviewed.");
+                                await resolveSponsorConversation(conversation.id);
+                                triggerToast("✓ Marked Reviewed", "The sponsor conversation has been retained and marked reviewed.");
                               } catch (err) {
-                                triggerToast("✗ Could Not Update Inbox", err instanceof Error ? err.message : "The Foundation inbox item could not be updated.");
+                                triggerToast("✗ Could Not Update Conversation", err instanceof Error ? err.message : "The sponsor conversation could not be updated.");
                               }
                             }}
                             className="bg-[#079432] hover:bg-[#14B84A] text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
@@ -1140,7 +1205,17 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL 3: Sponsor Talent Directory CMS */}
+        {/* PANEL 3: Non-sponsor public form submissions. */}
+        {activeSection === "submissions" && (
+          <div className="space-y-6">
+            <div><h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">Public Form Submissions</h1><p className="text-xs text-[#0B2E6B]/60 mt-0.5">Contact, support, volunteer, partnership, and other non-orientation public forms. These submissions never appear in sponsor conversations.</p></div>
+            <div className="bg-white rounded-2xl border border-[#0B2E6B]/10 overflow-hidden shadow-xl">
+              {publicSubmissions.length === 0 ? <div className="p-12 text-center text-[#0B2E6B]/50 text-xs">No public form submissions have arrived yet.</div> : <div className="divide-y divide-[#0B2E6B]/5">{publicSubmissions.map((submission) => <div key={submission.id} className="p-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div className="max-w-3xl space-y-2"><div className="flex flex-wrap items-center gap-2"><h2 className="font-montserrat text-base font-bold text-[#0B2E6B]">{submission.name || "Public visitor"}{submission.email ? ` (${submission.email})` : ""}</h2><span className="rounded-full border border-[#079432]/25 bg-[#079432]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-[#079432]">{submission.source || "Public form"}</span></div><div className="rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-4 text-xs leading-6 text-[#0B2E6B]/75"><p className="font-semibold text-[#079432]">Subject: <span className="text-[#0B2E6B]">{submission.subject || "Public submission"}</span></p><p className="mt-1 whitespace-pre-wrap">{submission.message || "No message provided."}</p><p className="mt-2 font-mono text-[10px] text-[#0B2E6B]/40">Received: {formatReceivedAt(submission.createdAt)}</p></div></div><div className="shrink-0">{submission.status !== "reviewed" ? <button onClick={async () => { try { await resolveSupportInquiry(submission.id, "public"); triggerToast("✓ Marked Reviewed", "The public form submission has been retained and marked reviewed."); } catch (error) { triggerToast("✗ Could Not Update Submission", error instanceof Error ? error.message : "The public form submission could not be updated."); } }} className="rounded-xl bg-[#079432] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#14B84A]">Mark Reviewed</button> : <span className="text-xs font-semibold text-[#079432]">Reviewed</span>}</div></div>)}</div>}
+            </div>
+          </div>
+        )}
+
+        {/* PANEL 4: Sponsor Talent Directory CMS */}
         {activeSection === "talent" && (
           <div className="space-y-6">
             <div>
@@ -1642,32 +1717,23 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Headshot Photo (Upload File or URL)</label>
+                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Headshot Photo (persistent upload or HTTPS URL)</label>
                     <div className="space-y-2">
                       <input
                         type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              if (event.target?.result) {
-                                setMemberPhoto(event.target.result as string);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleTeamHeadshotUpload}
+                        disabled={isUploadingMemberPhoto}
                         className="w-full p-2 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] text-xs file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#079432] file:text-white hover:file:brightness-110"
                       />
                       <input
                         type="text"
-                        placeholder="Or paste image URL..."
+                        placeholder="Or paste a trusted HTTPS image URL..."
                         value={memberPhoto}
                         onChange={(e) => setMemberPhoto(e.target.value)}
                         className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] text-xs focus:outline-none focus:border-[#079432]"
                       />
+                      {isUploadingMemberPhoto && <p className="text-[10px] font-semibold text-[#079432]">Storing headshot securely…</p>}
                       {memberPhoto && (
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-[#0B2E6B]/20">
                           <Image src={memberPhoto} alt="Preview" fill className="object-cover" />
@@ -1747,23 +1813,6 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* PANEL: Transparency and financial reporting are intentionally disabled. */}
-        {activeSection === "transparency" && (
-          <div className="space-y-6">
-            <div>
-              <h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">Partnership Information</h1>
-              <p className="text-xs text-[#0B2E6B]/60 mt-0.5">This portal does not manage financial contributions, tax records, or transparency reports.</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl border border-[#0B2E6B]/10 shadow-xl space-y-4 max-w-3xl">
-              <div className="w-11 h-11 rounded-2xl bg-[#079432]/10 text-[#079432] flex items-center justify-center">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h2 className="font-montserrat font-bold text-lg text-[#0B2E6B]">Financial and transparency workflows are unavailable</h2>
-              <p className="text-xs text-[#0B2E6B]/70 leading-relaxed">Do not upload reports, publish financial figures, or use this portal to process contributions. Appropriate partnership information is handled through private foundation processes outside this application.</p>
             </div>
           </div>
         )}
@@ -2404,7 +2453,7 @@ export default function AdminDashboardPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Transparency Section Badge</label>
+                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Partnership Section Badge</label>
                       <input
                         type="text"
                         value={brandingForm.transparencySectionBadge || ""}
@@ -2413,7 +2462,7 @@ export default function AdminDashboardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Transparency Section Title</label>
+                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Partnership Section Title</label>
                       <input
                         type="text"
                         value={brandingForm.transparencySectionTitle || ""}
@@ -2422,7 +2471,7 @@ export default function AdminDashboardPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Transparency Section Subtitle</label>
+                      <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Partnership Section Subtitle</label>
                       <input
                         type="text"
                         value={brandingForm.transparencySectionSubtitle || ""}
@@ -2525,53 +2574,66 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* PANEL 8: Audit Trail Log */}
+        {/* PANEL 8: Public Pages CMS */}
+        {activeSection === "editorial" && (
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#0B2E6B]/10 shadow-xl space-y-6 max-w-4xl">
+            <div className="border-b border-[#0B2E6B]/10 pb-4">
+              <h1 className="font-montserrat font-bold text-xl text-[#0B2E6B] flex items-center gap-2"><FileText className="w-5 h-5 text-[#079432]" /> Public Pages CMS</h1>
+              <p className="text-xs text-[#0B2E6B]/60 mt-1">Manage real Foundation content for How It Works, News &amp; Updates, and Media &amp; Press. Drafts stay private until they are published.</p>
+            </div>
+            <form
+              className="space-y-8"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                try {
+                  await updateEditorialPages(editorialForm);
+                  triggerToast("✓ Public pages saved", "Published page content is now available on its matching public route. Drafts remain private.");
+                } catch (error) {
+                  triggerToast("✗ Save failed", error instanceof Error ? error.message : "Could not save the public page content.");
+                }
+              }}
+            >
+              {([
+                ["howItWorks", "How It Works", "/our-pilot"],
+                ["foundationUpdates", "News & Updates", "/foundation-updates"],
+                ["mediaPress", "Media & Press", "/press-resources"],
+              ] as [EditorialPageKey, string, string][]).map(([key, label, route]) => {
+                const page = editorialForm[key] || INITIAL_EDITORIAL_PAGES[key];
+                const updatePage = (field: "title" | "introduction" | "body" | "status", value: string) => setEditorialForm((current) => ({ ...current, [key]: { ...page, [field]: value } }));
+                return <section key={key} className="rounded-xl border border-[#0B2E6B]/10 p-4 sm:p-5 space-y-3 bg-[#FCFCFA]">
+                  <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-bold text-sm text-[#0B2E6B]">{label}</h2><p className="text-[11px] text-[#0B2E6B]/60">Public route: {route}</p></div><select value={page.status} onChange={(event) => updatePage("status", event.target.value)} className="rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2 text-xs text-[#0B2E6B]"><option value="draft">Draft — private</option><option value="published">Published</option></select></div>
+                  <input value={page.title} onChange={(event) => updatePage("title", event.target.value)} maxLength={160} placeholder="Page title" className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]" />
+                  <textarea value={page.introduction} onChange={(event) => updatePage("introduction", event.target.value)} maxLength={1000} rows={3} placeholder="Introduction" className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]" />
+                  <textarea value={page.body} onChange={(event) => updatePage("body", event.target.value)} maxLength={20000} rows={8} placeholder="Page content" className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]" />
+                </section>;
+              })}
+              <div className="flex justify-end"><button type="submit" className="bg-[#079432] hover:brightness-110 text-white font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Save drafts &amp; publishing status</button></div>
+            </form>
+          </div>
+        )}
+
+        {/* PANEL 9: Audit Trail Log */}
         {activeSection === "audit" && (
           <div className="space-y-6">
             <div>
-              <h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">
-                Platform Performance &amp; Security Audit Trail
-              </h1>
+              <h1 className="font-montserrat font-bold text-2xl text-[#0B2E6B]">Operational Audit Trail</h1>
               <p className="text-xs text-[#0B2E6B]/60 mt-0.5">
-                Real-time security events, administrative credential generation, and telemetry logs.
+                Read-only record of protected administrator operations. It does not calculate financial or performance metrics.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-2xl border border-[#0B2E6B]/10 shadow-xl">
-                <span className="text-xs text-[#0B2E6B]/60 uppercase font-semibold">Total Verified Sponsors</span>
-                <p className="text-3xl font-montserrat font-bold text-[#0B2E6B] mt-2">
-                  {pendingSponsors.filter(s => s.status === "approved").length}
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl border border-[#0B2E6B]/10 shadow-xl">
-                <span className="text-xs text-[#0B2E6B]/60 uppercase font-semibold">Initiated Inquiries</span>
-                <p className="text-3xl font-montserrat font-bold text-[#079432] mt-2">
-                  {inquiries.length}
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl border border-[#0B2E6B]/10 shadow-xl">
-                <span className="text-xs text-[#0B2E6B]/60 uppercase font-semibold">Exhibition Grid Profiles</span>
-                <p className="text-3xl font-montserrat font-bold text-emerald-400 mt-2">
-                  {profiles.length}
-                </p>
-              </div>
-            </div>
-
             <div className="bg-white p-6 rounded-2xl border border-[#0B2E6B]/10 shadow-xl space-y-4">
-              <h3 className="font-montserrat font-bold text-base text-[#0B2E6B]">Security Event Log</h3>
+              <h3 className="font-montserrat font-bold text-base text-[#0B2E6B]">Administrative event log</h3>
               <div className="space-y-2">
-                {auditLogs.map((log) => (
+                {auditLogs.length === 0 ? <p className="rounded-xl border border-dashed border-[#0B2E6B]/20 p-5 text-xs text-[#0B2E6B]/60">No administrative events have been recorded yet.</p> : auditLogs.map((log) => (
                   <div key={log.id} className="p-3 bg-[#F8FAFC] rounded-xl border border-[#0B2E6B]/10 flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-emerald-400 font-mono font-bold">{log.action}</span>
-                      <p className="text-[#0B2E6B]/70 mt-0.5">{log.details}</p>
+                      <span className="text-emerald-400 font-mono font-bold">{String(log.action || "Administrative action")}</span>
+                      <p className="text-[#0B2E6B]/70 mt-0.5">{typeof log.details === "string" ? log.details : "Protected administrative event recorded."}</p>
                     </div>
                     <div className="text-right text-[10px] font-mono text-[#0B2E6B]/40">
-                      <div>{log.adminEmail}</div>
-                      <div>{log.timestamp}</div>
+                      <div>{String(log.adminEmail || log.performedBy || "Administrator")}</div>
+                      <div>{formatReceivedAt(log.timestamp || log.createdAt)}</div>
                     </div>
                   </div>
                 ))}
