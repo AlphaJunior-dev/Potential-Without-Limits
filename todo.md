@@ -107,3 +107,6 @@
 - [x] Make each approved sponsor Talent card open a server-authorized full private Talent detail view.
 - [x] Replace the public Sponsor Login destination with ordinary email-and-password sign-in that routes approved users to their dashboard.
 - [x] Restrict password creation to the Firebase invitation-link continuation flow and keep password changes within the authenticated sponsor account area.
+- [ ] Complete a release-critical end-to-end Preview audit of sponsor sign-in, invitation setup, private Talent details, dashboard revocation, and the public orientation handoff.
+- [ ] Confirm whether the account has an official affected-account notice and, if so, export a current Task Data Backup before the August 23 deadline.
+- [x] Prevent direct visits to the one-time sponsor password-setup route from displaying setup fields without a valid Firebase invitation-link action.

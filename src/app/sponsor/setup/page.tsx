@@ -17,7 +17,9 @@ export default function SponsorSetupPage() {
   const [validLink, setValidLink] = useState<boolean | null>(null);
 
   useEffect(() => {
-    setValidLink(isSignInWithEmailLink(auth, window.location.href));
+    const invitationUrl = new URL(window.location.href);
+    const hasInvitationAction = invitationUrl.searchParams.get("mode") === "signIn" && Boolean(invitationUrl.searchParams.get("oobCode"));
+    setValidLink(hasInvitationAction && isSignInWithEmailLink(auth, invitationUrl.toString()));
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -64,16 +66,19 @@ export default function SponsorSetupPage() {
           <p className="mt-1 font-inter text-xs text-[#0B2E6B]/70">Verify the approved email address from your invitation, then choose the password you will use to sign in.</p>
         </div>
 
-        {validLink === false && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-inter text-red-700"><span>This invitation link is invalid or has expired. Ask PWLIF to send a new one.</span></div>}
         {error && <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-inter text-red-700"><AlertCircle className="h-4 w-4 shrink-0" /><span>{error}</span></div>}
 
-        <form onSubmit={handleSubmit} className="space-y-5 font-inter text-xs">
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Approved email address<div className="relative mt-2"><Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-[#0B2E6B]/40" /><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="sponsor@organization.org" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] py-3 pl-10 pr-4 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></div></label>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Create password<input type="password" required minLength={10} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 10 characters" className="mt-2 w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></label>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Confirm password<input type="password" required minLength={10} autoComplete="new-password" value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} placeholder="Re-enter your password" className="mt-2 w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></label>
-          <button type="submit" disabled={submitting || validLink === false} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#079432] px-4 py-3.5 font-montserrat text-xs font-extrabold text-white shadow-lg transition hover:bg-[#14B84A] disabled:cursor-not-allowed disabled:opacity-50"><span>{submitting ? "Completing setup…" : "Set password & continue"}</span><ArrowRight className="h-4 w-4" /></button>
-        </form>
-        <p className="mt-3 text-center text-[11px] font-inter text-[#0B2E6B]/60">This link can be used only for your first password setup. PWLIF never sees or stores the password you choose.</p>
+        {validLink === null && <div className="rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] px-4 py-5 text-center text-xs font-inter text-[#0B2E6B]/65">Checking your invitation link…</div>}
+        {validLink === false && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-xs font-inter text-red-700"><p>This password setup page is available only from a current PWLIF invitation link.</p><p className="mt-2">Ask PWLIF to resend your invitation if your link has expired.</p><Link href="/login" className="mt-4 inline-flex font-bold text-[#079432] hover:underline">Go to Sponsor Login</Link></div>}
+        {validLink === true && <>
+          <form onSubmit={handleSubmit} className="space-y-5 font-inter text-xs">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Approved email address<div className="relative mt-2"><Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-[#0B2E6B]/40" /><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="sponsor@organization.org" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] py-3 pl-10 pr-4 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></div></label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Create password<input type="password" required minLength={10} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 10 characters" className="mt-2 w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#0B2E6B]">Confirm password<input type="password" required minLength={10} autoComplete="new-password" value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} placeholder="Re-enter your password" className="mt-2 w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm font-medium text-[#0B2E6B] placeholder:text-[#0B2E6B]/40 focus:border-[#079432] focus:outline-none focus:ring-1 focus:ring-[#079432]" /></label>
+            <button type="submit" disabled={submitting} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#079432] px-4 py-3.5 font-montserrat text-xs font-extrabold text-white shadow-lg transition hover:bg-[#14B84A] disabled:cursor-not-allowed disabled:opacity-50"><span>{submitting ? "Completing setup…" : "Set password & continue"}</span><ArrowRight className="h-4 w-4" /></button>
+          </form>
+          <p className="mt-3 text-center text-[11px] font-inter text-[#0B2E6B]/60">This link can be used only for your first password setup. PWLIF never sees or stores the password you choose.</p>
+        </>}
         <p className="mt-7 border-t border-[#0B2E6B]/10 pt-6 text-center text-xs font-inter text-[#0B2E6B]/75">Already created a password? <Link href="/login" className="font-bold text-[#079432] hover:underline">Sponsor Login</Link></p>
       </div>
     </div>

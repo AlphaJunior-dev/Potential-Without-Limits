@@ -150,6 +150,9 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.match(sponsorSetupPage, /isSignInWithEmailLink/);
   assert.match(sponsorSetupPage, /signInWithEmailLink/);
   assert.match(sponsorSetupPage, /updatePassword/);
+  assert.match(sponsorSetupPage, /validLink === false/);
+  assert.match(sponsorSetupPage, /validLink === true && <>/);
+  assert.match(sponsorSetupPage, /available only from a current PWLIF invitation link/);
   assert.match(adminRoute, /new URL\("\/sponsor\/setup", configuredContinueUrl\)/);
   assert.match(loginPage, /router\.replace\("\/sponsor\/dashboard"\)/);
   assert.match(bookCall, /\/api\/orientation/);
