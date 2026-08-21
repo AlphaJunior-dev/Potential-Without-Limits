@@ -16,5 +16,8 @@
 | TypeScript | `pnpm tsc --noEmit` passed. |
 | Regression suite | `pnpm test` passed: 18 tests. |
 | Production build | `NODE_ENV=production pnpm build` passed with the required `next build --webpack` configuration. |
+| Repair-branch preview | Commit `02886ef` reached `READY` in Vercel on the protected `repair/pwlif-secure-rebuild` preview. |
 
 The test coverage now includes the sponsor-only Foundation Conversations boundary, protected two-way sponsor threads, separated public form submissions, persistent Team headshots, controlled editorial pages, legal-page rendering, finance-control removal, and resilient operational audit rendering.
+
+No production deployment was created and pull request #1 was not merged.

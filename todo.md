@@ -123,4 +123,4 @@
 - [x] Diagnose and repair the Metrics & Audit Trail page-load failure while retaining only a read-only operational audit view with no fabricated performance metrics.
 - [x] Ensure Terms, Privacy, and Security Standards have dedicated public pages that render current administrator-published legal content.
 - [x] Add server-authorized draft and publish controls for How It Works, News & Updates, and Media & Press pages, using truthful empty states until real Foundation content is supplied.
-- [ ] Add automated coverage and preview verification for sponsor conversations, public-form submissions, Team publishing, legal propagation, editorial CMS publishing, audit access, and finance-control removal.
+- [x] Add automated coverage and preview verification for sponsor conversations, public-form submissions, Team publishing, legal propagation, editorial CMS publishing, audit access, and finance-control removal.
