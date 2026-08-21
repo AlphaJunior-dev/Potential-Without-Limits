@@ -151,6 +151,12 @@ function safeAssetUrl(value: unknown) {
   }
 }
 
+function safeTalentVideoUrl(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return /^\/api\/talent-video\/[A-Za-z0-9_-]{8,80}$/.test(trimmed) ? trimmed : undefined;
+}
+
 function safePublicText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return undefined;
   const text = sponsorTalentWording(value.trim()).slice(0, maxLength);
@@ -261,9 +267,10 @@ export function sanitizeTalentRecord(input: unknown) {
     skills,
     consent: {
       reference: safePublicText((item.consent as Record<string, unknown> | undefined)?.reference, 120) || "",
+      mediaReleasePermission: (item.consent as Record<string, unknown> | undefined)?.mediaReleasePermission === true,
     },
     photoUrl: safeAssetUrl(item.photoUrl) || "",
-    mediaUrls: rawMedia.map(safeAssetUrl).filter((url): url is string => Boolean(url)).slice(0, 4),
+    mediaUrls: rawMedia.map(safeTalentVideoUrl).filter((url): url is string => Boolean(url)).slice(0, 4),
     displayOrder: Math.max(1, Math.min(999, Number.isFinite(item.displayOrder) ? Math.trunc(item.displayOrder as number) : 999)),
     visibility: {
       profileVisible: rawVisibility.profileVisible === true,
@@ -302,7 +309,7 @@ export function toPublicTalentCard(id: string, input: unknown) {
   const record = sanitizeTalentRecord(input);
   if (!record || !record.visibility.profileVisible) return null;
   const photoVisible = record.visibility.photoVisible && Boolean(record.photoUrl);
-  const mediaVisible = record.visibility.mediaVisible && record.mediaUrls.length > 0;
+  const mediaVisible = record.consent.mediaReleasePermission && record.visibility.mediaVisible && record.mediaUrls.length > 0;
   return {
     id,
     title: record.displayTitle,

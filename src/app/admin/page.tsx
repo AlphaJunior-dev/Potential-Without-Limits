@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth, PendingSponsor } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
+import { TalentVideo } from "@/components/TalentVideo";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
 import { INITIAL_EDITORIAL_PAGES, INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, type EditorialPageKey, TeamMember } from "@/lib/cmsData";
@@ -133,6 +134,7 @@ export default function AdminDashboardPage() {
     addFoundationVideo,
     deleteFoundationVideo,
     uploadTalentPhoto,
+    uploadTalentVideo,
     talentTags,
     updateTalentTags,
     talentCategories,
@@ -146,7 +148,7 @@ export default function AdminDashboardPage() {
   const [progress, setProgress] = useState("");
   const [currentNeeds, setCurrentNeeds] = useState("");
   const [countryCommunity, setCountryCommunity] = useState("");
-  const [mediaReleasePermission, setMediaReleasePermission] = useState(true);
+  const [mediaReleasePermission, setMediaReleasePermission] = useState(false);
 
   // CMS State: Video Management Form
   const [videoTitle, setVideoTitle] = useState("");
@@ -285,6 +287,8 @@ export default function AdminDashboardPage() {
   const [consentReference, setConsentReference] = useState("");
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [isVideoUploading, setIsVideoUploading] = useState(false);
+  const [videoUploadError, setVideoUploadError] = useState<string | null>(null);
 
   // CMS State: Mission & Vision
   const [missionText, setMissionText] = useState(missionVision?.mission || INITIAL_MISSION_VISION.mission);
@@ -345,16 +349,28 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Local Video Upload Handler (Unlimited)
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Persistent video upload: the browser receives only a short-lived,
+  // administrator-issued storage capability. Video bytes never pass through
+  // this application route and never become a browser-only blob URL.
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
-    Array.from(files).forEach((file) => {
-      const videoBlobUrl = URL.createObjectURL(file);
-      setUploadedVideos((prev) => [...prev, videoBlobUrl]);
-      if (!rawMediaUrl) setRawMediaUrl(videoBlobUrl);
-    });
+    setVideoUploadError(null);
+    setIsVideoUploading(true);
+    try {
+      const videoUrls: string[] = [];
+      for (const file of Array.from(files)) videoUrls.push(await uploadTalentVideo(file));
+      setUploadedVideos((current) => [...current, ...videoUrls].slice(0, 4));
+      setRawMediaUrl(videoUrls[0] || "");
+      triggerToast("✓ Video Stored", `${videoUrls.length} Talent video${videoUrls.length === 1 ? "" : "s"} is private until its profile and media visibility controls are explicitly enabled.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The Talent video could not be stored.";
+      setVideoUploadError(message);
+      triggerToast("✗ Video Not Stored", message);
+    } finally {
+      setIsVideoUploading(false);
+      e.target.value = "";
+    }
   };
 
   // Save Talent CMS
@@ -406,7 +422,7 @@ export default function AdminDashboardPage() {
           location,
           bio,
           coverPhoto: coverPhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
-          rawMediaUrl: rawMediaUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            rawMediaUrl,
           status: "active",
           inquiriesCount: 0,
           galleryImages: uploadedImages,
@@ -447,6 +463,7 @@ export default function AdminDashboardPage() {
       setAspiration("");
       setSupportPathway("");
       setConsentReference("");
+      setMediaReleasePermission(false);
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
     }
@@ -469,6 +486,7 @@ export default function AdminDashboardPage() {
     setAspiration(p.aspiration || p.dream || "");
     setSupportPathway(p.supportPathway || p.current_needs || "");
     setConsentReference(p.consentRecord?.reference || "");
+    setMediaReleasePermission(p.consentRecord?.mediaReleasePermission === true);
   };
 
   const handleDeleteTalent = async (id: string) => {
@@ -1431,50 +1449,53 @@ export default function AdminDashboardPage() {
                     )}
                   </div>
 
-                  {/* UNLIMITED LOCAL FILE UPLOADS: VIDEOS */}
+                  {/* PERSISTENT PRIVATE VIDEO UPLOADS */}
                   <div className="p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="font-semibold text-[#0B2E6B] flex items-center gap-1.5 text-xs">
                         <VideoIcon className="w-3.5 h-3.5 text-[#079432]" />
-                        <span>Upload Local Videos (Unlimited)</span>
+                        <span>Store Talent Videos Privately</span>
                       </label>
                       <span className="text-[10px] text-[#0B2E6B]/40 font-mono">
-                        {uploadedVideos.length} Uploaded
+                        {uploadedVideos.length}/4 stored
                       </span>
                     </div>
 
                     <input
                       type="file"
                       multiple
-                      accept="video/*"
+                      accept="video/mp4,video/webm"
                       onChange={handleVideoUpload}
+                      disabled={isVideoUploading || uploadedVideos.length >= 4}
                       className="w-full text-[11px] text-[#0B2E6B]/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#079432] file:text-white hover:file:brightness-110 cursor-pointer"
                     />
+                    <p className="text-[10px] leading-4 text-[#0B2E6B]/58">MP4 or WebM only, up to 50 MB each. Uploads go directly to the Foundation’s private media storage. Save or update this Talent record to attach a stored video.</p>
+                    {isVideoUploading && <p role="status" className="text-[10px] font-semibold text-[#079432]">Uploading securely… Please keep this tab open.</p>}
+                    {videoUploadError && <p role="alert" className="text-[10px] font-semibold text-red-700">{videoUploadError}</p>}
 
-                    {/* Video Previews */}
                     {uploadedVideos.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
+                      <div className="space-y-3 pt-1">
                         {uploadedVideos.map((vUrl, idx) => (
-                          <div key={idx} className="p-2 rounded-lg bg-[#0B2E6B]/5 border border-[#0B2E6B]/10 flex items-center justify-between text-[11px]">
-                            <div className="flex items-center gap-2 truncate">
-                              <Play className="w-3 h-3 text-[#079432] shrink-0" />
-                              <span className="text-[#0B2E6B]/80 font-mono truncate">Local Video #{idx + 1}</span>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0">
+                          <div key={vUrl} className="overflow-hidden rounded-lg border border-[#0B2E6B]/10 bg-[#0B2E6B]/5 text-[11px]">
+                            <TalentVideo src={vUrl} className="aspect-video w-full bg-[#061D45] object-cover" />
+                            <div className="flex items-center justify-between p-2">
+                              <span className="flex items-center gap-2 truncate text-[#0B2E6B]/80 font-mono"><Play className="w-3 h-3 text-[#079432] shrink-0" />Stored video #{idx + 1}</span>
+                              <div className="flex items-center gap-1 shrink-0">
                               <button
                                 type="button"
                                 onClick={() => setRawMediaUrl(vUrl)}
                                 className="px-2 py-0.5 bg-[#079432]/20 text-[#079432] rounded text-[10px] font-bold"
                               >
-                                Set Reel
+                                Primary
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setUploadedVideos(uploadedVideos.filter((_, i) => i !== idx))}
+                                onClick={() => { setUploadedVideos(uploadedVideos.filter((_, i) => i !== idx)); if (rawMediaUrl === vUrl) setRawMediaUrl(""); }}
                                 className="p-1 text-red-400 hover:text-[#0B2E6B]"
                               >
                                 <X className="w-3 h-3" />
                               </button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1494,20 +1515,9 @@ export default function AdminDashboardPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Raw Media Video URL (Or select uploaded video)</label>
-                    <input
-                      type="url"
-                      value={rawMediaUrl}
-                      onChange={(e) => setRawMediaUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
-                    />
-                  </div>
-
                   <fieldset className="rounded-xl border border-[#079432]/25 bg-[#079432]/5 p-3 space-y-2">
                     <legend className="px-1 text-[11px] font-bold text-[#079432]">Public visibility controls</legend>
-                    <p className="text-[10px] text-[#0B2E6B]/60">All public fields are hidden by default. A photo appears publicly only when both the profile and its cover-photo setting are enabled. You can edit these choices after publishing.</p>
+                    <p className="text-[10px] text-[#0B2E6B]/60">All public fields are hidden by default. A video appears publicly only when its profile, approved-media setting, and recorded media-release consent are all enabled. You can edit these choices after publishing.</p>
                     {[
                       ["profileVisible", "Publish this Sponsor Talent profile"],
                       ["summaryVisible", "Show the approved summary"],

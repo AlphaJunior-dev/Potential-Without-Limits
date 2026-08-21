@@ -79,7 +79,13 @@ function isTemporaryMissionCopy(value: unknown) {
 const safeLegal: LegalSecurityConfig = { termsContent: "", privacyContent: "", securityStandardsContent: "", lastUpdated: "" };
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const internalTalentPhotoPattern = /^\/api\/talent-photo\/[A-Za-z0-9_-]{8,80}$/;
+const internalTalentVideoPattern = /^\/api\/talent-video\/[A-Za-z0-9_-]{8,80}$/;
 const MAX_TALENT_PHOTO_SOURCE_BYTES = 4 * 1024 * 1024;
+const MAX_TALENT_VIDEO_SOURCE_BYTES = 50 * 1024 * 1024;
+
+function isSafeTalentVideoUrl(value: unknown): value is string {
+  return typeof value === "string" && internalTalentVideoPattern.test(value);
+}
 
 async function prepareTalentPhotoForPrivateMedia(source: File) {
   if (!/^image\/(jpeg|png|webp)$/i.test(source.type)) {
@@ -168,9 +174,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       location: record.region || (record.visibility?.profileVisible === true ? "Publicly displayed" : "Not publicly displayed"),
       bio: record.summary,
       coverPhoto: record.photoUrl || "/pwlif-logo.png",
-      rawMediaUrl: Array.isArray(record.mediaUrls) ? record.mediaUrls[0] || "" : "",
+      rawMediaUrl: Array.isArray(record.mediaUrls) ? record.mediaUrls.find(isSafeTalentVideoUrl) || "" : "",
       galleryImages: record.photoUrl ? [record.photoUrl] : [],
-      galleryVideos: Array.isArray(record.mediaUrls) ? record.mediaUrls : [],
+      galleryVideos: Array.isArray(record.mediaUrls) ? record.mediaUrls.filter(isSafeTalentVideoUrl) : [],
       featuredOnHomepage: record.visibility?.profileVisible === true,
       publicVisibility: {
         profileVisible: record.visibility?.profileVisible === true,
@@ -213,9 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const talent = Array.isArray(data.talent) ? data.talent : [];
     setSponsorConversations(Array.isArray(data.conversations) ? data.conversations : []);
     setSponsorProfiles(talent.map((record: FlexibleRecord) => {
-      const mediaUrls = Array.isArray(record.mediaUrls)
-        ? record.mediaUrls.filter((url: unknown): url is string => typeof url === "string" && /^https:\/\//i.test(url))
-        : [];
+      const mediaUrls = Array.isArray(record.mediaUrls) ? record.mediaUrls.filter(isSafeTalentVideoUrl) : [];
       const photoUrl = isSafeTalentPhotoUrl(record.photoUrl)
         ? record.photoUrl
         : "/pwlif-logo.png";
@@ -334,6 +338,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !isSafeTalentPhotoUrl(result?.url)) {
       throw new Error(typeof result?.error === "string" ? result.error : "The Talent photo could not be stored.");
+    }
+    return result.url;
+  };
+
+  const uploadTalentVideo = async (video: File) => {
+    if (!user || userStatus !== "admin") throw new Error("Administrator access is required to upload a Talent video.");
+    if (!/^(video\/mp4|video\/webm)$/i.test(video.type) || video.size < 1 || video.size > MAX_TALENT_VIDEO_SOURCE_BYTES) {
+      throw new Error("Choose one MP4 or WebM video up to 50 MB.");
+    }
+    const token = await user.getIdToken(true);
+    const start = await fetch("/api/admin/talent-video", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: "start", contentType: video.type.toLowerCase(), size: video.size }),
+    });
+    const target = await start.json().catch(() => ({})) as FlexibleRecord;
+    if (!start.ok || typeof target.assetId !== "string" || typeof target.uploadUrl !== "string" || !target.uploadUrl.startsWith("https://")) {
+      throw new Error(typeof target?.error === "string" ? target.error : "The Talent video could not be prepared for storage.");
+    }
+
+    const uploaded = await fetch(target.uploadUrl, {
+      method: "PUT",
+      headers: { "content-type": video.type, "x-upsert": "false" },
+      body: video,
+    });
+    if (!uploaded.ok) throw new Error("The private media service did not accept this video. Please try again.");
+
+    const complete = await fetch("/api/admin/talent-video", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ action: "complete", assetId: target.assetId }),
+    });
+    const result = await complete.json().catch(() => ({})) as FlexibleRecord;
+    if (!complete.ok || !isSafeTalentVideoUrl(result?.url)) {
+      throw new Error(typeof result?.error === "string" ? result.error : "The Talent video could not be confirmed in private storage.");
     }
     return result.url;
   };
@@ -461,9 +500,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         story: profile.story || profile.current_situation || "",
         aspiration: profile.aspiration || profile.dream || "",
         supportPathway: profile.supportPathway || profile.current_needs || "",
-        consent: { reference: profile.consentRecord?.reference || "" },
+        consent: { reference: profile.consentRecord?.reference || "", mediaReleasePermission: profile.consentRecord?.mediaReleasePermission === true },
         photoUrl: isSafeTalentPhotoUrl(profile.coverPhoto) ? profile.coverPhoto : "",
-        mediaUrls: (profile.galleryVideos || []).filter((url) => /^https:\/\//i.test(url)),
+        mediaUrls: (profile.galleryVideos || []).filter(isSafeTalentVideoUrl),
         displayOrder: 0,
         visibility,
       },
@@ -482,7 +521,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateEditorialPages, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string) => runOperationalAction("resolvePublicSubmission", { submissionId: itemId }), resolveSponsorConversation: (itemId: string) => runOperationalAction("resolveInboxItem", { itemId }), replyToSponsorConversation, replyToFoundationConversation, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, uploadTalentVideo, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateEditorialPages, updateMissionVision, updateTeamMembers, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string) => runOperationalAction("resolvePublicSubmission", { submissionId: itemId }), resolveSponsorConversation: (itemId: string) => runOperationalAction("resolveInboxItem", { itemId }), replyToSponsorConversation, replyToFoundationConversation, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
   }), [adminRole, adminProfiles, auditLogs, branding, editorialPages, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, publicSubmissions, sponsorConversations, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

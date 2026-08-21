@@ -272,7 +272,7 @@ test("Talent photo uploads use a verified administrator server boundary and pres
 
   assert.match(adminPage, /uploadTalentPhoto/);
   assert.match(adminPage, /isImageUploading/);
-  assert.match(adminPage, /A photo appears publicly only when both the profile and its cover-photo setting are enabled/);
+  assert.match(adminPage, /All public fields are hidden by default/);
   assert.match(adminPage, /md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto/);
   const talentImageHandler = adminPage.slice(
     adminPage.indexOf("const handleImageUpload"),
@@ -283,7 +283,7 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(talentImageHandler, /selected as the cover and ready to save/);
   const coverPhotoInput = adminPage.slice(
     adminPage.indexOf("Cover Photo URL"),
-    adminPage.indexOf("Raw Media Video URL"),
+    adminPage.indexOf("Public visibility controls"),
   );
   assert.match(coverPhotoInput, /type="text"/);
   assert.match(coverPhotoInput, /inputMode="url"/);
@@ -313,6 +313,69 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(mediaLibrary, /SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(mediaLibrary, /allowedMimeTypes/);
   assert.match(imageConfig, /remotePatterns/);
+});
+
+test("Talent videos use bounded private storage, administrator-issued upload capabilities, and explicit public-release consent", async () => {
+  const [adminPage, provider, uploadRoute, publicRoute, privateRoute, adminLibrary, mediaLibrary, player, publicDetail, sponsorDetail] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/talent-video/route.ts"),
+    readSource("src/app/api/talent-video/[assetId]/route.ts"),
+    readSource("src/app/api/private/talent-video/[assetId]/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/lib/supabase-media.ts"),
+    readSource("src/components/TalentVideo.tsx"),
+    readSource("src/app/portfolio/[id]/page.tsx"),
+    readSource("src/app/sponsor/talent/[id]/page.tsx"),
+  ]);
+
+  assert.match(adminPage, /uploadTalentVideo/);
+  assert.match(adminPage, /isVideoUploading/);
+  assert.match(adminPage, /media-release consent/);
+  assert.doesNotMatch(adminPage, /Raw Media Video URL/);
+
+  assert.match(provider, /MAX_TALENT_VIDEO_SOURCE_BYTES = 50 \* 1024 \* 1024/);
+  assert.match(provider, /action: "start"/);
+  assert.match(provider, /action: "complete"/);
+  assert.match(provider, /fetch\("\/api\/admin\/talent-video"/);
+  assert.match(provider, /x-upsert/);
+  assert.match(provider, /internalTalentVideoPattern/);
+  assert.doesNotMatch(provider, /SUPABASE_SERVICE_ROLE_KEY/);
+
+  assert.match(uploadRoute, /requireAdministrator\(request\)/);
+  assert.match(uploadRoute, /allowedContentTypes/);
+  assert.match(uploadRoute, /MAX_TALENT_VIDEO_BYTES/);
+  assert.match(uploadRoute, /collection\("talent_video_assets"\)/);
+  assert.match(uploadRoute, /createTalentVideoUploadTarget/);
+  assert.match(uploadRoute, /uploadedBy: administrator\.uid/);
+  assert.match(uploadRoute, /uploadState: "pending"/);
+  assert.match(uploadRoute, /uploadState: "ready"/);
+
+  assert.match(mediaLibrary, /MAX_TALENT_VIDEO_BYTES = 50 \* 1024 \* 1024/);
+  assert.match(mediaLibrary, /video\/mp4/);
+  assert.match(mediaLibrary, /video\/webm/);
+  assert.match(mediaLibrary, /public: false/);
+  assert.match(mediaLibrary, /createSignedUploadUrl/);
+  assert.match(mediaLibrary, /createSignedUrl/);
+
+  assert.match(adminLibrary, /function safeTalentVideoUrl/);
+  assert.match(adminLibrary, /mediaReleasePermission/);
+  assert.match(adminLibrary, /record\.consent\.mediaReleasePermission/);
+  assert.doesNotMatch(adminLibrary, /mediaUrls: rawMedia\.map\(safeAssetUrl\)/);
+
+  assert.match(publicRoute, /toPublicTalentCard/);
+  assert.match(publicRoute, /array-contains/);
+  assert.match(publicRoute, /uploadState !== "ready"/);
+  assert.match(privateRoute, /requireApprovedSponsor\(request\)/);
+  assert.match(privateRoute, /toSponsorTalentCard/);
+  assert.match(privateRoute, /"Cache-Control": "private, no-store"/);
+
+  assert.match(player, /use client/);
+  assert.match(player, /getIdToken\(true\)/);
+  assert.match(player, /\/api\/private\/talent-video\//);
+  assert.match(player, /controlsList="nodownload"/);
+  assert.match(publicDetail, /TalentVideo/);
+  assert.match(sponsorDetail, /TalentVideo/);
 });
 
 test("the public header removes the redundant strapline and supports hover, click, keyboard, and mobile navigation", async () => {

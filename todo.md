@@ -130,3 +130,8 @@
 - [x] Convert unfinished public-content routes to consistent Coming Soon states while preserving the core public site and functional sponsor/admin dashboard routes.
 - [ ] Verify the sponsor dashboard, Admin Portal, Team upload, legal routes, and limited public release surface before reporting launch readiness.
 - [x] Resolve the final Next.js static-prerender failure affecting generated error output and public Coming Soon routes before committing the limited-launch repair set.
+- [x] Extend the private Supabase media configuration for bounded Talent video storage without exposing service credentials or existing private assets.
+- [x] Add administrator-authorized Talent video upload and authenticated delivery routes with strict media-type and file-size validation.
+- [x] Add private-by-default video record and public-release controls that require explicit profile and video visibility approvals.
+- [x] Connect the Talent CMS video interface to persistent protected storage and truthful upload-state feedback.
+- [x] Add regression coverage and production-build verification for private, sponsor-authorized, and public Talent video boundaries before seeking merge approval.
