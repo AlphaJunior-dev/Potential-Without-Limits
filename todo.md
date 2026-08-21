@@ -137,3 +137,4 @@
 - [x] Add regression coverage and production-build verification for private, sponsor-authorized, and public Talent video boundaries before seeking merge approval.
 - [x] Diagnose and repair the reported persisted-video playback failure in the administrator Talent CMS.
 - [x] Clarify and repair the Talent video save-and-public-release path so an explicitly approved record can surface on its public profile.
+- [x] Add a distinct consent-controlled Approved video section to public Talent detail pages so an existing cover photo does not hide released video media.

@@ -381,6 +381,10 @@ test("Talent videos use bounded private storage, administrator-issued upload cap
   assert.match(adminPage, /<TalentVideo src=\{vUrl\} access="private"/);
   assert.match(adminPage, /disabled=\{isImageUploading \|\| isVideoUploading\}/);
   assert.match(publicDetail, /TalentVideo/);
+  assert.match(publicDetail, /hasCoverPhoto && canSeeVideo/);
+  assert.match(publicDetail, /Approved media/);
+  assert.match(publicDetail, /Watch the approved video/);
+  assert.match(publicDetail, /access=\{videoAccess\}/);
   assert.match(sponsorDetail, /TalentVideo src=\{mediaUrl\} access="private"/);
 });
 
