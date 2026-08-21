@@ -124,3 +124,9 @@
 - [x] Ensure Terms, Privacy, and Security Standards have dedicated public pages that render current administrator-published legal content.
 - [x] Add server-authorized draft and publish controls for How It Works, News & Updates, and Media & Press pages, using truthful empty states until real Foundation content is supplied.
 - [x] Add automated coverage and preview verification for sponsor conversations, public-form submissions, Team publishing, legal propagation, editorial CMS publishing, audit access, and finance-control removal.
+- [x] Diagnose and repair the sponsor sign-in regression so approved sponsors can access their private dashboard securely.
+- [x] Diagnose and repair the Meet the Team headshot upload failure while retaining only persistent administrator-authorized storage paths.
+- [x] Diagnose and repair the dedicated Terms, Privacy, and Security page rendering so the Legal CMS produces visibly usable public policy pages.
+- [x] Convert unfinished public-content routes to consistent Coming Soon states while preserving the core public site and functional sponsor/admin dashboard routes.
+- [ ] Verify the sponsor dashboard, Admin Portal, Team upload, legal routes, and limited public release surface before reporting launch readiness.
+- [x] Resolve the final Next.js static-prerender failure affecting generated error output and public Coming Soon routes before committing the limited-launch repair set.

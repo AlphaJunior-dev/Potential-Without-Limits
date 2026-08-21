@@ -271,7 +271,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
         return;
       }
-      const claims = await currentUser.getIdTokenResult().then((token) => token.claims as Record<string, unknown>).catch(() => ({} as Record<string, unknown>));
+      // Refresh once when Firebase reports a session change. A newly approved sponsor can
+      // otherwise receive a cached token here after `login()` has already refreshed claims,
+      // causing this listener to overwrite the approved state with `pending`.
+      const claims = await currentUser.getIdTokenResult(true).then((token) => token.claims as Record<string, unknown>).catch(() => ({} as Record<string, unknown>));
       const nextStatus = claims.admin === true ? "admin" : claims.sponsor === true ? "approved" : "pending";
       setStatus(nextStatus);
       if (nextStatus === "admin") void loadAdminData(currentUser).catch(() => undefined);

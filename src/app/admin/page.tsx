@@ -8,7 +8,7 @@ import { TalentPhoto } from "@/components/TalentPhoto";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
 import { INITIAL_EDITORIAL_PAGES, INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, type EditorialPageKey, TeamMember } from "@/lib/cmsData";
-import { 
+import {
   ShieldCheck, 
   ShieldAlert, 
   Users, 
@@ -44,6 +44,49 @@ import {
   Mail,
   User
 } from "lucide-react";
+
+const prepareTeamHeadshotUpload = async (file: File): Promise<File> => {
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+    throw new Error("Use a JPEG, PNG, or WebP headshot.");
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const source = new window.Image();
+    await new Promise<void>((resolve, reject) => {
+      source.onload = () => resolve();
+      source.onerror = () => reject(new Error("This image could not be read. Please choose another file."));
+      source.src = objectUrl;
+    });
+
+    const render = async (maximumSide: number, quality: number) => {
+      const scale = Math.min(1, maximumSide / Math.max(source.width, source.height));
+      const width = Math.max(1, Math.round(source.width * scale));
+      const height = Math.max(1, Math.round(source.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Your browser could not prepare this headshot.");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(source, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      if (!blob) throw new Error("This image could not be prepared for secure upload.");
+      return blob;
+    };
+
+    let blob = await render(1600, 0.84);
+    if (blob.size > 3_000_000) blob = await render(1200, 0.76);
+    if (blob.size > 3_000_000) {
+      throw new Error("This headshot is still too large after preparation. Choose a smaller image file.");
+    }
+    const basename = file.name.replace(/\.[^.]+$/, "") || "team-headshot";
+    return new File([blob], `${basename}.jpg`, { type: "image/jpeg" });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+};
 
 export default function AdminDashboardPage() {
   const { 
@@ -501,9 +544,9 @@ export default function AdminDashboardPage() {
   };
 
   const handleTeamHeadshotUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const selectedFile = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
+    if (!selectedFile) return;
     if (!user) {
       triggerToast("✗ Upload Failed", "Sign in as an administrator before uploading a headshot.");
       return;
@@ -511,6 +554,7 @@ export default function AdminDashboardPage() {
 
     setIsUploadingMemberPhoto(true);
     try {
+      const file = await prepareTeamHeadshotUpload(selectedFile);
       const token = await user.getIdToken(true);
       const form = new FormData();
       form.set("photo", file);

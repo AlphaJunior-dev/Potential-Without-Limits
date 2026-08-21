@@ -1,17 +1,5 @@
-import { readPublicSite } from "@/lib/admin";
-import { PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
+import { ComingSoonPage } from "@/components/ComingSoonPage";
 
-export const dynamic = "force-dynamic";
-
-export default async function OurPilotPage() {
-  const site = await readPublicSite();
-  const editorial = site.editorialPages.howItWorks;
-  const hasPublishedEditorial = editorial.status === "published" && Boolean(editorial.title || editorial.introduction || editorial.body);
-  return <div className="bg-[#FCFCFA]">
-    <PublicHero dark eyebrow="Sponsor Talent pathway" title={hasPublishedEditorial && editorial.title ? editorial.title : "A careful pathway, held with respect."} intro={hasPublishedEditorial && editorial.introduction ? editorial.introduction : "Sponsor Talent conversations begin through a private orientation. PWLIF shares only appropriate, non-identifying context publicly."} primaryAction={{ href: "/orientation", label: "Request orientation" }} />
-    {hasPublishedEditorial && editorial.body && <section className="px-5 py-14 sm:px-8 lg:px-10"><div className="mx-auto max-w-4xl rounded-[1.75rem] border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_14px_40px_rgba(11,46,107,0.06)]"><p className="whitespace-pre-wrap text-sm leading-8 text-[#0B2E6B]/72">{editorial.body}</p></div></section>}
-    <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10"><div className="mx-auto max-w-7xl"><SectionHeading eyebrow="The approach" title="Potential is never reduced to a public selection process." intro="PWLIF is building a responsible pathway that honours context, dignity, and learning." /><div className="mt-12 grid gap-px overflow-hidden rounded-[1.75rem] border border-[#0B2E6B]/10 bg-[#0B2E6B]/10 md:grid-cols-3">{[["01", "Community-informed", "Planning begins with local knowledge, conversation, and responsible context."],["02", "Privacy-protective", "There are no public individual profiles, photos, identifying details, or selection mechanisms."],["03", "Learning-led", "The pathway is a starting point, not an unsupported claim of outcomes or scale."]].map(([number, title, copy]) => <article key={number} className="min-h-72 bg-white p-8"><span className="font-montserrat text-5xl font-black text-[#14B84A]">{number}</span><h2 className="mt-12 font-montserrat text-2xl font-black tracking-[-0.03em] text-[#0B2E6B]">{title}</h2><p className="mt-4 text-sm leading-7 text-[#0B2E6B]/65">{copy}</p></article>)}</div></div></section>
-    {site.pilotCards.length > 0 && <section className="bg-[#EAF7EF] px-5 py-20 sm:px-8 sm:py-28 lg:px-10"><div className="mx-auto max-w-7xl"><SectionHeading eyebrow="Published context" title="What PWLIF is ready to share publicly." intro="This context is controlled by PWLIF administrators and is limited to appropriate, non-identifying information." /><div className="mt-12 grid gap-5 md:grid-cols-3">{site.pilotCards.map((card, index) => <article key={card.id} className="rounded-[1.75rem] bg-[#061D45] p-7 text-white"><span className="font-montserrat text-4xl font-black text-[#14B84A]">{String(index + 1).padStart(2, "0")}</span><p className="mt-10 text-[10px] font-bold uppercase tracking-[0.15em] text-[#A9F1C3]">{card.supportArea || "Sponsor Talent overview"}</p><h2 className="mt-3 font-montserrat text-2xl font-black tracking-[-0.03em]">{card.title}</h2><p className="mt-4 text-sm leading-7 text-white/68">{card.summary}</p></article>)}</div></div></section>}
-    <PublicCtaBand eyebrow="Understand before committing" title="Start with a private Sponsor Talent orientation." intro="PWLIF does not offer public sponsorship selection or payment processing. An orientation conversation is the appropriate next step." action={{ href: "/orientation", label: "Request orientation" }} />
-  </div>;
+export default function HowItWorksPage() {
+  return <ComingSoonPage eyebrow="How it works" title="Our approach is being prepared with Foundation leadership." description="PWLIF will publish a clear, Foundation-approved explanation of its approach once the content is ready to share." />;
 }

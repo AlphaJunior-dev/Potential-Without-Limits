@@ -35,7 +35,7 @@ test("restored original interface receives public data through the safe provider
   assert.doesNotMatch(cms, /firebase\/firestore|onSnapshot|setDoc\(|deleteDoc\(/);
 });
 
-test("existing Team and FAQ shells receive safe published content and public wording avoids Rwanda-pilot labels", async () => {
+test("existing Team and FAQ shells receive safe published content and unfinished public wording avoids Rwanda-pilot labels", async () => {
   const [team, faq, provider, publicRoute, pilotPage, footer] = await Promise.all([
     readSource("src/app/meet-the-team/page.tsx"),
     readSource("src/app/faq/page.tsx"),
@@ -52,10 +52,10 @@ test("existing Team and FAQ shells receive safe published content and public wor
   assert.match(publicRoute, /teamMembers/);
   assert.match(publicRoute, /faqItems/);
 
-  for (const source of [pilotPage, footer]) {
-    assert.match(source, /Sponsor Talent/);
-    assert.doesNotMatch(source, /Rwanda pilot/i);
-  }
+  assert.match(pilotPage, /ComingSoonPage/);
+  assert.doesNotMatch(pilotPage, /Rwanda pilot/i);
+  assert.match(footer, /Sponsor Talent/);
+  assert.doesNotMatch(footer, /Rwanda pilot/i);
 });
 
 test("branding changes use a fresh Firebase ID token, a protected route, and an allowlisted public-data merge", async () => {
@@ -451,7 +451,7 @@ test("Team publishing uses persistent administrator-authorized media and the req
   assert.match(adminRoute, /body\.action === "updateEditorialPages"/);
   assert.match(adminLibrary, /sanitizeEditorialPages/);
   assert.match(adminLibrary, /status === "published"/);
-  for (const page of [howItWorks, updates, press, gallery]) assert.match(page, /editorialPages/);
+  for (const page of [howItWorks, updates, press, gallery]) assert.match(page, /ComingSoonPage/);
   assert.match(terms, /legalSecurity\?\.termsContent \|\|/);
   assert.match(privacy, /legalSecurity\?\.privacyContent \|\|/);
   assert.match(security, /legalSecurity\.securityStandardsContent \|\|/);

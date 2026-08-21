@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -76,6 +77,14 @@ export function Footer() {
           <span>&bull;</span>
           <Link href="/security-standards" className="hover:text-[#A9F1C3] transition-colors">
             Security &amp; Consent
+          </Link>
+          <span>&bull;</span>
+          <Link href="/privacy" className="hover:text-[#A9F1C3] transition-colors">
+            Privacy
+          </Link>
+          <span>&bull;</span>
+          <Link href="/terms" className="hover:text-[#A9F1C3] transition-colors">
+            Terms
           </Link>
           <span>&bull;</span>
           <Link href="/faq" className="hover:text-[#A9F1C3] transition-colors">
