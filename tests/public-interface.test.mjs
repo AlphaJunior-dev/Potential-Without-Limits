@@ -373,9 +373,15 @@ test("Talent videos use bounded private storage, administrator-issued upload cap
   assert.match(player, /use client/);
   assert.match(player, /getIdToken\(true\)/);
   assert.match(player, /\/api\/private\/talent-video\//);
+  assert.match(player, /access = "public"/);
+  assert.match(player, /access === "private"/);
+  assert.match(player, /Sign in to preview this protected Talent video/);
   assert.match(player, /controlsList="nodownload"/);
+  assert.match(provider, /galleryVideos\.some\(isSafeTalentVideoUrl\)/);
+  assert.match(adminPage, /<TalentVideo src=\{vUrl\} access="private"/);
+  assert.match(adminPage, /disabled=\{isImageUploading \|\| isVideoUploading\}/);
   assert.match(publicDetail, /TalentVideo/);
-  assert.match(sponsorDetail, /TalentVideo/);
+  assert.match(sponsorDetail, /TalentVideo src=\{mediaUrl\} access="private"/);
 });
 
 test("the public header removes the redundant strapline and supports hover, click, keyboard, and mobile navigation", async () => {

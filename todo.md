@@ -135,3 +135,5 @@
 - [x] Add private-by-default video record and public-release controls that require explicit profile and video visibility approvals.
 - [x] Connect the Talent CMS video interface to persistent protected storage and truthful upload-state feedback.
 - [x] Add regression coverage and production-build verification for private, sponsor-authorized, and public Talent video boundaries before seeking merge approval.
+- [x] Diagnose and repair the reported persisted-video playback failure in the administrator Talent CMS.
+- [x] Clarify and repair the Talent video save-and-public-release path so an explicitly approved record can surface on its public profile.

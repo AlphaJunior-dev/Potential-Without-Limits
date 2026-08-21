@@ -1477,7 +1477,7 @@ export default function AdminDashboardPage() {
                       <div className="space-y-3 pt-1">
                         {uploadedVideos.map((vUrl, idx) => (
                           <div key={vUrl} className="overflow-hidden rounded-lg border border-[#0B2E6B]/10 bg-[#0B2E6B]/5 text-[11px]">
-                            <TalentVideo src={vUrl} className="aspect-video w-full bg-[#061D45] object-cover" />
+                            <TalentVideo src={vUrl} access="private" className="aspect-video w-full bg-[#061D45] object-cover" />
                             <div className="flex items-center justify-between p-2">
                               <span className="flex items-center gap-2 truncate text-[#0B2E6B]/80 font-mono"><Play className="w-3 h-3 text-[#079432] shrink-0" />Stored video #{idx + 1}</span>
                               <div className="flex items-center gap-1 shrink-0">
@@ -1545,10 +1545,10 @@ export default function AdminDashboardPage() {
                   <div className="pt-2 flex gap-2">
                     <button
                       type="submit"
-                      disabled={isImageUploading}
+                      disabled={isImageUploading || isVideoUploading}
                       className="flex-1 bg-[#079432] hover:brightness-110 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isImageUploading ? "Storing Photo…" : editingId ? "Update Sponsor Talent" : "Save Sponsor Talent"}
+                      {isImageUploading ? "Storing Photo…" : isVideoUploading ? "Storing Video…" : editingId ? "Update Sponsor Talent" : "Save Sponsor Talent"}
                     </button>
                     {editingId && (
                       <button

@@ -479,7 +479,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const visibility = {
       profileVisible,
       photoVisible: profileVisible && requestedVisibility?.photoVisible === true && isSafeTalentPhotoUrl(profile.coverPhoto),
-      mediaVisible: profileVisible && requestedVisibility?.mediaVisible === true && Array.isArray(profile.galleryVideos) && profile.galleryVideos.some((url) => /^https:\/\//i.test(url)),
+      mediaVisible: profileVisible && requestedVisibility?.mediaVisible === true && Array.isArray(profile.galleryVideos) && profile.galleryVideos.some(isSafeTalentVideoUrl),
       summaryVisible: profileVisible && requestedVisibility?.summaryVisible === true,
       ageBandVisible: profileVisible && requestedVisibility?.ageBandVisible === true,
       regionVisible: profileVisible && requestedVisibility?.regionVisible === true,
