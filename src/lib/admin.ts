@@ -1,6 +1,7 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
+import { DEFAULT_SOCIAL_LINKS, type SocialLink, type SocialPlatform } from "@/lib/cmsData";
 
 // Firebase Admin is pinned to the CommonJS-compatible v13 line because the v14
 // ESM dependency chain fails when Vercel externalizes the package for Next.js.
@@ -441,6 +442,24 @@ export function sanitizePublicVideos(input: unknown) {
   }).filter((video): video is NonNullable<typeof video> => Boolean(video));
 }
 
+const supportedSocialPlatforms = new Set<SocialPlatform>(["LinkedIn", "Facebook", "Instagram", "X", "YouTube", "TikTok", "WhatsApp", "Website"]);
+
+export function sanitizeSocialLinks(input: unknown): SocialLink[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  return input.slice(0, 10).map((entry, index) => {
+    const item = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+    const platform = typeof item.platform === "string" && supportedSocialPlatforms.has(item.platform as SocialPlatform) ? item.platform as SocialPlatform : "Website";
+    const label = safePublicText(item.label, 80) || platform;
+    const url = safeAssetUrl(item.url);
+    const fallbackId = `${platform.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${index + 1}`;
+    const id = (safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || fallbackId).slice(0, 80);
+    if (!url || seen.has(id)) return null;
+    seen.add(id);
+    return { id, platform, label, url, visible: item.visible === true, order: Math.max(1, Math.min(99, Number.isFinite(item.order) ? Math.trunc(item.order as number) : index + 1)) };
+  }).filter((link): link is SocialLink => Boolean(link)).sort((first, second) => first.order - second.order);
+}
+
 export function sanitizePublicBranding(input: unknown) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
   const branding: Record<string, string> = {};
@@ -483,6 +502,7 @@ export async function readPublicSite() {
     const values = siteSnapshot.exists ? siteSnapshot.data() : {};
     const branding = sanitizePublicBranding(values?.branding);
     const talentTags = sanitizeTalentTagLibrary(values?.talentTags);
+    const socialLinks = Array.isArray(values?.socialLinks) ? sanitizeSocialLinks(values.socialLinks) : DEFAULT_SOCIAL_LINKS;
     const publishedCards = cardsSnapshot.docs.map((document) => {
       const card = document.data();
       if (card.status !== "published") return null;
@@ -516,8 +536,9 @@ export async function readPublicSite() {
       legalSecurity: sanitizePublicLegal(values?.legalSecurity),
       foundationVideos: sanitizePublicVideos(values?.foundationVideos),
       editorialPages: sanitizeEditorialPages(values?.editorialPages),
+      socialLinks,
     };
   } catch {
-    return { ...safePublicDefaults, branding: {}, talentTags: [], missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [], editorialPages: sanitizeEditorialPages({}) };
+    return { ...safePublicDefaults, branding: {}, talentTags: [], missionVision: {}, teamMembers: [], legalSecurity: {}, foundationVideos: [], editorialPages: sanitizeEditorialPages({}), socialLinks: DEFAULT_SOCIAL_LINKS };
   }
 }

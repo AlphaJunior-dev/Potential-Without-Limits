@@ -11,6 +11,7 @@ import {
   sanitizePublicLegal,
   sanitizePublicMissionVision,
   sanitizePublicVideos,
+  sanitizeSocialLinks,
   sanitizeTalentCategoryLibrary,
   sanitizeTalentRecord,
   sanitizeTalentTagLibrary,
@@ -230,6 +231,12 @@ export async function PATCH(request: NextRequest) {
       await db.collection("public_site_content").doc("main").set({ foundationVideos, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
       await appendAudit("updateFoundationVideos", "site_content", "main", administrator.uid);
       return NextResponse.json({ ok: true, foundationVideos });
+    } else if (body.action === "updateSocialLinks") {
+      if (!Array.isArray(body.socialLinks)) return NextResponse.json({ error: "Social links must be provided as a list." }, { status: 400 });
+      const socialLinks = sanitizeSocialLinks(body.socialLinks);
+      await db.collection("public_site_content").doc("main").set({ socialLinks, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });
+      await appendAudit("updateSocialLinks", "site_content", "main", administrator.uid, { visibleLinks: socialLinks.filter((link) => link.visible).length });
+      return NextResponse.json({ ok: true, socialLinks });
     } else if (body.action === "updateTalentTagLibrary") {
       const talentTags = sanitizeTalentTagLibrary(body.talentTags);
       await db.collection("public_site_content").doc("main").set({ talentTags, updatedAt: FieldValue.serverTimestamp(), updatedBy: administrator.uid }, { merge: true });

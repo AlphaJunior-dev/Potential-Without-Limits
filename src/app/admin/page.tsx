@@ -8,7 +8,7 @@ import { TalentPhoto } from "@/components/TalentPhoto";
 import { TalentVideo } from "@/components/TalentVideo";
 import { WlpLogoMark } from "@/components/WlpLogo";
 import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
-import { INITIAL_EDITORIAL_PAGES, INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, type EditorialPageKey, TeamMember } from "@/lib/cmsData";
+import { INITIAL_EDITORIAL_PAGES, INITIAL_MISSION_VISION, INITIAL_TEAM_MEMBERS, type EditorialPageKey, type SocialLink, TeamMember } from "@/lib/cmsData";
 import {
   ShieldCheck, 
   ShieldAlert, 
@@ -43,7 +43,8 @@ import {
   Eye,
   Award,
   Mail,
-  User
+  User,
+  Link2
 } from "lucide-react";
 
 const prepareTeamHeadshotUpload = async (file: File): Promise<File> => {
@@ -130,6 +131,8 @@ export default function AdminDashboardPage() {
     deleteFaqItem,
     teamMembers,
     updateTeamMembers,
+    socialLinks,
+    updateSocialLinks,
     foundationVideos,
     addFoundationVideo,
     deleteFoundationVideo,
@@ -160,9 +163,14 @@ export default function AdminDashboardPage() {
 
   // Selected Left Sidebar Section & Mobile Sidebar State
   const [activeSection, setActiveSection] = useState<
-    "vetting" | "inquiries" | "submissions" | "talent" | "mission" | "team" | "branding" | "editorial" | "legal" | "audit" | "videos"
+    "vetting" | "inquiries" | "submissions" | "talent" | "mission" | "team" | "branding" | "editorial" | "socials" | "legal" | "audit" | "videos"
   >("vetting");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [socialLinkDraft, setSocialLinkDraft] = useState<SocialLink[]>(socialLinks);
+
+  useEffect(() => {
+    setSocialLinkDraft(socialLinks);
+  }, [socialLinks]);
 
   // Manual Post-Call Sponsor Invitation State
   const [manualEmail, setManualEmail] = useState("");
@@ -827,6 +835,21 @@ export default function AdminDashboardPage() {
             >
               <FileText className="w-4 h-4" />
               <span>Public Pages CMS</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveSection("socials");
+                setIsMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition cursor-pointer ${
+                activeSection === "socials"
+                  ? "bg-[#079432] text-white font-extrabold"
+                  : "text-[#0B2E6B]/70 hover:bg-[#0B2E6B]/5 hover:text-[#0B2E6B]"
+              }`}
+            >
+              <Link2 className="w-4 h-4" />
+              <span>Social Links CMS</span>
             </button>
 
             <button
@@ -2662,6 +2685,42 @@ export default function AdminDashboardPage() {
                 </section>;
               })}
               <div className="flex justify-end"><button type="submit" className="bg-[#079432] hover:brightness-110 text-white font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Save drafts &amp; publishing status</button></div>
+            </form>
+          </div>
+        )}
+
+        {activeSection === "socials" && (
+          <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#0B2E6B]/10 shadow-xl space-y-6 max-w-4xl">
+            <div className="border-b border-[#0B2E6B]/10 pb-4">
+              <h1 className="font-montserrat font-bold text-xl text-[#0B2E6B] flex items-center gap-2"><Link2 className="w-5 h-5 text-[#079432]" /> Social Links CMS</h1>
+              <p className="text-xs text-[#0B2E6B]/60 mt-1">Add and manage the social links shown in the public footer. Only visible entries are published. Links open in a new tab and must use HTTPS.</p>
+            </div>
+            <form
+              className="space-y-4"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                try {
+                  await updateSocialLinks(socialLinkDraft);
+                  triggerToast("✓ Social links saved", "Visible, approved links are now published in the public footer.");
+                } catch (error) {
+                  triggerToast("✗ Save failed", error instanceof Error ? error.message : "Could not save social links.");
+                }
+              }}
+            >
+              {socialLinkDraft.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-[#0B2E6B]/20 bg-[#FCFCFA] p-5 text-xs text-[#0B2E6B]/60">No social links are currently configured. Add one below when you are ready to publish it.</p>
+              ) : socialLinkDraft.map((link, index) => (
+                <section key={link.id} className="rounded-xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-4 sm:p-5 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold text-sm text-[#0B2E6B]">Social link {index + 1}</h2><button type="button" onClick={() => setSocialLinkDraft((links) => links.filter((item) => item.id !== link.id))} className="rounded-lg border border-red-200 px-3 py-1.5 text-[11px] font-bold text-red-600 hover:bg-red-50">Remove</button></div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="space-y-1 text-xs font-semibold text-[#0B2E6B]"><span>Platform</span><select value={link.platform} onChange={(event) => setSocialLinkDraft((links) => links.map((item) => item.id === link.id ? { ...item, platform: event.target.value as SocialLink["platform"] } : item))} className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]"><option>LinkedIn</option><option>Facebook</option><option>Instagram</option><option>X</option><option>YouTube</option><option>TikTok</option><option>WhatsApp</option><option>Website</option></select></label>
+                    <label className="space-y-1 text-xs font-semibold text-[#0B2E6B]"><span>Public label</span><input value={link.label} onChange={(event) => setSocialLinkDraft((links) => links.map((item) => item.id === link.id ? { ...item, label: event.target.value } : item))} maxLength={60} placeholder="Follow PWLIF on LinkedIn" className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]" /></label>
+                  </div>
+                  <label className="block space-y-1 text-xs font-semibold text-[#0B2E6B]"><span>HTTPS destination</span><input type="url" value={link.url} onChange={(event) => setSocialLinkDraft((links) => links.map((item) => item.id === link.id ? { ...item, url: event.target.value } : item))} maxLength={500} placeholder="https://www.linkedin.com/company/..." className="w-full rounded-lg border border-[#0B2E6B]/15 bg-white px-3 py-2.5 text-sm text-[#0B2E6B]" required /></label>
+                  <div className="flex flex-wrap items-center gap-5"><label className="flex items-center gap-2 text-xs font-semibold text-[#0B2E6B]"><input type="checkbox" checked={link.visible} onChange={(event) => setSocialLinkDraft((links) => links.map((item) => item.id === link.id ? { ...item, visible: event.target.checked } : item))} className="h-4 w-4 accent-[#079432]" /> Show in public footer</label><label className="flex items-center gap-2 text-xs font-semibold text-[#0B2E6B]">Display order <input type="number" min={0} max={999} value={link.order} onChange={(event) => setSocialLinkDraft((links) => links.map((item) => item.id === link.id ? { ...item, order: Number(event.target.value) || 0 } : item))} className="w-20 rounded-lg border border-[#0B2E6B]/15 bg-white px-2 py-1.5 text-sm text-[#0B2E6B]" /></label></div>
+                </section>
+              ))}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#0B2E6B]/10 pt-5"><button type="button" onClick={() => setSocialLinkDraft((links) => [...links, { id: `social-${Date.now()}`, platform: "Website", label: "Foundation website", url: "", visible: false, order: links.length + 1 }])} className="rounded-xl border border-[#079432]/30 bg-[#079432]/5 px-4 py-2.5 text-xs font-bold text-[#087A2C] hover:bg-[#079432]/10"><Plus className="mr-1 inline h-4 w-4" /> Add social link</button><button type="submit" className="bg-[#079432] hover:brightness-110 text-white font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Save social links</button></div>
             </form>
           </div>
         )}

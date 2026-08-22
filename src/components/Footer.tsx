@@ -6,10 +6,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldCheck, Lock, Headset } from "lucide-react";
 import { SupportModal } from "./SupportModal";
+import { useAuth } from "@/context/AuthContext";
 
 export function Footer() {
   const pathname = usePathname();
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const { socialLinks } = useAuth();
+  const visibleSocialLinks = socialLinks.filter((link) => link.visible).sort((first, second) => first.order - second.order);
 
   // Hide footer on Admin Dashboard routes
   if (pathname?.startsWith("/admin")) {
@@ -59,6 +62,15 @@ export function Footer() {
           <p className="font-inter text-xs text-white/55 max-w-sm leading-relaxed">
             Unlocking Potential. Transforming Lives.
           </p>
+          {visibleSocialLinks.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 md:justify-start" aria-label="Foundation social links">
+              {visibleSocialLinks.map((link) => (
+                <a key={link.id} href={link.url} target="_blank" rel="noreferrer" className="rounded-full border border-white/15 bg-white/6 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white/75 transition hover:border-[#A9F1C3]/70 hover:text-[#A9F1C3]">
+                  {link.platform}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Center Column: Navigation Links */}
