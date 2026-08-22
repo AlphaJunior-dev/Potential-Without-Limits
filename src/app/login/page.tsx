@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError("");
     setSubmitting(true);
     try {
-      const destination = await login(email, password);
+      const destination = await login(email, password, "sponsor");
       router.replace(destination === "admin" ? "/admin" : "/sponsor/dashboard");
     } catch (loginError: unknown) {
       setError(loginError instanceof Error ? loginError.message : "Could not sign in. Check your email address and password, then try again.");

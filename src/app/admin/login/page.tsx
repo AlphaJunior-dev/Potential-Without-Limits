@@ -21,8 +21,8 @@ export default function AdminLoginPage() {
     setSubmitting(true);
 
     try {
-      await login(email, password);
-      router.push("/admin");
+      const destination = await login(email, password, "admin");
+      router.replace(destination === "admin" ? "/admin" : "/admin/login");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to sign in. Please check admin credentials.";
       setError(message);

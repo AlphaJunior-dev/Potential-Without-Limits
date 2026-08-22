@@ -143,7 +143,10 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.doesNotMatch(adminPage, /Vetting Call Status|Call Scheduled|Revoke &amp; Delete Sponsor/);
   assert.match(provider, /revokeSponsorAccess/);
   assert.match(adminLibrary, /account\.data\(\)\?\.accessStatus === "revoked"/);
-  assert.match(loginPage, /login\(email, password\)/);
+  assert.match(loginPage, /login\(email, password, "sponsor"\)/);
+  assert.match(provider, /portal === "admin"/);
+  assert.match(provider, /We could not verify these administrator credentials/);
+  assert.match(provider, /portal === "sponsor"/);
   assert.match(provider, /signInWithEmailAndPassword/);
   assert.match(loginPage, /\/sponsor\/setup/);
   assert.doesNotMatch(loginPage, /updatePassword|signInWithEmailLink/);

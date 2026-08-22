@@ -10,6 +10,7 @@ import { INITIAL_EDITORIAL_PAGES, type BrandingConfig, type EditorialPagesConfig
 type UserStatus = "logged_out" | "pending" | "admin" | "approved";
 type AdminRole = "Super Admin" | "Vetting Officer" | "Curator";
 type LoginDestination = "admin" | "approved";
+type LoginPortal = "admin" | "sponsor";
 type FlexibleRecord = Record<string, any>;
 export type PendingSponsor = FlexibleRecord;
 type AuthContextType = {
@@ -37,7 +38,7 @@ type AuthContextType = {
   sponsorDreams: FlexibleRecord[];
   mfaVerified: boolean;
   adminRole: AdminRole;
-  login: (email: string, pass: string) => Promise<LoginDestination>;
+  login: (email: string, pass: string, portal?: LoginPortal) => Promise<LoginDestination>;
   logout: () => Promise<void>;
   setAdminRole: (role: AdminRole) => void;
   bookVettingCall: (...args: any[]) => void;
@@ -288,15 +289,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const login = async (email: string, pass: string): Promise<LoginDestination> => {
+  const login = async (email: string, pass: string, portal?: LoginPortal): Promise<LoginDestination> => {
     try {
       const credential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), pass);
       const token = await credential.user.getIdTokenResult(true);
       if (token.claims.admin === true) {
+        if (portal === "sponsor") {
+          await signOut(auth);
+          throw new Error("This account is an administrator account. Please use the Admin Login portal.");
+        }
         setStatus("admin");
         return "admin";
       }
       if (token.claims.sponsor === true) {
+        if (portal === "admin") {
+          await signOut(auth);
+          throw new Error("This account is approved for Sponsor access. Please use the Sponsor Login portal.");
+        }
         setStatus("approved");
         return "approved";
       }
@@ -307,6 +316,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? String((loginError as { code?: unknown }).code)
         : "";
       if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+        if (portal === "admin") {
+          throw new Error("We could not verify these administrator credentials. Check the administrator email and password, then try again.");
+        }
         throw new Error("We could not verify this Sponsor login. Please use the email and password you created through a current PWLIF invitation. Sponsor access is activated only after orientation approval.");
       }
       throw loginError;
