@@ -558,13 +558,19 @@ test("administrative controls contain no financial CMS and audit rendering is op
 });
 
 test("Sponsor sign-in validates the secured account before routing and Sponsor Overview tolerates incomplete manual records", async () => {
-  const [provider, adminPage] = await Promise.all([
+  const [provider, adminPage, sponsorRoute, adminLibrary] = await Promise.all([
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/admin/page.tsx"),
+    readSource("src/app/api/sponsor/route.ts"),
+    readSource("src/lib/admin.ts"),
   ]);
 
   assert.match(provider, /const sponsorAccess = await fetch\("\/api\/sponsor"/);
   assert.match(provider, /Sponsor account is not ready for dashboard access yet/);
+  assert.match(provider, /payload\?\.reason === "revoked"/);
+  assert.match(sponsorRoute, /reason = message === "SPONSOR_ACCESS_REVOKED" \? "revoked" : "authorization"/);
+  assert.match(adminLibrary, /Earlier manual-approval records predate UID-keyed `sponsor_accounts` entries/);
+  assert.match(adminLibrary, /data\.status === "approved" && data\.accessStatus !== "revoked"/);
   assert.match(adminPage, /String\(selectedSponsorOverview\.email \|\| ""\)\.trim\(\)\.toLowerCase\(\)/);
   assert.match(adminPage, /typeof selectedSponsorOverview\.linkedin === "string"/);
 });

@@ -12,8 +12,9 @@ function optionalText(value: unknown, maxLength: number) {
 
 function accessDenied(error: unknown) {
   const message = error instanceof Error ? error.message : "";
+  const reason = message === "SPONSOR_ACCESS_REVOKED" ? "revoked" : "authorization";
   return NextResponse.json(
-    { error: "Approved sponsor access is required." },
+    { error: "Approved sponsor access is required.", reason },
     { status: message === "UNAUTHENTICATED" ? 401 : 403 },
   );
 }

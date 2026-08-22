@@ -152,4 +152,5 @@
 - [ ] Verify the manual approval flow visibly completes the Sponsor invitation, password setup, Firebase claim refresh, and successful private dashboard sign-in before any production merge.
 - [x] Trace the current Sponsor’s failed live password sign-in through Firebase credential validation, custom claims, Sponsor record authorization, and dashboard redirect; repair only the confirmed gate before any merge.
 - [x] Inspect and repair the Firebase account provisioning state for the confirmed approved Sponsor email, including password-provider availability and the Sponsor custom claim, before any merge.
-- [ ] Repair the Firebase password-reset invitation handoff so its valid one-time code reaches `/sponsor/setup` intact and the approved Sponsor can create a password.
+- [x] Repair the Firebase password-reset invitation handoff by using Firebase’s hosted reset action and returning the approved Sponsor to `/login?setup=complete` after password creation.
+- [ ] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.

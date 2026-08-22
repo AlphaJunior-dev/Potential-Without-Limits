@@ -212,7 +212,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadApprovedSponsorProfiles = async (authenticatedUser: User) => {
     const token = await authenticatedUser.getIdToken(true);
     const response = await fetch("/api/sponsor", { headers: { authorization: `Bearer ${token}` } });
-    if (response.status === 403) {
+    const payload = !response.ok
+      ? await response.json().catch(() => null) as { reason?: unknown } | null
+      : null;
+    // Only an explicit server-confirmed revocation ends an active Firebase session.
+    // A temporary data or authorization response must leave the user signed in so
+    // the dashboard can present an accurate recovery state instead of redirecting.
+    if (response.status === 403 && payload?.reason === "revoked") {
       await signOut(auth);
       throw new Error("Sponsor dashboard access has been revoked.");
     }

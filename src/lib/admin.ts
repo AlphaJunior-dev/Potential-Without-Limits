@@ -52,8 +52,35 @@ export async function requireApprovedSponsor(request: NextRequest) {
 
   const decoded = await adminAuth().verifyIdToken(token);
   if (decoded.sponsor !== true) throw new Error("FORBIDDEN");
-  const account = await adminDb().collection("sponsor_accounts").doc(decoded.uid).get();
-  if (!account.exists || account.data()?.accessStatus === "revoked") throw new Error("FORBIDDEN");
+  const db = adminDb();
+  const accountRef = db.collection("sponsor_accounts").doc(decoded.uid);
+  let account = await accountRef.get();
+  if (account.exists && account.data()?.accessStatus === "revoked") throw new Error("SPONSOR_ACCESS_REVOKED");
+
+  // Earlier manual-approval records predate UID-keyed `sponsor_accounts` entries.
+  // A verified Sponsor token alone is never enough: a missing account can be
+  // reconciled only when the token email matches an approved, non-revoked
+  // application. This preserves the server-side invitation and revocation gates.
+  if (!account.exists) {
+    const email = typeof decoded.email === "string" ? decoded.email.trim().toLowerCase() : "";
+    if (!email) throw new Error("SPONSOR_ACCOUNT_REQUIRED");
+    const applications = await db.collection("sponsor_applications").where("email", "==", email).limit(20).get();
+    const approvedApplication = applications.docs.find((document) => {
+      const data = document.data();
+      return data.status === "approved" && data.accessStatus !== "revoked";
+    });
+    if (!approvedApplication) throw new Error("SPONSOR_ACCOUNT_REQUIRED");
+    await accountRef.set({
+      email,
+      applicationId: approvedApplication.id,
+      accessStatus: "active",
+      reconciledAt: new Date(),
+      updatedAt: new Date(),
+      assignedTalentIds: [],
+    }, { merge: true });
+    account = await accountRef.get();
+  }
+  if (!account.exists || account.data()?.accessStatus === "revoked") throw new Error("SPONSOR_ACCESS_REVOKED");
   return decoded;
 }
 
