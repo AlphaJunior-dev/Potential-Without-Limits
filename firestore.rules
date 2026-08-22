@@ -1,84 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Public site content — visible to everyone, only admin (real login) can edit
-    match /faqs/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /team/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /videos/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /transparency/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /mission/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /siteContent/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /legal_security/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-    match /cms_content/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    // Talent/youth profiles — public preview read (this is the gallery), admin-only edits
-    match /profiles/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    // Public can submit these forms, but only admin (real login) can read the submissions back
-    match /support_inquiries/{docId} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
-    }
-    match /inquiries/{docId} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
-    }
-
-    // KNOWN TEMPORARY GAP: sponsor records (emails, LinkedIn, temp passwords).
-    // Left open for now because sponsor login/profile-completion is not yet
-    // wired to real Firebase Auth — it reads/writes this collection directly,
-    // pre-login, from the client. Locking this down requires migrating sponsor
-    // credential checks to a server-side function instead of a client-side
-    // Firestore read. Do NOT put real sponsor data in here until that's fixed.
-    match /pending_sponsors/{docId} {
-      allow read, write: if true;
-    }
-    match /bookings/{docId} {
-      allow read, write: if true;
-    }
-
-    match /sponsors/{docId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Same temporary gap as pending_sponsors above — these are written from
-    // sponsor self-service actions that also aren't on real auth yet.
-    match /audit_logs/{docId} {
-      allow read, write: if true;
-    }
-    match /sponsor_dreams/{docId} {
-      allow read, write: if true;
-    }
-
-    // Deny everything else by default
+    // Browser clients receive no direct Firestore access. Public content,
+    // orientation requests, audit records, and CMS operations are handled by
+    // server routes using the Firebase Admin SDK.
     match /{document=**} {
       allow read, write: if false;
     }

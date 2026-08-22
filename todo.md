@@ -1,0 +1,157 @@
+# Repair TODO
+
+- [x] Diagnose and fix the Vercel preview server error on `repair/pwlif-secure-rebuild` before merging the pull request.
+- [ ] Confirm the updated Vercel preview returns a successful public home-page response before merging pull request #1.
+- [x] Capture and resolve the remaining Vercel preview runtime error reported after commit `dac859c`.
+- [x] Determine why Vercel has not created a preview deployment for pushed commit `4e2c382` and trigger a preview-only rebuild.
+- [x] Resolve the Vercel `jose` ESM dependency runtime error introduced after Firebase Admin began loading successfully.
+- [x] Restore the familiar main-branch homepage and shared-header visual language while preserving the validated runtime and server-side security repairs.
+- [x] Replace the approximate restored homepage and header with the exact original main-branch visual components, retaining only isolated security and runtime changes.
+- [x] Validate the restored original-style public interface and its safe-content boundaries with an automated regression test.
+- [x] Capture the live production UI and interaction baseline route by route without changing any visual or behavioral detail.
+- [x] Compare the repair branch against the live baseline and limit changes to unsafe implementation paths only.
+- [x] Restore the original live route components, Navbar, layout shell, and visual styling without changing their render structure or class-level presentation.
+- [x] Replace only the original browser-side authentication, database authority, hard-coded credential, and form-submission paths with server-enforced equivalents.
+- [x] Verify no direct Firestore client write, mock credential, weak MFA, or unauthenticated private-data path remains after restoration.
+- [x] Audit the deployed preview route by route for empty states, broken interactions, and server/data dependency errors.
+- [x] Repair confirmed functional gaps without changing the restored page layouts, styling, navigation, or visual component structure.
+- [ ] Revalidate the updated preview before any production-merge decision.
+- [x] Populate the existing Meet the Team and FAQ visual components with safe, non-fabricated published content rather than blank states.
+- [x] Replace public Rwanda-pilot and child-specific language with Sponsor Talent wording while preserving every existing layout and style.
+- [ ] Keep Vercel preview access protected while confirming the production route will remain public after a deliberate merge.
+- [x] Preserve the existing Sponsor Talent detail-page two-column shell for legacy public links by serving a non-identifying generic record rather than a collapsed orientation-only fallback.
+- [x] Identify or create the real Firebase Authentication account that will administer the existing protected portal.
+- [x] Assign and verify the Firebase custom claim `admin: true` without exposing any service-account credential.
+- [ ] Confirm the secured Admin Portal can update approved public content before any production merge.
+- [x] Repair the Admin Portal branding-save control so it calls the authenticated server update route without altering the existing interface.
+- [x] Trace and resolve why the Vercel preview still serves the old disabled branding-save response after commit `2fff677`.
+- [x] Inventory each remaining Admin Portal action and retain only approved public-content workflows for server-enforced repair.
+- [x] Connect Mission & Vision, Meet the Team, legal, and video metadata controls to authenticated server routes without altering the portal interface; the current portal has no FAQ CMS form and Sponsor Talent records remain privacy-restricted.
+- [x] Preserve Sponsor Vetting, credential generation, talent-directory records, transparency reports, and audit controls as disabled until a dedicated privacy-reviewed workflow is approved.
+- [ ] Define a secure private inquiry queue for submitted sponsor-orientation applications, with statuses, review notes, and access limited to Firebase administrators.
+- [ ] Rebuild Sponsor Vetting so administrators can review, approve, decline, and record the outcome of a completed orientation call without client-side authority.
+- [ ] Build a server-only sponsor invitation workflow that grants limited sponsor access only after a manual administrator approval; never generate or reveal credentials in the browser.
+- [ ] Configure a server-triggered passwordless Firebase invitation path, with delivery method recorded and no password or invite token exposed in the Admin Portal.
+- [ ] Rebuild the Talent Directory as controlled, non-identifying Sponsor Talent records with distinct public and private fields, consent safeguards, and administrator-only management.
+- [ ] Add per-record Sponsor Talent publication controls, with public profile, photo, media, and non-identifying summary disabled by default until an administrator deliberately publishes approved content.
+- [ ] Add per-member Meet the Team visibility controls for the full profile, photo, role, biography, and optional external link so administrators can choose exactly what is public.
+- [ ] Gate the Sponsor Dashboard by sponsor-specific server authorization so each approved sponsor can access only their assigned content.
+- [ ] Add a read-only server-generated operational audit log for sensitive approvals and content changes.
+- [ ] Keep finance and transparency workflows out of the operational rebuild scope unless explicitly re-approved by the foundation.
+- [x] Trigger a fresh `repair/pwlif-secure-rebuild` preview after the passwordless invitation variable change and verify it uses the correct source commit.
+- [ ] Verify and correct the Preview `FIREBASE_EMAIL_LINK_CONTINUE_URL` value, then retest one passwordless sponsor invitation without affecting production.
+- [x] Refine the Sponsor Dashboard’s information hierarchy, empty-state treatment, and content density before any merge or production-launch decision, without weakening access controls or altering the established foundation visual identity.
+- [x] Redesign the Sponsor Dashboard’s visual system, navigation hierarchy, and responsive layouts with creative freedom while retaining sponsor-only server authorization, passwordless access, privacy controls, and the foundation brand assets.
+- [x] Retain and redesign the Notifications tab as a clear, non-misleading future communications workspace without fabricating notifications or enabling unapproved automated alerts.
+- [x] Replace Sponsor Dashboard client-side placeholder account metadata with a sponsor-authorized server response that returns only the authenticated sponsor’s approved profile fields and no fabricated defaults.
+- [x] Correct the Sponsor Dashboard header and tab-bar overlap across desktop and mobile layouts without changing the public-site header behavior.
+- [x] Update the sponsor-authorized server route so approved sponsors can access the full private Sponsor Talent pipeline, while public pages continue to receive only administrator-approved field-visible records.
+- [x] Add regression coverage confirming private sponsor access is authorization-gated and remains distinct from the public visibility sanitizer.
+- [x] Make the Foundation Homepage and related Talent views automatically use the complete server-authorized Sponsor Talent pipeline for approved sponsor sessions, while anonymous public sessions remain field-limited.
+- [x] Add regression coverage proving the sponsor-only homepage data handoff requires a fresh Firebase sponsor claim and cannot alter anonymous public responses.
+- [x] Create an administrator-only Sponsor Talent design-preview route with clearly labelled fictional, non-identifying layout cards that cannot appear in public or sponsor-facing data paths.
+- [x] Add regression coverage proving the design-preview route requires the Firebase administrator claim and does not seed or expose mock Talent records through the Sponsor Talent APIs.
+- [x] Replace shared PWLIF logo references with the supplied official logo asset, including accessible alternative text and appropriate compact-header treatments.
+- [x] Apply a cohesive accessible visual system derived from the supplied logo’s navy, green, blue, gold, and restrained magenta colors across shared brand tokens and primary interface surfaces.
+- [x] Verify the logo and palette update does not affect sponsor authorization, public data filtering, or passwordless invitation workflows.
+- [x] Clarify the Sponsor Talent publication interface so administrators can distinguish record publication from each opt-in public visibility setting, especially public photo/media visibility.
+- [x] Preserve private-by-default visibility controls and verify that a photo appears publicly only after both the profile and photo are explicitly approved for public display.
+- [x] Replace the Talent editor’s browser-only local photo picker with a persistent server-authorized image-upload workflow and truthful upload-state feedback.
+- [x] Make the Admin Portal left navigation fixed on larger screens, responsive on smaller screens, and keep homepage return and administrator sign-out controls accessible without scrolling the page body.
+- [x] Add regression coverage for administrator-only image uploads and preserve the existing public-profile and public-photo opt-in requirements.
+- [x] Diagnose and repair the Preview Firebase Storage error that prevents an administrator-selected Talent photo from being persisted.
+- [x] Replace the unavailable paid Firebase Storage dependency with a bounded, administrator-only Firestore-backed Talent image workflow.
+- [x] Preserve the exact public photo opt-ins while serving Firestore-backed Talent images through safe public and approved-sponsor data boundaries.
+- [x] Assess and select a durable media architecture suitable for large photo and video collections without relying on the Firestore image fallback.
+- [ ] Review the Allan Children Foundation public site and define an original PWLIF visual translation that preserves PWLIF branding, content safeguards, and existing authorization boundaries.
+- [x] Do not implement the high-media architecture or reference-inspired visual changes until the foundation approves a staged scope and media-provider decision.
+- [ ] Define and implement a distinctive original PWLIF hero that does not imitate the Allan Children Foundation editorial header treatment.
+- [x] Obtain the selected durable media provider’s project credentials and configure server-only media access before replacing the temporary Firestore image fallback.
+- [x] Create and securely connect the Foundation-owned Supabase project for private PWLIF media storage without migrating Firebase authentication or Firestore CMS data.
+- [x] Diagnose and repair the Preview handoff where a successful Talent upload or CMS save is reported as updated but the selected cover image or public profile does not reflect the saved state.
+- [x] Repair the Admin Portal’s browser URL validation so a valid protected `/api/talent-photo/…` cover reference can be saved without relaxing server-side asset validation.
+- [x] Repair the Preview visibility handoff so administrator-enabled public profile, photo, summary, and media settings are reflected on the corresponding public Talent profile.
+- [x] Prevent legacy Firestore query failures from replacing published Sponsor Talent records with generic public fallback cards.
+- [x] Remove the remaining legacy public-card Firestore filter and ordering query that can cause the complete public reader to fall back despite valid published Talent records.
+- [x] Prepare a PWLIF-specific UI direction informed by the Allan Children Foundation’s visual qualities, for user approval before implementation.
+- [x] Implement the user-approved public-interface refresh while preserving PWLIF’s brand, content safeguards, and authorization boundaries.
+- [ ] Replace the browser-only local video preview with a bounded, server-authorized persistent media workflow before treating video upload as a live feature.
+- [x] Map every reference-site public page to an original PWLIF public route and document the approved structural translation.
+- [x] Rebuild the complete PWLIF public route set with the approved high-media structural rhythm, without copying reference-site assets, content, or code.
+- [x] Preserve the existing Admin Portal and Sponsor Dashboard layouts and all authorization boundaries during the public-site refresh.
+- [x] Replace the confusing LUXARO hero-side card with a clearly labelled original PWLIF privacy-and-potential visual.
+- [x] Add the approved PWLIF top navigation and keyboard-accessible dropdown menus without changing portal navigation or authorization.
+- [x] Add the approved truthful public pages for Foundation Updates, Stories & Learning, Media Gallery, and Press & Resources with safe empty states until real materials are published.
+- [x] Remove the redundant public pre-header strapline above the PWLIF navigation.
+- [x] Make desktop public dropdown menus open on hover while retaining click, keyboard, touch, and mobile-drawer access.
+- [x] Increase public-header typography size and contrast for faster scanning without changing the approved menu behavior.
+- [x] Design and implement a founder-approved, consent-controlled public Talent Showcase with granular field and media publication controls.
+- [x] Add Foundation-managed skills and interests tags with reusable suggested tags plus the ability for admins to create, edit, reuse, and retire custom tags.
+- [x] Extend the server-authorized Talent record model with reviewed public story, aspiration, support-pathway, consent-reference, and per-field release controls.
+- [x] Replace fixed public Talent category filters with active Foundation-managed tags and add safe empty states.
+- [x] Upgrade public Talent detail pages to present only explicitly released profile content and route interest through sponsor orientation.
+- [x] Add regression coverage for private-by-default Talent fields, media, and flexible tags.
+- [x] Replace the fixed primary-category dropdown with a Foundation-managed expandable category library, including administrator create, rename, and retire controls.
+- [x] Remove consent-review date inputs from the Talent CMS while retaining the private consent reference and explicit public-release controls.
+- [x] Clarify and implement the administrator-controlled public age option using a non-identifying age band by default.
+- [x] Replace growing inline category and skills tag lists with compact selection controls and a separate administrator management view.
+- [x] Repair the protected Sponsor Vetting delete action and confirm that it removes the intended sponsor record safely.
+- [x] Remove obsolete sponsor tier fields, labels, and workflow logic from Sponsor Vetting and sponsor records.
+- [x] Inspect and document whether the approved sponsor dashboard safely presents the applicant’s orientation-form information.
+- [x] Assess a secure invite-to-password onboarding option without exposing, generating, or storing passwords in application data.
+- [x] Remove redundant orientation time-slot collection so applicants schedule solely through the Calendly embed after submission.
+- [x] Verify the LinkedIn profile field’s validation, private admin visibility, and authenticated sponsor-only dashboard visibility.
+- [x] Expand the private Sponsor Vetting overview to show the full orientation submission without exposing it publicly.
+- [ ] Complete a controlled inbox-receipt test of the Firebase invitation email after this Preview is available; the portal now records only Firebase request acceptance and reports initiation failures honestly.
+- [x] Replace the vetting-call status control with a non-destructive revoke-access action that disables the sponsor dashboard while retaining the sponsor record and delete control.
+- [x] Make each approved sponsor Talent card open a server-authorized full private Talent detail view.
+- [x] Replace the public Sponsor Login destination with ordinary email-and-password sign-in that routes approved users to their dashboard.
+- [x] Restrict password creation to the Firebase invitation-link continuation flow and keep password changes within the authenticated sponsor account area.
+- [ ] Complete a release-critical end-to-end Preview audit of sponsor sign-in, invitation setup, private Talent details, dashboard revocation, and the public orientation handoff.
+- [ ] Confirm whether the account has an official affected-account notice and, if so, export a current Task Data Backup before the August 23 deadline.
+- [x] Prevent direct visits to the one-time sponsor password-setup route from displaying setup fields without a valid Firebase invitation-link action.
+- [x] Improve the approved-sponsor Talent detail page so empty or incomplete records communicate their status professionally and complete records are easy to review.
+- [x] Remove the public orientation-call call-to-action from authenticated sponsor navigation and replace it with an appropriate dashboard or message pathway.
+- [x] Map and document which public header routes are currently editable through the Admin Portal and add controlled editing where the current CMS has a justified content model.
+- [x] Implement a private Foundation inbox for public contact, volunteer, partnership, and sponsor Talent enquiries, with source labels, administrator-only review, and sponsor dashboard message submission.
+- [x] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
+- [x] Validate the secure Foundation inbox, approved-sponsor navigation, and sparse Talent record experience with type checks, regression tests, and a production build.
+- [x] Restrict the Foundation Inbox to approved-sponsor conversations and add secure administrator replies that are visible to the corresponding sponsor in a private conversation thread.
+- [x] Route Volunteer, Partnership, Contact/Support, and every other non-orientation public form to a separate administrator-only Public Form Submissions inbox retaining the complete validated submission, source, timestamp, and review status.
+- [x] Diagnose and repair the Meet the Team CMS save failure, including persistent administrator-authorized headshot upload and verified public visibility propagation.
+- [x] Remove the disabled Transparency Financial CMS and all related finance or transparency controls from the Admin Portal and application routes.
+- [x] Diagnose and repair the Metrics & Audit Trail page-load failure while retaining only a read-only operational audit view with no fabricated performance metrics.
+- [x] Ensure Terms, Privacy, and Security Standards have dedicated public pages that render current administrator-published legal content.
+- [x] Add server-authorized draft and publish controls for How It Works, News & Updates, and Media & Press pages, using truthful empty states until real Foundation content is supplied.
+- [x] Add automated coverage and preview verification for sponsor conversations, public-form submissions, Team publishing, legal propagation, editorial CMS publishing, audit access, and finance-control removal.
+- [x] Diagnose and repair the sponsor sign-in regression so approved sponsors can access their private dashboard securely.
+- [x] Diagnose and repair the Meet the Team headshot upload failure while retaining only persistent administrator-authorized storage paths.
+- [x] Diagnose and repair the dedicated Terms, Privacy, and Security page rendering so the Legal CMS produces visibly usable public policy pages.
+- [x] Convert unfinished public-content routes to consistent Coming Soon states while preserving the core public site and functional sponsor/admin dashboard routes.
+- [ ] Verify the sponsor dashboard, Admin Portal, Team upload, legal routes, and limited public release surface before reporting launch readiness.
+- [x] Resolve the final Next.js static-prerender failure affecting generated error output and public Coming Soon routes before committing the limited-launch repair set.
+- [x] Extend the private Supabase media configuration for bounded Talent video storage without exposing service credentials or existing private assets.
+- [x] Add administrator-authorized Talent video upload and authenticated delivery routes with strict media-type and file-size validation.
+- [x] Add private-by-default video record and public-release controls that require explicit profile and video visibility approvals.
+- [x] Connect the Talent CMS video interface to persistent protected storage and truthful upload-state feedback.
+- [x] Add regression coverage and production-build verification for private, sponsor-authorized, and public Talent video boundaries before seeking merge approval.
+- [x] Diagnose and repair the reported persisted-video playback failure in the administrator Talent CMS.
+- [x] Clarify and repair the Talent video save-and-public-release path so an explicitly approved record can surface on its public profile.
+- [x] Add a distinct consent-controlled Approved video section to public Talent detail pages so an existing cover photo does not hide released video media.
+- [x] Diagnose and repair the confirmed zero-duration Talent video byte-stream failure in the persisted Supabase object or protected delivery response.
+- [x] Remove unstable public Talent detail, gallery, and media playback routes from the limited public launch surface while preserving private records for later repair.
+- [x] Replace public Sponsor Talent discovery with an honest orientation-led overview that does not expose draft Talent data, unverified media, or unavailable profile links.
+- [x] Run focused limited-launch regression, production-build, and preview-response verification before seeking merge approval.
+- [x] Remove the empty Foundation Introduction placeholder section from the public homepage without affecting the active orientation call-to-action.
+- [x] Restore public Sponsor Talent directory and individual profile routes using only explicitly published, consent-controlled fields and approved cover images; keep public video playback disabled pending separate end-to-end repair.
+- [x] Update regression coverage, production build verification, and Vercel preview checks for the revised public Talent release surface.
+- [x] Diagnose and repair the Sponsor login failure from `/login` through Firebase authentication, approved-sponsor claim resolution, and private dashboard routing; do not merge until verified.
+- [x] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
+- [x] Correct the shared invalid-credential message so the Admin Login never displays Sponsor invitation guidance, while preserving role-specific routing and access controls.
+- [x] Repair the Sponsor Vetting overview action so it opens the intended record reliably on the current preview instead of a failed deployment page.
+- [x] Verify the manual approval flow visibly completes the Sponsor invitation, password setup, Firebase claim refresh, and successful private dashboard sign-in before any production merge.
+- [x] Trace the current Sponsor’s failed live password sign-in through Firebase credential validation, custom claims, Sponsor record authorization, and dashboard redirect; repair only the confirmed gate before any merge.
+- [x] Inspect and repair the Firebase account provisioning state for the confirmed approved Sponsor email, including password-provider availability and the Sponsor custom claim, before any merge.
+- [x] Repair the Firebase password-reset invitation handoff by using Firebase’s hosted reset action and returning the approved Sponsor to `/login?setup=complete` after password creation.
+- [x] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.
+- [x] Capture server-side evidence for the latest failed Sponsor login and define a public-only soft-launch boundary that does not misrepresent unavailable private access.

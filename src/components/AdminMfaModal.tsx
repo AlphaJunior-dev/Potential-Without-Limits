@@ -20,7 +20,7 @@ export function AdminMfaModal({ onVerify }: AdminMfaModalProps) {
     setTimeout(() => {
       const success = onVerify(code);
       if (!success) {
-        setError("Invalid security verification code. Try code: 123456");
+        setError("Verification could not be completed. Please sign in again with your configured identity provider.");
       }
       setLoading(false);
     }, 600);
@@ -60,11 +60,11 @@ export function AdminMfaModal({ onVerify }: AdminMfaModalProps) {
               required
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="123456"
+              placeholder="Authenticator code"
               className="w-full text-center tracking-[0.5em] text-2xl font-mono py-3 bg-wlp-alabaster border border-wlp-navy/15 rounded-lg focus:outline-none focus:border-wlp-coral focus:ring-1 focus:ring-wlp-coral font-bold text-wlp-navy"
             />
             <p className="text-[11px] text-wlp-navy/40 text-center mt-2">
-              For testing, enter <span className="font-mono font-bold text-wlp-navy/70">123456</span>
+              Use the authentication method configured for your administrator account.
             </p>
           </div>
 

@@ -6,6 +6,13 @@ export interface TeamMember {
   photoUrl: string;
   linkedinUrl?: string;
   twitterUrl?: string;
+  visibility?: {
+    isPublic: boolean;
+    showPhoto: boolean;
+    showRole: boolean;
+    showBio: boolean;
+    showLink: boolean;
+  };
   order: number;
 }
 
@@ -76,6 +83,24 @@ export interface LegalSecurityConfig {
   lastUpdated: string;
 }
 
+export type EditorialPageKey = "howItWorks" | "foundationUpdates" | "mediaPress";
+
+export interface EditorialPageContent {
+  title: string;
+  introduction: string;
+  body: string;
+  status: "draft" | "published";
+  updatedAt: string;
+}
+
+export type EditorialPagesConfig = Record<EditorialPageKey, EditorialPageContent>;
+
+export const INITIAL_EDITORIAL_PAGES: EditorialPagesConfig = {
+  howItWorks: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+  foundationUpdates: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+  mediaPress: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+};
+
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
@@ -106,36 +131,36 @@ export interface SupportInquiry {
 export const INITIAL_FAQ_ITEMS: FaqItem[] = [
   {
     id: "faq-1",
-    question: "How does Potential Without Limits International Foundation protect child safety and privacy?",
-    answer: "Public profiles display verified first names, ages, and community regions only. Every child profile is published under 100% verified parental/guardian consent records, and all sponsor interactions are safeguarded by foundation officers.",
+    question: "How does Potential Without Limits International Foundation approach safety and privacy?",
+    answer: "PWLIF uses careful safeguarding and privacy review. Public Sponsor Talent information is intentionally limited, and partnership conversations take place through appropriate foundation-led channels.",
     category: "Child Protection",
     order: 1,
   },
   {
     id: "faq-2",
     question: "What are the available Sponsorship Categories?",
-    answer: "PWLIF offers 5 tailored categories: Individual (direct child sponsorship), Corporate & Institutional (CSR matching & grants), Academic/University (STEM & tuition funding), Faith-Based & Community (group sponsorship), and Professional & Skill-Based (mentorship & equipment grants).",
+    answer: "PWLIF discusses potential Sponsor Talent, programme, foundation, corporate, and strategic partnership opportunities during a private orientation conversation. Availability and scope are reviewed individually.",
     category: "Sponsors",
     order: 2,
   },
   {
     id: "faq-3",
     question: "What benefits come with different Membership Tiers?",
-    answer: "Membership Tiers include Bronze ($150/mo), Silver ($500/mo), Gold ($1,500/mo), and Platinum ($5,000+/mo). Each tier provides private progress tracking, quarterly impact updates, dedicated foundation concierge support, and community lab naming opportunities.",
+    answer: "PWLIF does not publish standardised membership benefits or financial commitments on this site. Potential partnership arrangements are discussed privately after an orientation call.",
     category: "Sponsors",
     order: 3,
   },
   {
     id: "faq-4",
-    question: "How do I Sponsor a Specific Child's Dream?",
-    answer: "Prospective sponsors visit /book-a-call to schedule a 15-minute orientation call. Our admissions team reviews your sponsorship preferences, matches a child's dream, and provisions private dashboard credentials for direct milestone tracking.",
+    question: "How do I begin a Sponsor Talent conversation?",
+    answer: "Prospective sponsors submit an orientation request at /book-a-call and then schedule a private conversation. Sponsor access is considered only after that call and manual approval; approved sponsors receive a one-time email-link invitation to create their own password.",
     category: "General",
     order: 4,
   },
   {
     id: "faq-5",
-    question: "How are sponsorship funds distributed and audited?",
-    answer: "Financial stewardship reports are provided privately to verified sponsors through their dashboard and to partners upon request.",
+    question: "Where can I learn more about partnership details?",
+    answer: "PWLIF shares relevant partnership information through appropriate private conversations. This public site and sponsor portal do not publish financial, tax, or transparency reports.",
     category: "General",
     order: 5,
   },
@@ -143,92 +168,75 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
 
 export const INITIAL_MISSION_VISION: MissionVisionData = {
   mission:
-    "Potential Without Limits International Foundation (PWLIF) is dedicated to discovering, fostering, and funding high-potential youth creators, innovators, and students in underserved African communities — starting in Ethiopia — by pairing them with international sponsors through audited educational grants.",
+    "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
   vision:
-    "A self-sustaining ecosystem of regional Talent Development Centres, equipped with modern robotics, digital art studios, and educational hardware, where every child can turn raw potential into lifelong purpose.",
+    "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
   foundersNote:
-    "Potential Without Limits International Foundation was born from a simple but powerful belief: every child has unique potential waiting to be discovered. Through education, mentorship, talent development, and compassionate partnerships, we aim to unlock that potential and create pathways toward dignity, hope, and lasting success.",
+    "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
   foundersTitle:
-    "Rafiki Emmanuel — Founder & President, Potential Without Limits International Foundation (PWLIF)",
-  pillars: [
-    {
-      title: "Direct Child Educational Grants",
-      description: "Direct funding for equipment, tuition, assistive tech, and learning supplies with 100% financial auditability.",
-    },
-    {
-      title: "Youth Leadership & Entrepreneurship",
-      description: "Practical mentorship and confidence building to equip youth for self-reliance and community impact.",
-    },
-    {
-      title: "Digital Literacy & Innovation",
-      description: "Equipping youth with modern computer skills, coding, robotics, and creative digital media tools.",
-    },
-    {
-      title: "Sustainable Partnerships Across Africa",
-      description: "Collaborating with local schools, international sponsors, and community foundations to build lasting opportunity.",
-    },
-  ],
+    "Potential Without Limits International Foundation",
+  pillars: [],
   lastUpdated: "2026-08-01",
 };
 
 export const INITIAL_BRANDING: BrandingConfig = {
   logoUrl: "/pwlif-logo.png",
   siteTitle: "Potential Without Limits International Foundation",
-  primaryColor: "#051836",
-  secondaryColor: "#005C27",
-  backgroundColor: "#FDFCF9",
+  primaryColor: "#0B2E6B",
+  secondaryColor: "#079432",
+  backgroundColor: "#FCFCFA",
   cardBackgroundColor: "#FFFFFF",
-  textColor: "#051836",
+  textColor: "#0B2E6B",
   headerFont: "Montserrat",
   bodyFont: "Inter",
   heroMediaType: "image",
   heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
   heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
   heroBadgeText: "Potential Without Limits International Foundation (PWLIF)",
-  heroHeadline: "Unlocking Potential. Transforming Lives.",
-  heroSubheadline: "Connecting dedicated sponsors with young dreamers and innovators across Africa — beginning in Ethiopia — through direct educational grants, talent development, and 100% transparent stewardship.",
-  heroCtaText: "Sponsor a Dream Today",
+  heroHeadline: "Potential grows when communities lead.",
+  heroSubheadline: "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.",
+  heroCtaText: "Explore Sponsor Talent",
   heroSecondaryCtaText: "Book Sponsor Orientation",
-  heroCardLocation: "Mathare Youth Tech Lab • Nairobi, Kenya",
-  heroCardTitle: "Engineering Hope & Assistive Tech",
-  heroCardDescription: "Direct sponsorship equipped Sarah with high-precision soldering gear to build Swahili AI screen readers for 50 blind students.",
-  videoSectionBadge: "Humanitarian Spotlight",
+  heroCardLocation: "Sponsor Talent",
+  heroCardTitle: "Community-guided potential",
+  heroCardDescription: "Partnership conversations begin with an orientation call and safeguarding review.",
+  videoSectionBadge: "Foundation Introduction",
   videoSectionTitle: "Foundation Introduction & Impact",
-  videoSectionSubtitle: "Watch how our direct child sponsorship model bridges resources with unseen talent around the world.",
-  sponsorSectionBadge: "Direct Child Sponsorship",
-  sponsorSectionTitle: "Sponsor a Child's Dream",
-  sponsorSectionSubtitle: "Each child profile features an active dream, current situation, and specific equipment or tuition needs.",
-  pathwaySectionBadge: "Transformational Pathway",
+  videoSectionSubtitle: "An introduction video will be shared when it is ready.",
+  sponsorSectionBadge: "Sponsor Talent",
+  sponsorSectionTitle: "Sponsor Talent",
+  sponsorSectionSubtitle: "Explore non-identifying Sponsor Talent information and begin with an orientation conversation.",
+  pathwaySectionBadge: "Our Pathway",
   pathwaySectionTitle: "From Potential to Purpose",
-  pathwaySectionSubtitle: "Our structured 4-phase journey transforms talent through direct equipment grants and parental consent verification.",
-  transparencySectionBadge: "Accountability & Stewardship",
-  transparencySectionTitle: "Institutional Transparency",
-  transparencySectionSubtitle: "PWLIF publishes independent financial audits and annual grant distribution reports for public inspection.",
+  pathwaySectionSubtitle: "A careful, community-guided pathway for Sponsor Talent opportunities.",
+  transparencySectionBadge: "Partnership",
+  transparencySectionTitle: "Accountability & stewardship",
+  transparencySectionSubtitle: "Detailed information is shared through appropriate private partnership conversations.",
   statsMetrics: [
-    { value: "340+", label: "Youth Sponsored" },
-    { value: "24", label: "Global Communities" },
-    { value: "100%", label: "Direct Grant Audit" },
+    { value: "Sponsor", label: "Talent" },
+    { value: "Guided", label: "by community" },
+    { value: "Private", label: "orientation" },
   ],
   pathSteps: [
     {
       stepNumber: "STEP 01",
-      title: "Identification & Consent",
-      description: "Local community leaders identify unseen talent; parental consent and guardian safety verification logged.",
+      title: "Listen",
+      description: "Begin with community-informed planning.",
     },
     {
       stepNumber: "STEP 02",
-      title: "Direct Dream Adoption",
-      description: "Foundation sponsors adopt specific child dreams, allocating targeted equipment or tuition grants.",
+      title: "Prepare",
+      description: "Review safeguarding and partnership needs.",
     },
     {
       stepNumber: "STEP 03",
-      title: "Equipment & Lab Deployment",
-      description: "100% audited hardware, musical instruments, or lab components delivered to the youth innovator.",
+      title: "Connect",
+      description: "Hold a private orientation conversation.",
     },
     {
       stepNumber: "STEP 04",
-      title: "Community Purpose",
-      description: "The child deploys their solution or art to lift their school, village, or local conservatory.",
+      title: "Support",
+      description: "Coordinate carefully with local partners.",
     },
   ],
 };
@@ -236,188 +244,43 @@ export const INITIAL_BRANDING: BrandingConfig = {
 export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
   termsContent: `Terms of Service - Potential Without Limits International Foundation (PWLIF)
 
-1. Acceptance of Terms: By accessing the Potential Without Limits International Foundation platform, sponsors, donors, and partners agree to abide by our child protection standards, parental consent guidelines, and transparent stewardship protocols.
+1. Acceptance of Terms: By accessing the PWLIF platform, visitors, sponsors, donors, and partners agree to use the site responsibly and respect its safeguarding and privacy practices.
 
-2. Sponsor Conduct & Ethics: Sponsor accounts are granted to support educational and creative development. Any unauthorized distribution or inappropriate communication is strictly prohibited and subject to immediate revocation.
+2. Sponsor Conduct & Ethics: Sponsor access is considered only after an orientation call and manual approval. Any inappropriate use of private information or communications is prohibited and may result in access being withdrawn.
 
-3. Grant & Stewardship Integrity: 100% of sponsorship grants allocated to children and youth programs must be deployed towards educational hardware, learning materials, tuition, or community lab resources as specified in sponsorship terms.`,
-  privacyContent: `Child Protection & Privacy Shield Protocol
+3. Partnership Information: This site does not publish financial, tax, or transparency reports. Relevant partnership details are discussed through appropriate private channels.`,
+  privacyContent: `Privacy & Safeguarding Protocol
 
-1. Parental & Guardian Consent: Public child profiles display verified first names, age, and community regions only. Every profile is backed by signed parental consent records on file.
+1. Limited Public Information: PWLIF publishes only the Sponsor Talent information it has specifically approved for public display. Public pages are designed to avoid unnecessary personal or identifying information.
 
-2. Data Encryption & Safety: Personal child identification, document records, and location details are encrypted and protected behind multi-factor administrative access.
+2. Account Data: Orientation-request and sponsor-access information is handled through controlled, server-enforced systems. Access is limited to authorised foundation personnel.
 
-3. Monitored Communications: All sponsor updates, letters, and progress milestones are facilitated through PWLIF foundation officers to ensure complete minor safety.`,
-  securityStandardsContent: `PWLIF Child Protection & Safeguarding Standards
+3. Private Communications: Partnership conversations are coordinated through appropriate PWLIF channels and are not an open public messaging service.`,
+  securityStandardsContent: `PWLIF Security & Safeguarding Standards
 
-1. Child Safety & Parental Consent Verification: Every youth profile is published only after formal, signed parental/guardian consent and identity verification by our foundation safety panel.
+1. Controlled Publication: Sponsor Talent records and team information use field-level publication controls, so information can be reviewed, published, edited, or withdrawn as appropriate.
 
-2. Transparent Financial Stewardship: 100% of direct grant contributions are tracked, audited annually, and published in open transparency reports.
+2. Sponsor Password Access: Sponsors receive a secure one-time email-link invitation only after an orientation call and manual approval. The invitation lets each sponsor create their own password; no passwords are generated, displayed, or stored by the portal.
 
-3. Immutable Compliance Logging: All administrative actions, sponsor approvals, password updates, and credential changes are recorded in immutable security audit logs.`,
+3. Administrative Accountability: Authorised administrative actions, including application reviews, invitations, and content updates, are recorded through protected server-side workflows.`,
   lastUpdated: "2026-08-01",
 };
 
-export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
-  {
-    id: "team-1",
-    name: "Rafiki Emmanuel",
-    role: "Founder & President",
-    bio: "Teacher, youth mentor, and community volunteer who met talented children whose gifts were limited only by poverty and circumstance — and built PWLIF to give every child a real pathway.",
-    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/rafiki-emmanuel",
-    twitterUrl: "https://twitter.com/rafiki_pwlif",
-    order: 1,
-  },
-  {
-    id: "team-2",
-    name: "Dr. Amara Kone",
-    role: "Lead Educator & Youth Mentor (Africa Region)",
-    bio: "Dedicated educational director overseeing STEM workshops, learning centers, and academic sponsorship programs in Ethiopia and East Africa.",
-    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/amara-kone",
-    order: 2,
-  },
-  {
-    id: "team-3",
-    name: "Sarah Jenkins",
-    role: "Director of Volunteer & Sponsor Relations",
-    bio: "Coordinates global volunteer mentors, family foundation partnerships, and child protection verification.",
-    photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/sarahjenkins-pwlif",
-    order: 3,
-  },
-  {
-    id: "team-4",
-    name: "Marcus Vance",
-    role: "Head of Child Safeguarding & Ethics",
-    bio: "10+ years in child advocacy and ethical compliance. Oversees PWLIF's parental consent protocols and safety standards.",
-    photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80",
-    linkedinUrl: "https://linkedin.com/in/marcus-vance",
-    order: 4,
-  },
-];
+export const INITIAL_TEAM_MEMBERS: TeamMember[] = [];
 
-import { useState, useEffect } from "react";
-import { db } from "./firebase";
-import {
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-} from "firebase/firestore";
-import { INITIAL_YOUTH_PROFILES, INITIAL_TRANSPARENCY_REPORTS, INITIAL_FOUNDATION_VIDEOS } from "./data";
+/**
+ * The original client-side Firestore helpers were deliberately removed. Public
+ * and administrator data must now come through server-enforced API routes.
+ * These narrow compatibility stubs prevent accidental reintroduction of a
+ * browser database write path while preserving imports in legacy components.
+ */
+export const DEFAULTS = { siteContent: INITIAL_BRANDING, faqs: INITIAL_FAQ_ITEMS, mission: INITIAL_MISSION_VISION, team: INITIAL_TEAM_MEMBERS, legal_security: INITIAL_LEGAL_SECURITY };
 
-export const DEFAULTS = {
-  siteContent: INITIAL_BRANDING,
-  profiles: INITIAL_YOUTH_PROFILES,
-  videos: INITIAL_FOUNDATION_VIDEOS,
-  faqs: INITIAL_FAQ_ITEMS,
-  mission: INITIAL_MISSION_VISION,
-  team: INITIAL_TEAM_MEMBERS,
-  transparency: INITIAL_TRANSPARENCY_REPORTS,
-  legal_security: INITIAL_LEGAL_SECURITY,
-};
-
-export function useFirestoreCollection<T>(name: string, defaults: T[]): T[] {
-  const [items, setItems] = useState<T[] | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const unsub = onSnapshot(collection(db, name), (snap) => {
-      if (snap.empty) {
-        // First load & empty collection: seed with defaults
-        const seed = async () => {
-          try {
-            const batch = defaults.map((item, i) =>
-              setDoc(
-                doc(db, name, (item as { id?: string }).id || `${name}-${i}`),
-                item as Record<string, unknown>
-              )
-            );
-            await Promise.all(batch);
-          } catch {}
-          setItems(defaults);
-        };
-        seed();
-      } else {
-        setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as unknown as T[]);
-      }
-    });
-    return () => unsub();
-  }, [name]);
-
-  return items ?? defaults;
-}
-
-export function useFirestoreDoc<T>(name: string, docId: string, defaultValue: T): T {
-  const [item, setItem] = useState<T>(defaultValue);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const unsub = onSnapshot(doc(db, name, docId), (snap) => {
-      if (!snap.exists()) {
-        setDoc(doc(db, name, docId), defaultValue as Record<string, unknown>).catch(() => {});
-        setItem(defaultValue);
-      } else {
-        setItem(snap.data() as T);
-      }
-    });
-    return () => unsub();
-  }, [name, docId]);
-
-  return item;
-}
-
-export async function addDocSafe(name: string, data: unknown) {
-  const ref = doc(collection(db, name));
-  const docData = { ...(data as Record<string, unknown>), id: ref.id, updatedAt: Date.now() };
-  try {
-    await setDoc(ref, docData);
-  } catch (err) {
-    console.error(`[Firestore] addDocSafe failed for collection "${name}":`, err);
-    throw err;
-  }
-  return ref.id;
-}
-
-export async function updateDocSafe(name: string, id: string, data: unknown) {
-  try {
-    await setDoc(doc(db, name, id), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
-  } catch (err) {
-    console.error(`[Firestore] updateDocSafe failed for "${name}/${id}":`, err);
-    throw err;
-  }
-}
-
-export async function deleteDocSafe(name: string, id: string) {
-  try {
-    await deleteDoc(doc(db, name, id));
-  } catch (err) {
-    console.error(`[Firestore] deleteDocSafe failed for "${name}/${id}":`, err);
-    throw err;
-  }
-}
-
-export async function setSingleDocSafe(name: string, docId: string, data: unknown) {
-  try {
-    await setDoc(doc(db, name, docId), { ...(data as Record<string, unknown>), updatedAt: Date.now() }, { merge: true });
-  } catch (err) {
-    console.error(`[Firestore] setSingleDocSafe failed for "${name}/${docId}":`, err);
-    throw err;
-  }
-}
-
-// Deprecated alias helper to maintain smooth fallback
-export function useCmsData<T>(key: string, defaultValue: T): T {
-  const docName = key.replace("wlp_", "");
-  return useFirestoreDoc<T>("cms_content", docName, defaultValue);
-}
-
-export function saveCmsData<T>(key: string, value: T) {
-  const docName = key.replace("wlp_", "");
-  setSingleDocSafe("cms_content", docName, value);
-}
+export function useFirestoreCollection<T>(_name: string, defaults: T[]): T[] { return defaults; }
+export function useFirestoreDoc<T>(_name: string, _docId: string, defaultValue: T): T { return defaultValue; }
+export async function addDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function updateDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function deleteDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export async function setSingleDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
+export function useCmsData<T>(_key: string, defaultValue: T): T { return defaultValue; }
+export function saveCmsData(): never { throw new Error("Client database writes are disabled."); }

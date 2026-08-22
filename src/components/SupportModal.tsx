@@ -10,6 +10,8 @@ interface SupportModalProps {
 
 export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,24 +21,39 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      onClose();
-      setFormData({ name: "", email: "", subject: "Child Sponsorship & Grants", message: "" });
-    }, 2500);
+    setSubmitError("");
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ...formData, source: "Support Concierge" }),
+      });
+      const payload = await response.json().catch(() => null) as { error?: string } | null;
+      if (!response.ok) throw new Error(payload?.error || "Your message could not be sent. Please try again.");
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        onClose();
+        setFormData({ name: "", email: "", subject: "Child Sponsorship & Grants", message: "" });
+      }, 2500);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Your message could not be sent. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#051836]/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#051836]/10 overflow-hidden font-inter">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B2E6B]/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#0B2E6B]/10 overflow-hidden font-inter">
         {/* Header */}
-        <div className="bg-[#051836] px-6 py-5 text-white flex items-center justify-between">
+        <div className="bg-[#0B2E6B] px-6 py-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-[#005C27]/20 border border-[#005C27]/30">
-              <Mail className="w-5 h-5 text-[#005C27]" />
+            <div className="p-2 rounded-lg bg-[#079432]/20 border border-[#079432]/30">
+              <Mail className="w-5 h-5 text-[#079432]" />
             </div>
             <div>
               <h3 className="font-montserrat text-lg font-bold text-white">Contact PWLIF Concierge</h3>
@@ -52,49 +69,49 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
         </div>
 
         {/* Content Body */}
-        <div className="p-6 text-xs text-[#051836]">
+        <div className="p-6 text-xs text-[#0B2E6B]">
           {submitted ? (
             <div className="py-8 text-center space-y-3">
-              <div className="inline-flex p-3 rounded-full bg-emerald-100 text-[#005C27] mb-2 border border-[#005C27]/20">
-                <CheckCircle2 className="w-8 h-8 text-[#005C27]" />
+              <div className="inline-flex p-3 rounded-full bg-emerald-100 text-[#079432] mb-2 border border-[#079432]/20">
+                <CheckCircle2 className="w-8 h-8 text-[#079432]" />
               </div>
-              <h4 className="font-montserrat font-bold text-xl text-[#051836]">Inquiry Received</h4>
-              <p className="text-xs text-[#051836]/70 max-w-xs mx-auto leading-relaxed">
-                Thank you for contacting our foundation desk. A representative will respond to your email within 24 hours.
+              <h4 className="font-montserrat font-bold text-xl text-[#0B2E6B]">Inquiry Received</h4>
+              <p className="text-xs text-[#0B2E6B]/70 max-w-xs mx-auto leading-relaxed">
+                Thank you for contacting our foundation desk. Your message has been saved to the Foundation inbox for review.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#051836]/80 mb-1">Your Full Name</label>
+                <label className="block text-xs font-bold text-[#0B2E6B]/80 mb-1">Your Full Name</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. John Mwangi"
-                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-lg text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#051836]/80 mb-1">Email Address</label>
+                <label className="block text-xs font-bold text-[#0B2E6B]/80 mb-1">Email Address</label>
                 <input
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="e.g. john@example.org"
-                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-lg text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#051836]/80 mb-1">Subject</label>
+                <label className="block text-xs font-bold text-[#0B2E6B]/80 mb-1">Subject</label>
                 <select
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition font-medium"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-lg text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition font-medium"
                 >
                   <option value="Child Sponsorship & Grants">Child Sponsorship &amp; Grants</option>
                   <option value="Parental Consent Verification">Parental Consent Verification</option>
@@ -104,29 +121,31 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#051836]/80 mb-1">How can we assist you?</label>
+                <label className="block text-xs font-bold text-[#0B2E6B]/80 mb-1">How can we assist you?</label>
                 <textarea
                   rows={4}
                   required
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Provide details regarding your inquiry..."
-                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#051836]/15 rounded-lg text-sm text-[#051836] focus:outline-none focus:border-[#005C27] focus:ring-1 focus:ring-[#005C27] transition"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-lg text-sm text-[#0B2E6B] focus:outline-none focus:border-[#079432] focus:ring-1 focus:ring-[#079432] transition"
                 />
               </div>
 
               <div className="pt-2 flex items-center justify-between">
-                <span className="text-[11px] text-[#051836]/50 flex items-center gap-1 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#005C27]" /> Protected by PWLIF Safety Protocol
+                <span className="text-[11px] text-[#0B2E6B]/50 flex items-center gap-1 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#079432]" /> Protected by PWLIF Safety Protocol
                 </span>
                 <button
                   type="submit"
-                  className="bg-[#005C27] hover:bg-[#327B2F] text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md cursor-pointer"
+                  disabled={isSubmitting}
+                  className="bg-[#079432] hover:bg-[#14B84A] text-white px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-md cursor-pointer"
                 >
-                  <span>Send Message</span>
+                  <span>{isSubmitting ? "Sending…" : "Send Message"}</span>
                   <Send className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>
+              {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{submitError}</p>}
             </form>
           )}
         </div>

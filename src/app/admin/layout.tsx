@@ -31,10 +31,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="h-screen bg-[#FDFCF9] flex items-center justify-center font-inter">
+      <div className="h-screen bg-[#FCFCFA] flex items-center justify-center font-inter">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-[#005C27] border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs text-[#051836]/60 font-medium">Verifying admin credentials...</span>
+          <div className="w-8 h-8 border-4 border-[#079432] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-[#0B2E6B]/60 font-medium">Verifying admin credentials...</span>
         </div>
       </div>
     );
@@ -42,23 +42,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!authorized) {
     return (
-      <div className="h-screen bg-[#FDFCF9] flex items-center justify-center p-4 font-inter">
-        <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-md border border-[#051836]/10 text-center">
+      <div className="h-screen bg-[#FCFCFA] flex items-center justify-center p-4 font-inter">
+        <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-md border border-[#0B2E6B]/10 text-center">
           <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-100">
             <Lock className="w-8 h-8" />
           </div>
-          <h2 className="font-montserrat font-bold text-xl text-[#051836] mb-2">
+          <h2 className="font-montserrat font-bold text-xl text-[#0B2E6B] mb-2">
             Access Denied
           </h2>
-          <p className="text-xs text-[#051836]/70 mb-6 leading-relaxed">
+          <p className="text-xs text-[#0B2E6B]/70 mb-6 leading-relaxed">
             You do not have administrator permissions to access the PWLIF Admin Portal.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link
               href="/admin/login"
-              className="bg-[#005C27] text-white px-5 py-2.5 rounded-lg text-xs font-medium hover:bg-[#327B2F] transition inline-flex items-center gap-2"
+              className="bg-[#079432] text-white px-5 py-2.5 rounded-lg text-xs font-medium hover:bg-[#14B84A] transition inline-flex items-center gap-2"
             >
-              <ShieldAlert className="w-4 h-4 text-[#F5AB00]" />
+              <ShieldAlert className="w-4 h-4 text-[#F7B500]" />
               <span>Admin Login Portal</span>
             </Link>
           </div>
@@ -67,5 +67,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  return <div className="min-h-screen bg-[#FDFCF9]">{children}</div>;
+  return <div className="min-h-screen bg-[#FCFCFA]">{children}</div>;
 }

@@ -1,964 +1,576 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { INITIAL_YOUTH_PROFILES, YouthProfile } from "@/lib/data";
-import { 
-  ShieldCheck, 
-  Clock, 
-  Send, 
-  Sparkles, 
-  CheckCircle2, 
-  ArrowRight, 
-  ExternalLink,
-  MessageSquare,
-  Building2,
-  Mail,
-  User,
+import { auth } from "@/lib/firebase";
+import { TalentPhoto } from "@/components/TalentPhoto";
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import {
+  ArrowRight,
   Bell,
-  Edit3,
-  Lock,
-  Filter,
-  Check,
-  Award,
-  Layers,
-  Phone,
-  Download,
-  AlertCircle,
-  FileCheck,
-  KeyRound,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  CircleUserRound,
+  Compass,
+  FileText,
+  LockKeyhole,
+  Mail,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
+type DashboardTab = "overview" | "talent" | "partnership" | "account" | "notifications";
+
+type SponsorProfile = {
+  name?: string;
+  organization?: string;
+  roleTitle?: string;
+  email?: string;
+  applicationRecorded: boolean;
+  passwordSetupComplete?: boolean;
+  orientationSubmission?: {
+    websiteOrLinkedIn?: string;
+    organizationDescription?: string;
+    supportIntent?: string;
+  } | null;
+};
+
+type SponsorTalent = {
+  id: string;
+  title: string;
+  summary: string;
+  supportArea?: string;
+  photoUrl?: string;
+  mediaUrls?: string[];
+  displayOrder: number;
+};
+
+type ConversationEntry = {
+  id: string;
+  sender?: "sponsor" | "foundation";
+  senderName?: string;
+  message?: string;
+  createdAt?: unknown;
+};
+
+type SponsorConversation = {
+  id: string;
+  subject: string;
+  talentId?: string;
+  status?: string;
+  message?: string;
+  thread?: ConversationEntry[];
+};
+
+type DashboardData = {
+  sponsor: SponsorProfile;
+  talent: SponsorTalent[];
+  conversations?: SponsorConversation[];
+};
+
+const tabs: Array<{ id: DashboardTab; label: string; icon: React.ElementType }> = [
+  { id: "overview", label: "Overview", icon: Compass },
+  { id: "talent", label: "Sponsor Talent", icon: Sparkles },
+  { id: "partnership", label: "Partnership Desk", icon: MessageCircle },
+  { id: "account", label: "Account", icon: CircleUserRound },
+  { id: "notifications", label: "Notifications", icon: Bell },
+];
+
+function profileLabel(profile: SponsorProfile) {
+  return profile.organization || profile.name || "Sponsor partner";
+}
+
+function DetailRow({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div className="border-b border-[#0B2E6B]/10 py-4 last:border-b-0">
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B2E6B]/50">{label}</p>
+      <p className="mt-1.5 text-sm font-semibold text-[#0B2E6B]">{value}</p>
+    </div>
+  );
+}
+
+function conversationTime(value: unknown) {
+  if (typeof value === "number") return new Date(value).toLocaleString();
+  if (value && typeof value === "object" && "toMillis" in value && typeof (value as { toMillis?: unknown }).toMillis === "function") {
+    return new Date((value as { toMillis: () => number }).toMillis()).toLocaleString();
+  }
+  return "Just now";
+}
+
 export default function SponsorDashboardPage() {
-  const { user, userStatus, pendingSponsors, inquiries, profiles, sendInquiry, updateSponsorProfile, completeFirstTimeProfile, updateSponsorPassword } = useAuth();
-  
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "exhibition" | "partnerships" | "security" | "certificates" | "alerts"
-  >("overview");
+  const { user, userStatus, loading: authLoading, logout, sendInquiry, replyToFoundationConversation } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [feedCategory, setFeedCategory] = useState("All");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [nextPassword, setNextPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageBody, setMessageBody] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [replyBodies, setReplyBodies] = useState<Record<string, string>>({});
+  const [replyStatus, setReplyStatus] = useState<Record<string, string>>({});
+  const [replyingConversation, setReplyingConversation] = useState<string | null>(null);
 
-  // Find active sponsor or fallback
-  const sponsorMatch = pendingSponsors.find(
-    (s) => s.email.toLowerCase() === (user?.email || "sponsor@wlp.org").toLowerCase()
-  ) || pendingSponsors[0];
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+    if (userStatus === "admin") {
+      router.replace("/admin");
+      return;
+    }
+    if (userStatus === "pending") router.replace("/pending");
+  }, [authLoading, router, user, userStatus]);
 
-  const sponsorInquiries = inquiries.filter(
-    (inq) => inq.sponsorEmail.toLowerCase() === (user?.email || sponsorMatch?.email || "").toLowerCase()
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPasswordMessage("");
+    if (!user?.email || !auth.currentUser) {
+      setPasswordMessage("Your active sponsor session could not be verified. Please sign in again.");
+      return;
+    }
+    if (nextPassword.length < 10) {
+      setPasswordMessage("Choose a new password with at least 10 characters.");
+      return;
+    }
+    if (nextPassword !== passwordConfirmation) {
+      setPasswordMessage("Your new password confirmation does not match.");
+      return;
+    }
+    setIsUpdatingPassword(true);
+    try {
+      await reauthenticateWithCredential(auth.currentUser, EmailAuthProvider.credential(user.email, currentPassword));
+      await updatePassword(auth.currentUser, nextPassword);
+      setCurrentPassword("");
+      setNextPassword("");
+      setPasswordConfirmation("");
+      setPasswordMessage("Your password has been updated.");
+    } catch (passwordError) {
+      setPasswordMessage(passwordError instanceof Error ? passwordError.message : "Your password could not be updated. Please try again.");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleFoundationMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setMessageStatus("");
+    if (!messageSubject.trim() || !messageBody.trim()) {
+      setMessageStatus("Please add both a subject and a message for the Foundation team.");
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      const created = await sendInquiry(messageSubject, messageBody) as { conversationId?: unknown } | null;
+      const createdId = typeof created?.conversationId === "string" ? created.conversationId : "";
+      if (createdId) {
+        const message = messageBody.trim();
+        const subject = messageSubject.trim();
+        setDashboard((current) => current ? {
+          ...current,
+          conversations: [{
+            id: createdId,
+            subject,
+            status: "new",
+            thread: [{ id: "sent", sender: "sponsor", senderName: current.sponsor.name || "Approved sponsor", message, createdAt: Date.now() }],
+          }, ...(current.conversations || [])],
+        } : current);
+      }
+      setMessageSubject("");
+      setMessageBody("");
+      setMessageStatus("Your message has been sent to the Foundation team. You can continue the conversation below when they reply.");
+    } catch (error) {
+      setMessageStatus(error instanceof Error ? error.message : "Your message could not be sent. Please try again.");
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
+  const handleConversationReply = async (event: React.FormEvent, conversationId: string) => {
+    event.preventDefault();
+    const message = (replyBodies[conversationId] || "").trim();
+    if (!message) {
+      setReplyStatus((current) => ({ ...current, [conversationId]: "Write a message before sending your reply." }));
+      return;
+    }
+    setReplyingConversation(conversationId);
+    setReplyStatus((current) => ({ ...current, [conversationId]: "" }));
+    try {
+      await replyToFoundationConversation(conversationId, message);
+      setDashboard((current) => current ? {
+        ...current,
+        conversations: (current.conversations || []).map((conversation) => conversation.id === conversationId ? {
+          ...conversation,
+          status: "new",
+          thread: [...(conversation.thread || []), { id: `reply-${Date.now()}`, sender: "sponsor", senderName: current.sponsor.name || "Approved sponsor", message, createdAt: Date.now() }],
+        } : conversation),
+      } : current);
+      setReplyBodies((current) => ({ ...current, [conversationId]: "" }));
+      setReplyStatus((current) => ({ ...current, [conversationId]: "Your reply has been sent to the Foundation team." }));
+    } catch (error) {
+      setReplyStatus((current) => ({ ...current, [conversationId]: error instanceof Error ? error.message : "Your reply could not be sent. Please try again." }));
+    } finally {
+      setReplyingConversation(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!user || userStatus !== "approved") return;
+    const authenticatedUser = user;
+    let cancelled = false;
+
+    async function loadDashboard() {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        const token = await authenticatedUser.getIdToken(true);
+        const response = await fetch("/api/sponsor", {
+          headers: { authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("Your sponsor information could not be loaded right now.");
+        const nextDashboard = await response.json() as DashboardData;
+        if (!cancelled) setDashboard(nextDashboard);
+      } catch (error) {
+        if (!cancelled) setLoadError(error instanceof Error ? error.message : "Your sponsor information could not be loaded right now.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    void loadDashboard();
+    return () => { cancelled = true; };
+  }, [user, userStatus]);
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set((dashboard?.talent || []).map((record) => record.supportArea).filter((value): value is string => Boolean(value))))],
+    [dashboard?.talent],
+  );
+  const filteredTalent = useMemo(
+    () => (dashboard?.talent || []).filter((record) => feedCategory === "All" || record.supportArea === feedCategory),
+    [dashboard?.talent, feedCategory],
   );
 
-  // First-Time Profile Modal Form State
-  const [modalCompany, setModalCompany] = useState(sponsorMatch?.company || "");
-  const [modalIndustry, setModalIndustry] = useState("Technology & VC");
-  const [modalContactName, setModalContactName] = useState(sponsorMatch?.name || "");
-  const [modalPhone, setModalPhone] = useState("+1 (555) 234-5678");
-  const [modalAgreed, setModalAgreed] = useState(false);
+  useEffect(() => {
+    if (!categories.includes(feedCategory)) setFeedCategory("All");
+  }, [categories, feedCategory]);
 
-  // Profile Edit State
-  const [editName, setEditName] = useState(sponsorMatch?.name || "WLP Partner");
-  const [editCompany, setEditCompany] = useState(sponsorMatch?.company || "WLP Impact Network");
-  const [editLinkedin, setEditLinkedin] = useState(sponsorMatch?.linkedin || "https://linkedin.com");
-  const [editInterests, setEditInterests] = useState<string[]>(sponsorMatch?.interests || ["Technology", "Robotics"]);
-  const [savedNotice, setSavedNotice] = useState(false);
+  const isResolvingAccess = authLoading || (Boolean(user) && userStatus === "logged_out");
+  if (isResolvingAccess) {
+    return <main className="min-h-screen bg-[#F5F6F0] px-5 py-10 text-sm text-[#0B2E6B]/65 sm:px-8 sm:py-14">Verifying your secure Sponsor access…</main>;
+  }
+  if (!user || userStatus === "pending" || userStatus === "admin") return null;
 
-  // Password & Security State
-  const [newPassword, setNewPassword] = useState("");
-  const [mfaEnabled, setMfaEnabled] = useState(true);
-  const [passwordNotice, setPasswordNotice] = useState(false);
-
-  // Alert Settings State
-  const [alertCategory, setAlertCategory] = useState("AI & Technology");
-  const [alertFrequency, setAlertFrequency] = useState("Weekly Digest");
-  const [alertNotice, setAlertNotice] = useState(false);
-
-  // Feed Filter
-  const [feedCategory, setFeedCategory] = useState<string>("All");
-
-  // Messaging Modal State
-  const [messagingTalent, setMessagingTalent] = useState<YouthProfile | null>(null);
-  const [messageText, setMessageText] = useState("");
-  const [messageSentNotice, setMessageSentNotice] = useState(false);
-
-  const availableCategories = ["All", "Technology", "Robotics", "Digital Art", "Music", "Sports", "Academics", "Leadership", "Entrepreneurship", "Biotech", "Creative Writing"];
-
-  const activeProfiles = profiles && profiles.length > 0 ? profiles : INITIAL_YOUTH_PROFILES;
-
-  const filteredFeed = activeProfiles.filter((p) => {
-    if (feedCategory === "All") return p.status === "active" || p.status === "sponsored";
-    return p.category === feedCategory;
-  });
-
-  const handleFirstTimeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!modalAgreed) return;
-    completeFirstTimeProfile(sponsorMatch.id, modalContactName, modalCompany, "https://linkedin.com", [modalIndustry]);
-  };
-
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateSponsorProfile(sponsorMatch.id, editName, editCompany, editLinkedin, editInterests);
-    setSavedNotice(true);
-    setTimeout(() => setSavedNotice(false), 3000);
-  };
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messagingTalent || !messageText) return;
-    sendInquiry(messagingTalent.id, messagingTalent.name, messageText);
-    setMessageSentNotice(true);
-    setTimeout(() => {
-      setMessageSentNotice(false);
-      setMessagingTalent(null);
-      setMessageText("");
-    }, 2000);
-  };
-
-  // Mandatory First-Time Profile Completion Modal check
-  const showFirstTimeModal = userStatus === "approved" && sponsorMatch && !sponsorMatch.isProfileComplete;
+  const profile = dashboard?.sponsor;
+  const displayName = profileLabel(profile || { applicationRecorded: false });
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] pb-16 bg-foundation-pattern relative">
-      {/* 1. MANDATORY FIRST-TIME LOGIN PROFILE SETUP MODAL */}
-      {showFirstTimeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#051836]/80 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-8 border border-[#005C27]/30 shadow-2xl space-y-6 text-[#051836]">
-            <div className="text-center space-y-2 border-b border-[#051836]/10 pb-4">
-              <div className="inline-flex p-3 rounded-2xl bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/30 mb-1">
-                <Building2 className="w-8 h-8" />
+    <div className="min-h-screen bg-[#F5F6F0] pb-20 text-[#0B2E6B]">
+      <header className="relative z-20 border-b border-white/10 bg-[#0B2E6B] text-white">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8">
+          <Link href="/" aria-label="Potential Without Limits International Foundation" className="flex items-center gap-3">
+            <img src="/pwlif-logo.png" alt="Potential Without Limits International Foundation" className="h-12 w-auto rounded-full bg-white object-contain p-1" />
+            <span className="hidden border-l border-white/15 pl-3 text-xs font-bold uppercase tracking-[0.15em] text-white/75 sm:inline">Sponsor Portal</span>
+          </Link>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="hidden rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/70 md:inline-flex">Approved partner</span>
+            <Link href="/" className="hidden text-xs font-bold text-white/75 transition hover:text-[#F7B500] sm:inline-flex">Foundation home</Link>
+            <button type="button" onClick={() => logout()} className="rounded-xl border border-white/20 px-3 py-2 text-xs font-bold text-white transition hover:border-[#F7B500] hover:text-[#F7B500] sm:px-4">Sign out</button>
+          </div>
+        </div>
+      </header>
+      <section className="relative overflow-hidden bg-[#0B2E6B] text-white">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 84% 18%, #F7B500 0, transparent 21%), radial-gradient(circle at 7% 88%, #14B84A 0, transparent 28%)" }} />
+        <div className="absolute -right-24 top-[-110px] h-80 w-80 rounded-full border border-white/15" />
+        <div className="absolute -right-8 top-[-42px] h-56 w-56 rounded-full border border-white/10" />
+        <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+            <div className="max-w-2xl">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#F7B500]" />
+                Private partnership portal
               </div>
-              <h2 className="font-montserrat text-2xl font-black text-[#051836]">
-                Complete Sponsor Profile
-              </h2>
-              <p className="text-xs text-[#051836]/70">
-                Welcome to PWLIF! Before accessing child dream profiles and tracking sponsorship impact, please verify your sponsor credentials.
+              <h1 className="font-montserrat text-3xl font-black tracking-[-0.04em] sm:text-5xl">Partnership, with purpose.</h1>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-white/75 sm:text-base">
+                A focused space for approved partners to review the foundation’s private Sponsor Talent pipeline and coordinate appropriate next steps.
               </p>
             </div>
-
-            <form onSubmit={handleFirstTimeSubmit} className="space-y-4 text-xs font-inter">
-              <div>
-                <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                  Organization / Sponsor Entity Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={modalCompany}
-                  onChange={(e) => setModalCompany(e.target.value)}
-                  placeholder="e.g. NextGen Philanthropic Foundation"
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                    Sponsorship Sector *
-                  </label>
-                  <select
-                    value={modalIndustry}
-                    onChange={(e) => setModalIndustry(e.target.value)}
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  >
-                    <option value="Technology & VC">Technology &amp; Education</option>
-                    <option value="Arts & Media Production">Arts &amp; Media</option>
-                    <option value="Robotics & Hardware Engineering">STEM &amp; Robotics</option>
-                    <option value="Biotech & Life Sciences">Biotech &amp; Life Sciences</option>
-                    <option value="Corporate Foundation / CSR">Corporate Foundation / CSR</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                    Direct Phone Number *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={modalPhone}
-                    onChange={(e) => setModalPhone(e.target.value)}
-                    placeholder="+1 (555) 000-0000"
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#051836]/10 text-[11px] text-[#051836]/80 space-y-2">
-                <label className="flex items-start gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    required
-                    checked={modalAgreed}
-                    onChange={(e) => setModalAgreed(e.target.checked)}
-                    className="mt-0.5 rounded text-[#005C27] focus:ring-[#005C27]"
-                  />
-                  <span>
-                    I confirm that I am an authorized representative and agree to uphold PWLIF Child Protection &amp; Parental Consent standards.
-                  </span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={!modalAgreed}
-                className="w-full bg-[#005C27] hover:bg-[#327B2F] disabled:opacity-50 text-white font-montserrat font-bold py-3.5 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
-              >
-                <span>Activate My Sponsorship Hub</span>
-                <ArrowRight className="w-4 h-4 text-white" />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Top Banner Header */}
-      <div className="bg-white text-[#051836] py-8 px-4 sm:px-6 lg:px-8 border-b border-[#051836]/10 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <Link href="/">
-                <img
-                  src="/pwlif-logo.png"
-                  alt="PWLIF"
-                  className="h-10 w-auto object-contain"
-                />
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#F7B500]"><CheckCircle2 className="h-4 w-4" /> Sponsor access active</div>
+              <p className="mt-3 text-sm font-semibold text-white">{isLoading ? "Loading your profile…" : displayName}</p>
+              {profile?.email && <p className="mt-1 truncate text-xs text-white/65">{profile.email}</p>}
+              <Link href="/" className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-white transition hover:text-[#F7B500]">
+                Foundation homepage <ArrowRight className="h-3.5 w-3.5" />
               </Link>
-              <div className="h-5 w-px bg-[#051836]/20" />
-              <h1 className="font-montserrat font-black text-2xl sm:text-3xl text-[#051836]">
-                My Sponsorship Hub
-              </h1>
             </div>
-
-            <div className="flex items-center gap-3 pt-1">
-              <span className="bg-[#F5AB00] text-[#051836] text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                Tier: {sponsorMatch?.membershipTier || "Gold"}
-              </span>
-              <span className="bg-[#005C27] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                Category: {sponsorMatch?.sponsorCategory || "Child Sponsor"}
-              </span>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#051836]/80">
-              Welcome back, <strong>{sponsorMatch?.name || "Verified Sponsor"}</strong> ({sponsorMatch?.company || "PWLIF Impact Partner"}). Child dream tracking &amp; financial audit downloads active.
-            </p>
           </div>
-
-          <Link
-            href="/"
-            className="self-start md:self-auto bg-[#005C27] text-white font-extrabold px-5 py-2.5 rounded-xl text-xs hover:bg-[#327B2F] transition shadow-md inline-flex items-center gap-2 cursor-pointer"
-          >
-            <span>Foundation Homepage</span>
-            <ArrowRight className="w-4 h-4 text-white" />
-          </Link>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
-        {/* 7 Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#051836]/10 overflow-x-auto pb-1 scrollbar-none">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "overview"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Overview</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("exhibition")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "exhibition"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Dream Tracking</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("partnerships")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "partnerships"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Building2 className="w-4 h-4" />
-            <span>My Sponsored Dreams</span>
-          </button>
-
-
-
-          <button
-            onClick={() => setActiveTab("security")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "security"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Lock className="w-4 h-4" />
-            <span>Security &amp; Password</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("certificates")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "certificates"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Award className="w-4 h-4" />
-            <span>Impact Reports</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("alerts")}
-            className={`pb-3 px-4 text-xs font-bold uppercase tracking-wider transition cursor-pointer shrink-0 border-b-2 flex items-center gap-2 ${
-              activeTab === "alerts"
-                ? "border-[#005C27] text-[#005C27]"
-                : "border-transparent text-[#051836]/60 hover:text-[#051836]"
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            <span>Child Alerts</span>
-          </button>
-        </div>
-
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-[#051836]">
-            {/* Account Info Box */}
-            <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl space-y-6">
-              <div className="flex items-center justify-between border-b border-[#051836]/10 pb-4">
-                <h2 className="font-montserrat font-bold text-lg text-[#051836] flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-[#005C27]" />
-                  <span>Verified Organization</span>
-                </h2>
+      <main className="mx-auto max-w-6xl px-5 pt-7 sm:px-8 sm:pt-8">
+        <div className="rounded-2xl border border-[#0B2E6B]/10 bg-white p-2 shadow-[0_18px_45px_rgba(5,24,54,0.12)]">
+          <nav aria-label="Sponsor portal sections" className="flex gap-1 overflow-x-auto scrollbar-none">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
                 <button
-                  onClick={() => setActiveTab("security")}
-                  className="text-xs font-semibold text-[#005C27] hover:underline flex items-center gap-1"
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex min-w-max items-center gap-2 rounded-xl px-3 py-3 text-xs font-bold transition sm:px-4 ${active ? "bg-[#079432] text-white shadow-sm" : "text-[#0B2E6B]/65 hover:bg-[#F5F6F0] hover:text-[#0B2E6B]"}`}
                 >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
                 </button>
-              </div>
+              );
+            })}
+          </nav>
+        </div>
 
-              <div className="space-y-4 text-xs">
-                <div>
-                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
-                    Organization Name
-                  </span>
-                  <p className="font-bold text-[#051836] text-sm flex items-center gap-1.5">
-                    <Building2 className="w-4 h-4 text-[#051836]/40" />
-                    {sponsorMatch?.company || "NextGen Ventures"}
-                  </p>
-                </div>
-
-                <div>
-                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
-                    Sponsor Representative
-                  </span>
-                  <p className="font-bold text-[#051836] text-sm flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-[#051836]/40" />
-                    {sponsorMatch?.name || "Sophia Martinez"}
-                  </p>
-                </div>
-
-                <div>
-                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
-                    Sponsorship Category &amp; Tier
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-[#005C27]/10 text-[#005C27] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#005C27]/20">
-                      {sponsorMatch?.sponsorCategory || "Child Sponsor"}
-                    </span>
-                    <span className="bg-[#F5AB00]/15 text-[#051836] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#051836]/20">
-                      {sponsorMatch?.membershipTier || "Gold Tier"}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
-                    Verified Email Address
-                  </span>
-                  <p className="font-bold text-[#051836] text-sm flex items-center gap-1.5">
-                    <Mail className="w-4 h-4 text-[#051836]/40" />
-                    {sponsorMatch?.email || "sponsor@wlp.org"}
-                  </p>
-                </div>
-
-                <div>
-                  <span className="text-[#051836]/50 font-semibold uppercase tracking-wider block mb-1">
-                    Focus Track Interests
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {(sponsorMatch?.interests || ["Technology", "Robotics"]).map((int: string) => (
-                      <span
-                        key={int}
-                        className="bg-[#F8FAFC] text-[#051836] font-semibold px-2.5 py-1 rounded-md border border-[#051836]/10 text-[11px]"
-                      >
-                        {int}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Impact Metrics */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl">
-                <h2 className="font-montserrat font-bold text-lg text-[#051836] flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-[#005C27]" />
-                  <span>Sponsorship Impact Overview</span>
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10">
-                    <span className="text-3xl font-black text-[#005C27] font-montserrat">
-                      $15,000
-                    </span>
-                    <p className="text-xs text-[#051836]/60 font-semibold mt-1">
-                      Direct Capital Grants Deployed
-                    </p>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10">
-                    <span className="text-3xl font-black text-[#005C27] font-montserrat">
-                      2 Children
-                    </span>
-                    <p className="text-xs text-[#051836]/60 font-semibold mt-1">
-                      Actively Sponsored
-                    </p>
-                  </div>
-                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10">
-                    <span className="text-3xl font-black text-[#F5AB00] font-montserrat">
-                      100%
-                    </span>
-                    <p className="text-xs text-[#051836]/60 font-semibold mt-1">
-                      Parent Consent Verified
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => setActiveTab("exhibition")}
-                    className="bg-[#005C27] hover:bg-[#327B2F] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer"
-                  >
-                    <span>View Child Dream Progress</span>
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("certificates")}
-                    className="bg-[#F8FAFC] text-[#051836] border border-[#051836]/15 px-5 py-2.5 rounded-xl font-bold text-xs hover:border-[#005C27] hover:text-[#005C27] transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Download className="w-4 h-4 text-[#005C27]" />
-                    <span>Download Impact Reports</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Security & Governance Status Box */}
-              <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl space-y-3">
-                <h3 className="font-montserrat font-bold text-sm text-[#051836] flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#005C27]" />
-                  <span>Child Protection &amp; Governance Clearance</span>
-                </h3>
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-[#005C27]/20 text-xs text-[#051836] space-y-1">
-                  <p className="font-bold flex items-center gap-1.5 text-[#005C27]">
-                    <CheckCircle2 className="w-4 h-4 text-[#005C27]" /> Sponsor Credentials Active &amp; Verified
-                  </p>
-                  <p className="text-[#051836]/70 leading-relaxed">
-                    Your sponsor account has passed PWLIF admissions clearance. All interactions adhere to 100% verified parental consent records.
-                  </p>
-                </div>
-              </div>
-            </div>
+        {isLoading && (
+          <div className="mt-10 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="h-80 animate-pulse rounded-3xl bg-white" />
+            <div className="h-80 animate-pulse rounded-3xl bg-white" />
           </div>
         )}
 
-        {/* TAB 2: DREAM TRACKING (PROGRESS UPDATES) */}
-        {activeTab === "exhibition" && (
-          <div className="space-y-6 text-[#051836]">
-            <div className="bg-white p-6 rounded-3xl border border-[#051836]/10 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#005C27]" />
-                  <span>Dream Tracking &amp; Child Milestone Progress</span>
-                </h2>
-                <p className="text-xs text-[#051836]/70 mt-0.5">
-                  Follow live progress updates and grant distribution for sponsored children.
-                </p>
-              </div>
+        {!isLoading && loadError && (
+          <section className="mt-10 rounded-3xl border border-amber-400/40 bg-amber-50 p-7 shadow-sm">
+            <p className="font-montserrat text-lg font-bold text-[#0B2E6B]">Your portal information is temporarily unavailable</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#0B2E6B]/70">{loadError} You can use the Partnership Desk to coordinate with the foundation.</p>
+            <button type="button" onClick={() => setActiveTab("partnership")} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#0B2E6B] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#082657]">
+              Open Partnership Desk <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </section>
+        )}
 
-              <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
-                <Filter className="w-4 h-4 text-[#051836]/40 shrink-0" />
-                {availableCategories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setFeedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition shrink-0 cursor-pointer ${
-                      feedCategory === cat
-                        ? "bg-[#005C27] text-white font-bold"
-                        : "bg-[#F8FAFC] text-[#051836]/70 border border-[#051836]/10 hover:border-[#005C27]"
-                    }`}
-                  >
-                    {cat}
+        {!isLoading && !loadError && activeTab === "overview" && (
+          <section className="mt-10 space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+              <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Your partnership profile</p>
+                    <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.03em]">{displayName}</h2>
+                  </div>
+                  <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#079432]/10 text-[#079432]"><Building2 className="h-5 w-5" /></div>
+                </div>
+                <div className="mt-6">
+                  <DetailRow label="Representative" value={profile?.name} />
+                  <DetailRow label="Organization" value={profile?.organization} />
+                  <DetailRow label="Role" value={profile?.roleTitle} />
+                  <DetailRow label="Verified email" value={profile?.email} />
+                </div>
+                {!profile?.applicationRecorded && <p className="mt-5 rounded-xl bg-[#F5F6F0] p-3 text-xs leading-5 text-[#0B2E6B]/70">Your access is active. The foundation can confirm any remaining profile details through the Partnership Desk.</p>}
+              </article>
+
+              <article className="relative overflow-hidden rounded-3xl bg-[#079432] p-7 text-white shadow-[0_18px_40px_rgba(0,92,39,0.22)] sm:p-8">
+                <div className="absolute -right-14 -top-14 h-52 w-52 rounded-full border border-white/15" />
+                <div className="relative flex h-full flex-col justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80"><Sparkles className="h-3.5 w-3.5 text-[#F7B500]" /> Approved sponsor access</div>
+                    <h2 className="mt-5 max-w-md font-montserrat text-3xl font-black leading-tight tracking-[-0.04em]">Review the full Sponsor Talent pipeline.</h2>
+                    <p className="mt-4 max-w-md text-sm leading-6 text-white/75">Your approved account provides private access to the complete Sponsor Talent records maintained by the foundation. Public-page visibility is managed separately.</p>
+                  </div>
+                  <button type="button" onClick={() => setActiveTab("talent")} className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-bold text-[#079432] transition hover:bg-[#F7B500] hover:text-[#0B2E6B]">
+                    Browse Sponsor Talent <ArrowRight className="h-4 w-4" />
                   </button>
+                </div>
+              </article>
+            </div>
+
+            {profile?.applicationRecorded && (
+              <article className="rounded-3xl border border-[#0B2E6B]/10 bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
+                <div className="flex items-start justify-between gap-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Your orientation submission</p>
+                    <h2 className="mt-2 font-montserrat text-xl font-black tracking-[-0.03em]">The details you shared with PWLIF</h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[#0B2E6B]/65">This private overview is visible only to your approved sponsor account and mirrors the information submitted before your orientation call.</p>
+                  </div>
+                  <FileText className="h-6 w-6 shrink-0 text-[#079432]" />
+                </div>
+                <div className="mt-5 grid gap-x-8 md:grid-cols-2">
+                  <DetailRow label="Website or LinkedIn" value={profile.orientationSubmission?.websiteOrLinkedIn} />
+                  <DetailRow label="About your organization" value={profile.orientationSubmission?.organizationDescription} />
+                  <DetailRow label="How you hope to support" value={profile.orientationSubmission?.supportIntent} />
+                </div>
+              </article>
+            )}
+
+            <article className="rounded-3xl border border-[#0B2E6B]/10 bg-white p-6 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-7">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">A considered process</p>
+                  <h2 className="mt-2 font-montserrat text-xl font-black tracking-[-0.03em]">Designed for private, responsible coordination.</h2>
+                </div>
+                <button type="button" onClick={() => setActiveTab("partnership")} className="inline-flex items-center gap-2 text-xs font-bold text-[#079432] hover:text-[#14B84A]">Open Partnership Desk <ChevronRight className="h-4 w-4" /></button>
+              </div>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {[
+                  ["01", "Verified access", "Sponsor accounts are reviewed and approved before portal access is issued."],
+                  ["02", "Private Talent directory", "Approved sponsors can review the complete Sponsor Talent pipeline; public pages have separate visibility controls."],
+                  ["03", "Guided next steps", "The partnership team coordinates follow-up through appropriate private channels."],
+                ].map(([number, title, description]) => (
+                  <div key={number} className="rounded-2xl bg-[#F5F6F0] p-5">
+                    <span className="font-montserrat text-xs font-black text-[#F7B500]">{number}</span>
+                    <h3 className="mt-3 font-montserrat text-sm font-black">{title}</h3>
+                    <p className="mt-2 text-xs leading-5 text-[#0B2E6B]/65">{description}</p>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredFeed.map((profile) => (
-                <div
-                  key={profile.id}
-                  className="bg-white rounded-3xl overflow-hidden border border-[#051836]/10 shadow-lg hover:border-[#005C27]/40 transition-all p-5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-4 bg-[#051836] border border-[#051836]/10">
-                      <Image
-                        src={profile.coverPhoto}
-                        alt={profile.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                      <span className="absolute top-2 left-2 bg-[#005C27] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
-                        {profile.category}
-                      </span>
-                      <span className="absolute bottom-2 right-2 bg-emerald-950/80 backdrop-blur-md text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-emerald-400" /> Parent Consent Verified
-                      </span>
-                    </div>
-
-                    <div className="flex items-baseline justify-between mb-1">
-                      <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                        {profile.name}, {profile.age}
-                      </h3>
-                      <span className="text-xs font-semibold text-[#051836]/50">
-                        {profile.country_community || profile.location}
-                      </span>
-                    </div>
-
-                    {/* Child's Dream */}
-                    <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#051836]/10 text-xs mb-3 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#005C27]">
-                        🌟 Dream: &quot;{profile.dream}&quot;
-                      </span>
-                      <p className="text-[11px] text-[#051836]/80 pt-1">
-                        <strong>Current Progress:</strong> {profile.progress}
-                      </p>
-                    </div>
-
-                    <p className="text-xs text-[#051836]/70 line-clamp-2 mb-4 leading-relaxed">
-                      {profile.bio}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-[#051836]/10">
-                    <Link
-                      href={`/portfolio/${profile.id}`}
-                      className="w-full bg-[#F8FAFC] hover:bg-[#005C27] hover:text-white text-[#051836] font-bold py-2.5 px-3 rounded-xl text-xs transition text-center block border border-[#051836]/15"
-                    >
-                      View Child Portfolio &amp; Details
-                    </Link>
-                    <button
-                      onClick={() => setMessagingTalent(profile)}
-                      className="w-full bg-[#005C27]/10 hover:bg-[#005C27] hover:text-white text-[#005C27] font-extrabold py-2.5 px-3 rounded-xl text-xs transition text-center flex items-center justify-center gap-1.5 cursor-pointer border border-[#005C27]/30"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Sponsor This Dream</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+            </article>
+          </section>
         )}
 
-        {/* TAB 3: MY SPONSORED DREAMS */}
-        {activeTab === "partnerships" && (
-          <div className="bg-white rounded-3xl border border-[#051836]/10 shadow-xl overflow-hidden p-6 sm:p-8 space-y-6 text-[#051836]">
-            <div>
-              <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#005C27]" />
-                <span>My Sponsored Children &amp; Dreams</span>
-              </h2>
-              <p className="text-xs text-[#051836]/70 mt-1">
-                Active child dream profiles supported by your organization.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-inter">
-              {activeProfiles.slice(0, 2).map((p) => (
-                <div key={p.id} className="bg-[#F8FAFC] p-6 rounded-2xl border border-[#051836]/10 flex flex-col justify-between space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden relative shrink-0 border-2 border-[#005C27]">
-                      <Image src={p.coverPhoto} alt={p.name} fill className="object-cover" />
-                    </div>
-                    <div>
-                      <h4 className="font-montserrat font-bold text-base text-[#051836]">{p.name}</h4>
-                      <p className="text-xs text-[#005C27] font-semibold">{p.category} • {p.country_community || p.location}</p>
-                      <span className="inline-block mt-1 bg-emerald-100 text-[#005C27] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#005C27]/20">
-                        Grant Active ($7,500)
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-white border border-[#051836]/10 text-xs">
-                    <strong className="text-[#005C27]">Dream:</strong> &quot;{p.dream}&quot;
-                  </div>
-
-                  <div className="pt-2 border-t border-[#051836]/10 flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => setMessagingTalent(p)}
-                      className="text-[#005C27] font-bold hover:underline flex items-center gap-1"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> Message Foundation Desk
-                    </button>
-                    <Link href={`/portfolio/${p.id}`} className="text-[#051836]/60 hover:text-[#005C27] flex items-center gap-1 font-semibold">
-                      View Progress <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </div>
+        {!isLoading && !loadError && activeTab === "talent" && (
+          <section className="mt-10">
+            <div className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Approved sponsor access</p>
+                  <h2 className="mt-2 font-montserrat text-3xl font-black tracking-[-0.04em]">Private Sponsor Talent directory</h2>
+                  <p className="mt-3 text-sm leading-6 text-[#0B2E6B]/65">Your approved sponsor account provides access to every safe Sponsor Talent record in the foundation’s private pipeline. Anonymous public pages receive a separate, field-limited view.</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: SECURITY & SETTINGS */}
-        {activeTab === "security" && (
-          <div className="bg-white rounded-3xl border border-[#051836]/10 shadow-xl p-6 sm:p-8 space-y-8 max-w-3xl mx-auto text-[#051836]">
-            <div className="border-b border-[#051836]/10 pb-4">
-              <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                <Lock className="w-5 h-5 text-[#005C27]" />
-                <span>Security &amp; Password Settings</span>
-              </h2>
-              <p className="text-xs text-[#051836]/70 mt-1">
-                Manage your credentials, Multi-Factor Authentication (MFA), and sponsor profile.
-              </p>
-            </div>
-
-            {/* Profile Update Form */}
-            <form onSubmit={handleSaveProfile} className="space-y-4 text-xs font-inter">
-              <h3 className="font-montserrat font-bold text-sm text-[#051836]">Update Representative Details</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                    Representative Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                    Organization Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editCompany}
-                    onChange={(e) => setEditCompany(e.target.value)}
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  />
-                </div>
+                {categories.length > 1 && (
+                  <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
+                    {categories.map((category) => (
+                      <button key={category} type="button" onClick={() => setFeedCategory(category)} className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold transition ${feedCategory === category ? "bg-[#0B2E6B] text-white" : "border border-[#0B2E6B]/10 bg-[#F5F6F0] text-[#0B2E6B]/70 hover:border-[#079432]/50"}`}>
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                  Website / LinkedIn URL
-                </label>
-                <input
-                  type="url"
-                  required
-                  value={editLinkedin}
-                  onChange={(e) => setEditLinkedin(e.target.value)}
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                />
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="bg-[#005C27] text-white font-bold py-2.5 px-5 rounded-xl transition text-xs hover:bg-[#327B2F]"
-                >
-                  Save Profile Details
-                </button>
-                {savedNotice && <span className="ml-3 text-xs text-emerald-600 font-semibold">Saved!</span>}
-              </div>
-            </form>
-
-            {/* Change Password Form */}
-            <div className="pt-6 border-t border-[#051836]/10 space-y-4">
-              <h3 className="font-montserrat font-bold text-sm text-[#051836] flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-[#005C27]" /> Change Sponsor Password
-              </h3>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!newPassword.trim()) return;
-                  if (sponsorMatch?.email || user?.email) {
-                    updateSponsorPassword(sponsorMatch?.email || user?.email || "", newPassword);
-                  }
-                  setPasswordNotice(true);
-                  setNewPassword("");
-                  setTimeout(() => setPasswordNotice(false), 4000);
-                }}
-                className="flex flex-col sm:flex-row items-end gap-4 text-xs font-inter"
-              >
-                <div className="flex-1 w-full">
-                  <label className="block font-bold text-[#051836]/80 mb-1">New Sponsor Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter strong new password..."
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  />
+              {filteredTalent.length === 0 ? (
+                <div className="mt-8 grid min-h-72 place-items-center rounded-2xl border border-dashed border-[#0B2E6B]/20 bg-[#F5F6F0] p-8 text-center">
+                  <div className="max-w-md">
+                    <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#079432] shadow-sm"><Sparkles className="h-5 w-5" /></div>
+                    <h3 className="mt-5 font-montserrat text-xl font-black">No Sponsor Talent records are available yet.</h3>
+                    <p className="mt-3 text-sm leading-6 text-[#0B2E6B]/65">No Sponsor Talent records are currently available in the private pipeline. You can use the Partnership Desk for a conversation with the foundation.</p>
+                    <button type="button" onClick={() => setActiveTab("partnership")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#079432] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A]">Open Partnership Desk <ArrowRight className="h-4 w-4" /></button>
+                  </div>
                 </div>
-
-                <button
-                  type="submit"
-                  className="bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3 px-6 rounded-xl transition text-xs flex items-center gap-2 cursor-pointer shadow-md shrink-0"
-                >
-                  <Lock className="w-4 h-4" />
-                  <span>Update Password</span>
-                </button>
-              </form>
-
-              {passwordNotice && (
-                <p className="text-xs text-[#005C27] font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4 text-[#005C27]" /> New password saved. Temporary password has been invalidated immediately.
-                </p>
+              ) : (
+                <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredTalent.map((record) => (
+                    <article key={record.id} className="group overflow-hidden rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] shadow-[0_10px_25px_rgba(5,24,54,0.07)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(5,24,54,0.13)]">
+                      {record.photoUrl ? (
+                        <TalentPhoto src={record.photoUrl} alt="" className="h-44 w-full object-cover" />
+                      ) : (
+                        <div className="relative flex h-44 items-end overflow-hidden bg-[#0B2E6B] p-5">
+                          <div className="absolute right-[-20px] top-[-45px] h-40 w-40 rounded-full border border-white/10" />
+                          <span className="relative rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white/80">Sponsor Talent</span>
+                        </div>
+                      )}
+                      <div className="p-6">
+                        {record.supportArea && <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#079432]">{record.supportArea}</p>}
+                        <h3 className="mt-2 font-montserrat text-lg font-black leading-snug">{record.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-[#0B2E6B]/65">{record.summary}</p>
+                        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#0B2E6B]/10 pt-4">
+                          {record.mediaUrls?.length ? (
+                            <div className="flex flex-wrap gap-2">
+                              {record.mediaUrls.map((mediaUrl, index) => (
+                                <a key={mediaUrl} href={mediaUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#F5F6F0] px-2.5 py-2 text-[11px] font-bold text-[#079432] transition hover:bg-[#079432] hover:text-white"><FileText className="h-3.5 w-3.5" /> Media {index + 1}</a>
+                              ))}
+                            </div>
+                          ) : <span className="text-[11px] font-semibold text-[#0B2E6B]/45">No shared media</span>}
+                          <Link href={`/sponsor/talent/${record.id}`} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#079432] hover:text-[#14B84A]">View full record <ArrowRight className="h-3.5 w-3.5" /></Link>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               )}
             </div>
-
-            {/* MFA Security Toggle */}
-            <div className="pt-6 border-t border-[#051836]/10 flex items-center justify-between">
-              <div>
-                <h4 className="font-montserrat font-bold text-sm text-[#051836]">Multi-Factor Authentication (MFA)</h4>
-                <p className="text-xs text-[#051836]/60">Enforce OTP verification upon login.</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setMfaEnabled(!mfaEnabled)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                  mfaEnabled ? "bg-emerald-100 text-[#005C27] border border-[#005C27]/30" : "bg-gray-100 text-[#051836]/60"
-                }`}
-              >
-                {mfaEnabled ? "MFA Active ✓" : "Enable MFA"}
-              </button>
-            </div>
-          </div>
+          </section>
         )}
 
-        {/* TAB 6: IMPACT REPORTS */}
-        {activeTab === "certificates" && (
-          <div className="bg-white rounded-3xl border border-[#051836]/10 shadow-xl p-6 sm:p-8 space-y-6 text-[#051836]">
-            <div>
-              <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#005C27]" />
-                <span>Foundation Impact &amp; Financial Stewardship Reports</span>
-              </h2>
-              <p className="text-xs text-[#051836]/70 mt-1">
-                Official verified reports for grant allocations, child progress milestones, and tax receipts.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-inter text-xs">
-              <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-[#051836]/10 space-y-4">
-                <div className="flex items-center justify-between border-b border-[#051836]/10 pb-3">
-                  <span className="text-xs font-mono text-[#005C27] font-bold">REPORT-2026-PWLIF-091</span>
-                  <span className="bg-emerald-100 text-[#005C27] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#005C27]/20">Verified</span>
-                </div>
-                <div>
-                  <h4 className="font-montserrat font-bold text-base text-[#051836]">Direct Grant: Laptop &amp; Learning Tools</h4>
-                  <p className="text-xs text-[#051836]/60 mt-1">Sponsor: {sponsorMatch?.company} • Amount: $7,500</p>
-                </div>
-                <button className="w-full bg-[#005C27]/10 hover:bg-[#005C27] hover:text-white text-[#005C27] font-bold py-2.5 px-4 rounded-xl text-xs border border-[#005C27]/30 transition flex items-center justify-center gap-2 cursor-pointer">
-                  <Download className="w-4 h-4" /> Download Impact PDF Report
-                </button>
-              </div>
-
-              <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-[#051836]/10 space-y-4">
-                <div className="flex items-center justify-between border-b border-[#051836]/10 pb-3">
-                  <span className="text-xs font-mono text-[#005C27] font-bold">REPORT-2026-PWLIF-042</span>
-                  <span className="bg-emerald-100 text-[#005C27] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#005C27]/20">Verified</span>
-                </div>
-                <div>
-                  <h4 className="font-montserrat font-bold text-base text-[#051836]">Community Center STEM Lab Stipend</h4>
-                  <p className="text-xs text-[#051836]/60 mt-1">Sponsor: {sponsorMatch?.company} • Amount: $7,500</p>
-                </div>
-                <button className="w-full bg-[#005C27]/10 hover:bg-[#005C27] hover:text-white text-[#005C27] font-bold py-2.5 px-4 rounded-xl text-xs border border-[#005C27]/30 transition flex items-center justify-center gap-2 cursor-pointer">
-                  <Download className="w-4 h-4" /> Download Impact PDF Report
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 7: CHILD ALERTS */}
-        {activeTab === "alerts" && (
-          <div className="bg-white rounded-3xl border border-[#051836]/10 shadow-xl p-6 sm:p-8 space-y-6 max-w-3xl mx-auto text-[#051836]">
-            <div>
-              <h2 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#005C27]" />
-                <span>Automated Child Dream Alert Settings</span>
-              </h2>
-              <p className="text-xs text-[#051836]/70 mt-1">
-                Receive notifications when new verified child dream profiles match your sponsorship criteria.
-              </p>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setAlertNotice(true);
-                setTimeout(() => setAlertNotice(false), 3000);
-              }}
-              className="space-y-4 text-xs font-inter"
-            >
-              <div>
-                <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                  Target Dream Category Alert
-                </label>
-                <select
-                  value={alertCategory}
-                  onChange={(e) => setAlertCategory(e.target.value)}
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                >
-                  <option value="Technology">Technology</option>
-                  <option value="Robotics">Robotics</option>
-                  <option value="Digital Art">Digital Art</option>
-                  <option value="Music">Music</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Academics">Academics</option>
-                  <option value="Leadership">Leadership</option>
-                  <option value="Entrepreneurship">Entrepreneurship</option>
-                  <option value="Biotech">Biotech</option>
-                  <option value="Creative Writing">Creative Writing</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#051836]/80 uppercase tracking-wider mb-1">
-                  Notification Frequency
-                </label>
-                <select
-                  value={alertFrequency}
-                  onChange={(e) => setAlertFrequency(e.target.value)}
-                  className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-sm text-[#051836] focus:outline-none focus:border-[#005C27]"
-                >
-                  <option value="Immediate Email Alert">Immediate Email Notification</option>
-                  <option value="Weekly Digest">Weekly Foundation Digest</option>
-                  <option value="Monthly Executive Summary">Monthly Executive Summary</option>
-                </select>
-              </div>
-
-              <div className="pt-2 flex items-center justify-between">
-                <button
-                  type="submit"
-                  className="bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3 px-6 rounded-xl transition text-xs shadow-md cursor-pointer"
-                >
-                  Save Alert Rules
-                </button>
-                {alertNotice && <span className="text-xs text-emerald-600 font-bold">Alert preferences updated!</span>}
-              </div>
-            </form>
-          </div>
-        )}
-      </div>
-
-      {/* Secure Messaging Modal */}
-      {messagingTalent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#051836]/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#051836]/10 space-y-6 text-[#051836]">
-            <div className="flex items-center justify-between border-b border-[#051836]/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#005C27]/10 text-[#005C27] border border-[#005C27]/30 flex items-center justify-center font-bold">
-                  <Send className="w-5 h-5 text-[#005C27]" />
-                </div>
-                <div>
-                  <h3 className="font-montserrat font-bold text-lg text-[#051836]">
-                    Sponsorship Proposal for {messagingTalent.name}
-                  </h3>
-                  <p className="text-xs text-[#051836]/60">Category: {messagingTalent.category}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setMessagingTalent(null)}
-                className="text-[#051836]/40 hover:text-[#051836] p-1 text-xs"
-              >
-                ✕
-              </button>
-            </div>
-
-            {messageSentNotice ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="p-3 rounded-full bg-emerald-100 text-[#005C27] border border-[#005C27]/30 inline-block">
-                  <CheckCircle2 className="w-8 h-8 text-[#005C27]" />
-                </div>
-                <h4 className="font-montserrat font-bold text-lg text-[#051836]">Sponsorship Proposal Transmitted!</h4>
-                <p className="text-xs text-[#051836]/70 max-w-xs mx-auto">
-                  Your message has been logged for foundation officer review.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSendMessage} className="space-y-4 text-xs font-inter">
-                <div>
-                  <label className="block font-bold text-[#051836]/80 mb-1">
-                    Sponsorship Grant Proposal &amp; Details
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder={`Describe your sponsorship grant proposal or support commitment for ${messagingTalent.name}...`}
-                    className="w-full p-3 bg-[#F8FAFC] border border-[#051836]/15 rounded-xl text-xs text-[#051836] focus:outline-none focus:border-[#005C27]"
-                  />
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#051836]/10 text-[11px] text-[#051836]/70 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#005C27] shrink-0" />
-                  <span>100% verified parental consent protocol enforced.</span>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setMessagingTalent(null)}
-                    className="px-4 py-2.5 rounded-xl border border-[#051836]/10 text-xs text-[#051836]/70 hover:bg-[#F8FAFC]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md cursor-pointer"
-                  >
-                    <span>Transmit Proposal</span>
-                    <Send className="w-3.5 h-3.5 text-white" />
-                  </button>
-                </div>
+        {!isLoading && !loadError && activeTab === "partnership" && (
+          <section className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Partnership Desk</p>
+              <h2 className="mt-2 max-w-xl font-montserrat text-3xl font-black tracking-[-0.04em]">Coordinate the next conversation with care.</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[#0B2E6B]/65">Individual sponsorship assignments and sensitive partnership information are not displayed in this portal. Start a focused conversation, then continue privately with the Foundation team after they reply.</p>
+              <form onSubmit={handleFoundationMessage} className="mt-7 max-w-xl space-y-3">
+                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#0B2E6B]/55" htmlFor="partnership-message-subject">Message subject</label>
+                <input id="partnership-message-subject" value={messageSubject} maxLength={200} onChange={(event) => setMessageSubject(event.target.value)} placeholder="How can the Foundation help?" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" />
+                <label className="block text-[10px] font-bold uppercase tracking-[0.14em] text-[#0B2E6B]/55" htmlFor="partnership-message-body">Your message</label>
+                <textarea id="partnership-message-body" value={messageBody} maxLength={2000} rows={5} onChange={(event) => setMessageBody(event.target.value)} placeholder="Share the context for your question or partnership conversation." className="w-full resize-y rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm leading-6 text-[#0B2E6B] outline-none focus:border-[#079432]" />
+                <button type="submit" disabled={isSendingMessage} className="inline-flex items-center gap-2 rounded-xl bg-[#079432] px-5 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A] disabled:cursor-not-allowed disabled:opacity-60">{isSendingMessage ? "Sending message…" : "Send to Foundation"} <ArrowRight className="h-4 w-4" /></button>
+                {messageStatus && <p role="status" className="text-xs leading-5 text-[#0B2E6B]/70">{messageStatus}</p>}
               </form>
-            )}
-          </div>
-        </div>
-      )}
+            </article>
+            <aside className="max-h-[620px] overflow-y-auto rounded-3xl border border-[#0B2E6B]/10 bg-[#FCFCFA] p-7 shadow-[0_12px_32px_rgba(5,24,54,0.06)] sm:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#F7B500]/20 text-[#0B2E6B]"><MessageCircle className="h-5 w-5" /></div>
+                <span className="rounded-full bg-[#079432]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#079432]">Private conversation</span>
+              </div>
+              <h3 className="mt-5 font-montserrat text-xl font-black">Your conversations</h3>
+              {!dashboard?.conversations?.length ? (
+                <p className="mt-4 text-sm leading-6 text-[#0B2E6B]/65">No Foundation conversations yet. Send a focused message to begin one.</p>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  {dashboard.conversations.map((conversation) => {
+                    const entries = conversation.thread?.length ? conversation.thread : conversation.message ? [{ id: "first-message", sender: "sponsor" as const, message: conversation.message }] : [];
+                    return <article key={conversation.id} className="rounded-2xl border border-[#0B2E6B]/10 bg-white p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-bold text-[#0B2E6B]">{conversation.subject}</h4><span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${conversation.status === "replied" ? "bg-[#079432]/10 text-[#079432]" : "bg-[#F7B500]/15 text-[#0B2E6B]"}`}>{conversation.status === "replied" ? "Foundation replied" : "Awaiting Foundation"}</span></div>
+                      <div className="mt-4 space-y-3">
+                        {entries.map((entry) => <div key={entry.id} className={`rounded-xl px-3 py-2.5 text-xs leading-5 ${entry.sender === "foundation" ? "bg-[#0B2E6B] text-white" : "bg-[#F5F6F0] text-[#0B2E6B]"}`}><p className={`text-[9px] font-bold uppercase tracking-[0.12em] ${entry.sender === "foundation" ? "text-white/65" : "text-[#079432]"}`}>{entry.sender === "foundation" ? "PWLIF Foundation Team" : "You"}</p><p className="mt-1 whitespace-pre-wrap">{entry.message}</p><p className={`mt-1 text-[9px] ${entry.sender === "foundation" ? "text-white/50" : "text-[#0B2E6B]/45"}`}>{conversationTime(entry.createdAt)}</p></div>)}
+                      </div>
+                      <form onSubmit={(event) => handleConversationReply(event, conversation.id)} className="mt-4 space-y-2"><label className="sr-only" htmlFor={`conversation-reply-${conversation.id}`}>Reply to Foundation</label><textarea id={`conversation-reply-${conversation.id}`} value={replyBodies[conversation.id] || ""} maxLength={2000} rows={3} onChange={(event) => setReplyBodies((current) => ({ ...current, [conversation.id]: event.target.value }))} placeholder="Continue this private conversation…" className="w-full resize-y rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-3 py-2.5 text-xs leading-5 text-[#0B2E6B] outline-none focus:border-[#079432]" /><button type="submit" disabled={replyingConversation === conversation.id} className="rounded-lg border border-[#079432]/30 px-3 py-2 text-[10px] font-bold text-[#079432] transition hover:bg-[#079432] hover:text-white disabled:opacity-50">{replyingConversation === conversation.id ? "Sending…" : "Send reply"}</button>{replyStatus[conversation.id] && <p role="status" className="text-[11px] leading-5 text-[#0B2E6B]/65">{replyStatus[conversation.id]}</p>}</form>
+                    </article>;
+                  })}
+                </div>
+              )}
+            </aside>
+          </section>
+        )}
+
+        {!isLoading && !loadError && activeTab === "account" && (
+          <section className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <article className="rounded-3xl bg-[#0B2E6B] p-7 text-white shadow-[0_16px_38px_rgba(5,24,54,0.18)] sm:p-8">
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-[#F7B500]"><LockKeyhole className="h-5 w-5" /></div>
+              <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.16em] text-white/60">Account security</p>
+              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Your access is protected by your password.</h2>
+              <p className="mt-4 text-sm leading-6 text-white/70">You create your password once through the private invitation link. You can update it here whenever you need to.</p>
+              <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white/85"><CheckCircle2 className="h-3.5 w-3.5 text-[#F7B500]" /> Access active</div>
+            </article>
+            <article className="rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Change password</p>
+              <h2 className="mt-2 font-montserrat text-2xl font-black tracking-[-0.04em]">Update your sign-in details</h2>
+              <form onSubmit={handlePasswordChange} className="mt-5 space-y-3"><input aria-label="Current password" type="password" required autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Current password" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><input aria-label="New password" type="password" required minLength={10} autoComplete="new-password" value={nextPassword} onChange={(event) => setNextPassword(event.target.value)} placeholder="New password — at least 10 characters" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><input aria-label="Confirm new password" type="password" required minLength={10} autoComplete="new-password" value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} placeholder="Confirm new password" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] px-4 py-3 text-sm text-[#0B2E6B] outline-none focus:border-[#079432]" /><button type="submit" disabled={isUpdatingPassword} className="rounded-xl bg-[#079432] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#14B84A] disabled:opacity-50">{isUpdatingPassword ? "Updating password…" : "Update password"}</button></form>{passwordMessage && <p className="mt-4 text-xs leading-5 text-[#0B2E6B]/70">{passwordMessage}</p>}<div className="mt-6 border-t border-[#0B2E6B]/10 pt-5"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Approved profile</p><div className="mt-3"><DetailRow label="Representative" value={profile?.name} /><DetailRow label="Organization" value={profile?.organization} /><DetailRow label="Role" value={profile?.roleTitle} /><DetailRow label="Email" value={profile?.email} /></div><div className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F5F6F0] p-4 text-xs leading-5 text-[#0B2E6B]/70"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#079432]" /><span>To request a change to approved sponsor details, please use the Partnership Desk to arrange a conversation with the foundation.</span></div></div>
+            </article>
+          </section>
+        )}
+
+        {!isLoading && !loadError && activeTab === "notifications" && (
+          <section className="mt-10 rounded-3xl bg-white p-7 shadow-[0_12px_32px_rgba(5,24,54,0.08)] sm:p-8">
+            <div className="mx-auto max-w-2xl py-6 text-center sm:py-12">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#079432]/10 text-[#079432]"><Bell className="h-6 w-6" /></div>
+              <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.16em] text-[#079432]">Notifications</p>
+              <h2 className="mt-2 font-montserrat text-3xl font-black tracking-[-0.04em]">A calm space for foundation updates.</h2>
+              <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#0B2E6B]/65">There are no updates to display. When PWLIF enables a reviewed sponsor communications workflow, foundation-issued updates will appear here. This portal does not create automated alerts or promotional messages.</p>
+              <button type="button" onClick={() => setActiveTab("partnership")} className="mt-7 inline-flex items-center gap-2 rounded-xl border border-[#079432]/25 bg-[#079432]/5 px-4 py-3 text-xs font-bold text-[#079432] transition hover:bg-[#079432] hover:text-white">Contact the Partnership Desk <ArrowRight className="h-4 w-4" /></button>
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   );
 }

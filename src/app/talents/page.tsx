@@ -1,184 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import { ArrowUpRight, Search, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { INITIAL_YOUTH_PROFILES } from "@/lib/data";
-import {
-  Search,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  ArrowLeft,
-} from "lucide-react";
+import { TalentPhoto } from "@/components/TalentPhoto";
+import { PublicHero, SectionHeading } from "@/components/PublicStory";
 
 export default function TalentsPage() {
-  const { profiles } = useAuth();
+  const { profiles, userStatus, talentTags } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const categories = [
-    "All",
-    "Technology",
-    "Music",
-    "Digital Art",
-    "Sports (Football)",
-    "Academics",
-    "Robotics",
-    "Leadership",
-    "Entrepreneurship",
-  ];
-
-  const activeProfiles = profiles && profiles.length > 0 ? profiles : INITIAL_YOUTH_PROFILES;
-
-  const filteredTalent = activeProfiles.filter((profile) => {
-    const matchesCategory =
-      selectedCategory === "All" || profile.category === selectedCategory;
-    const matchesSearch =
-      profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.dream.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (profile.skills &&
-        profile.skills.some((s: string) =>
-          s.toLowerCase().includes(searchQuery.toLowerCase())
-        ));
+  const hasApprovedSponsorAccess = userStatus === "approved";
+  const filteredTalent = useMemo(() => profiles.filter((profile) => {
+    const query = searchQuery.trim().toLowerCase();
+    const matchesCategory = selectedCategory === "All" || profile.category === selectedCategory || profile.skills?.includes(selectedCategory);
+    const matchesSearch = !query || [profile.name, profile.bio, profile.category, profile.story, profile.aspiration, profile.supportPathway, ...(profile.skills || [])].filter(Boolean).some((value) => String(value).toLowerCase().includes(query));
     return matchesCategory && matchesSearch;
-  });
+  }), [profiles, searchQuery, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-[#FDFCF9] font-inter text-[#051836] bg-foundation-pattern py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#051836]/10 pb-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Link href="/" className="text-[#051836]/60 hover:text-[#005C27] transition flex items-center gap-1.5 text-xs font-semibold">
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Homepage</span>
-              </Link>
-            </div>
+    <div className="bg-[#FCFCFA]">
+      <PublicHero
+        dark
+        eyebrow="Sponsor Talent directory"
+        title={hasApprovedSponsorAccess ? "The complete Sponsor Talent pipeline." : "Explore a careful introduction to potential."}
+        intro={hasApprovedSponsorAccess ? "Your approved sponsor account can review the foundation’s safe private pipeline. Public visibility controls do not limit your approved private access." : "Explore only non-identifying Sponsor Talent information and cover photography that PWLIF administrators have selected for public display. Information may be edited or withdrawn at any time."}
+        primaryAction={{ href: hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/book-a-call", label: hasApprovedSponsorAccess ? "Open Partnership Desk" : "Begin sponsor orientation" }}
+      >
+        <div className="rounded-[1.75rem] border border-white/12 bg-white/7 p-6 text-white backdrop-blur-sm"><ShieldCheck className="h-7 w-7 text-[#A9F1C3]" /><p className="mt-8 text-[10px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3]">Access note</p><p className="mt-3 font-montserrat text-xl font-bold">{hasApprovedSponsorAccess ? "Approved sponsor view" : "Published public information only"}</p></div>
+      </PublicHero>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#005C27]/10 border border-[#005C27]/20 text-[#005C27] text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-[#005C27]" />
-              <span>Child Dream Directory</span>
-            </div>
-
-            <h1 className="font-montserrat text-3xl sm:text-5xl font-black text-[#051836] tracking-tight">
-              Empower Youth Dreams
-            </h1>
-            <p className="text-xs sm:text-sm text-[#051836]/70 max-w-2xl leading-relaxed">
-              Explore verified child dream profiles across Technology, Music, Digital Art, Robotics, Sports, Academics, Leadership, and Entrepreneurship. Every profile is backed by 100% verified parental consent records.
-            </p>
+      <section className="px-5 py-16 sm:px-8 sm:py-24 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-8 border-b border-[#0B2E6B]/10 pb-10 lg:flex-row lg:items-end lg:justify-between">
+            <SectionHeading eyebrow="Find an overview" title="Potential, organised with care." intro="Use the filters to explore the published overview categories currently available." />
+            <label className="relative block w-full max-w-md"><span className="sr-only">Search Sponsor Talent</span><Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#079432]" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search focus, category, or overview" className="w-full rounded-full border border-[#0B2E6B]/14 bg-white py-4 pl-12 pr-5 text-sm text-[#0B2E6B] outline-none transition placeholder:text-[#0B2E6B]/45 focus:border-[#079432]" /></label>
           </div>
-
-          {/* Search Bar */}
-          <div className="w-full md:w-80">
-            <div className="relative">
-              <Search className="w-4 h-4 text-[#051836]/40 absolute left-3.5 top-3.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, dream, category..."
-                className="w-full pl-10 pr-4 py-3 bg-white border border-[#051836]/15 rounded-xl text-xs text-[#051836] placeholder:text-[#051836]/40 focus:outline-none focus:border-[#005C27] transition shadow-xs"
-              />
-            </div>
-          </div>
+          <div className="mt-7 flex gap-2 overflow-x-auto pb-2">{["All", ...talentTags.filter((tag) => tag.status === "active").map((tag) => tag.name)].map((category) => <button key={category} onClick={() => setSelectedCategory(category)} className={`shrink-0 rounded-full px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] transition ${selectedCategory === category ? "bg-[#0B2E6B] text-white" : "border border-[#0B2E6B]/12 bg-white text-[#0B2E6B]/68 hover:border-[#079432] hover:text-[#079432]"}`}>{category}</button>)}</div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{filteredTalent.map((profile, index) => <article key={profile.id} className="group overflow-hidden rounded-[1.75rem] border border-[#0B2E6B]/8 bg-white shadow-[0_14px_40px_rgba(11,46,107,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_56px_rgba(11,46,107,0.14)]"><div className="relative aspect-[4/3] overflow-hidden bg-[#061D45]"><TalentPhoto src={profile.coverPhoto} alt="Sponsor Talent overview" fill className="object-cover transition duration-700 group-hover:scale-105" /><div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#061D45]/80 to-transparent p-5"><span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#A9F1C3]">{String(index + 1).padStart(2, "0")} / {profile.category || "Sponsor Talent"}</span></div></div><div className="p-6"><div className="flex gap-4"><h2 className="font-montserrat text-2xl font-black tracking-[-0.035em] text-[#0B2E6B]">{profile.name || "Sponsor Talent"}</h2><span className="ml-auto shrink-0 text-[10px] font-bold uppercase tracking-[0.1em] text-[#079432]">{hasApprovedSponsorAccess ? "Private" : "Public"}</span></div>{profile.skills?.length ? <div className="mt-4 flex flex-wrap gap-1.5">{profile.skills.slice(0, 4).map((skill) => <span key={skill} className="rounded-full bg-[#079432]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-[#079432]">{skill}</span>)}</div> : null}<p className="mt-4 line-clamp-3 text-sm leading-6 text-[#0B2E6B]/66">{profile.story || profile.bio || profile.dream || "An approved non-identifying overview will appear here."}</p>{profile.aspiration ? <p className="mt-4 text-xs font-semibold leading-5 text-[#0B2E6B]/72"><span className="text-[#079432]">Heading toward: </span>{profile.aspiration}</p> : null}<Link href={hasApprovedSponsorAccess ? `/sponsor/talent/${profile.id}` : `/portfolio/${profile.id}`} className="mt-7 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#079432] hover:text-[#14B84A]">{hasApprovedSponsorAccess ? "View full private record" : "Open overview"} <ArrowUpRight className="h-4 w-4" /></Link></div></article>)}</div>
+          {filteredTalent.length === 0 && <div className="mt-12 rounded-[1.75rem] border border-dashed border-[#0B2E6B]/18 p-12 text-center"><p className="font-montserrat text-2xl font-bold text-[#0B2E6B]">No matching published overview yet.</p><p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#0B2E6B]/65">Try a different search or category. PWLIF administrators control which non-identifying profiles appear here.</p></div>}
         </div>
-
-        {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition shrink-0 cursor-pointer ${
-                selectedCategory === cat
-                  ? "bg-[#005C27] text-white font-bold shadow-md"
-                  : "bg-white text-[#051836]/70 border border-[#051836]/10 hover:border-[#005C27] hover:text-[#005C27]"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Talent Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {filteredTalent.map((profile, index) => (
-            <motion.div
-              key={profile.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.04 }}
-              className="bg-white rounded-3xl overflow-hidden border border-[#051836]/10 shadow-lg hover:shadow-2xl hover:border-[#005C27]/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
-            >
-              <div>
-                {/* 16:9 Cover Photo */}
-                <div className="relative aspect-video w-full bg-[#051836] overflow-hidden">
-                  <Image
-                    src={profile.coverPhoto}
-                    alt={profile.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                  <span className="absolute top-3 left-3 bg-[#005C27] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                    {profile.category}
-                  </span>
-
-                  <span className="absolute top-3 right-3 bg-emerald-950/80 backdrop-blur-md text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> Parental Consent Verified ✓
-                  </span>
-                </div>
-
-                <div className="p-6 space-y-3">
-                  <div className="flex items-baseline justify-between">
-                    <h3 className="font-montserrat font-bold text-xl text-[#051836] flex items-center gap-1.5">
-                      <span>{profile.name}, {profile.age}</span>
-                    </h3>
-                    <span className="text-xs font-semibold text-[#051836]/60">
-                      {profile.country_community || profile.location || "Kenya"}
-                    </span>
-                  </div>
-
-                  {/* Child's Dream Highlight Box */}
-                  <div className="p-3 rounded-2xl bg-[#F8FAFC] border border-[#051836]/10 text-xs space-y-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#005C27]">
-                      🌟 Child&apos;s Aspiration &amp; Dream
-                    </div>
-                    <p className="font-montserrat font-bold text-xs text-[#051836] line-clamp-2">
-                      &quot;{profile.dream}&quot;
-                    </p>
-                  </div>
-
-                  <p className="text-xs text-[#051836]/70 leading-relaxed line-clamp-2">
-                    {profile.bio}
-                  </p>
-
-                  <div className="text-[11px] text-[#051836]/80 pt-1">
-                    <strong className="text-[#005C27]">Grant Need:</strong> {profile.current_needs}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 pt-0 space-y-2">
-                <Link
-                  href={`/portfolio/${profile.id}`}
-                  className="w-full bg-[#005C27] hover:bg-[#327B2F] text-white font-montserrat font-bold py-3.5 px-4 rounded-xl text-xs transition text-center flex items-center justify-center gap-2 shadow-md cursor-pointer"
-                >
-                  <span>Sponsor This Dream</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-white" />
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      </section>
     </div>
   );
 }
