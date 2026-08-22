@@ -92,9 +92,11 @@ export async function POST(request: NextRequest) {
     }
     const db = adminDb();
     if (body.action === "completePasswordSetup") {
+      const accountSnapshot = await db.collection("sponsor_accounts").doc(sponsor.uid).get();
+      const passwordSetupCompletedAt = accountSnapshot.data()?.passwordSetupCompletedAt;
       await db.collection("sponsor_accounts").doc(sponsor.uid).set({
         passwordSetupRequired: false,
-        passwordSetupCompletedAt: FieldValue.serverTimestamp(),
+        ...(passwordSetupCompletedAt ? {} : { passwordSetupCompletedAt: FieldValue.serverTimestamp() }),
         updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
       return NextResponse.json({ ok: true });

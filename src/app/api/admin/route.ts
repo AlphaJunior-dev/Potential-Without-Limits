@@ -64,7 +64,12 @@ async function requestSponsorSetupEmail(email: string) {
   if (!apiKey || !configuredContinueUrl) throw new Error("Sponsor invitation delivery is not configured.");
   let continueUrl: string;
   try {
-    continueUrl = new URL("/sponsor/setup", configuredContinueUrl).toString();
+    // Firebase's hosted reset handler owns the one-time `oobCode`. A continue URL
+    // is only reached after that handler has consumed the code, so it must return
+    // to normal Sponsor login rather than to our custom code-validation screen.
+    const setupCompletionUrl = new URL("/login", configuredContinueUrl);
+    setupCompletionUrl.searchParams.set("setup", "complete");
+    continueUrl = setupCompletionUrl.toString();
   } catch {
     throw new Error("Sponsor invitation delivery is not configured with a valid continue URL.");
   }
@@ -72,7 +77,7 @@ async function requestSponsorSetupEmail(email: string) {
   const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${encodeURIComponent(apiKey)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ requestType: "PASSWORD_RESET", email, continueUrl }),
+    body: JSON.stringify({ requestType: "PASSWORD_RESET", email, continueUrl, canHandleCodeInApp: false }),
   });
   const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;
   if (!response.ok) {

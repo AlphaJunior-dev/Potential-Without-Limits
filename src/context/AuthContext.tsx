@@ -306,13 +306,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await signOut(auth);
           throw new Error("This account is approved for Sponsor access. Please use the Sponsor Login portal.");
         }
+        const sponsorToken = await credential.user.getIdToken(true);
         const sponsorAccess = await fetch("/api/sponsor", {
-          headers: { authorization: `Bearer ${await credential.user.getIdToken(true)}` },
+          headers: { authorization: `Bearer ${sponsorToken}` },
         });
         if (!sponsorAccess.ok) {
           await signOut(auth);
           throw new Error("Your Sponsor account is not ready for dashboard access yet. Please complete the current PWLIF invitation email to set your password, or ask the foundation to resend the invitation.");
         }
+        // Firebase's hosted password-reset page returns the newly approved Sponsor
+        // here after it consumes the one-time action code. This server-side,
+        // claim-gated metadata update is deliberately best-effort: access remains
+        // governed by the approved Firebase claim and active account record.
+        await fetch("/api/sponsor", {
+          method: "POST",
+          headers: { authorization: `Bearer ${sponsorToken}`, "content-type": "application/json" },
+          body: JSON.stringify({ action: "completePasswordSetup" }),
+        }).catch(() => undefined);
         setStatus("approved");
         return "approved";
       }
