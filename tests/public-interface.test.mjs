@@ -601,3 +601,29 @@ test("private Sponsor routes wait for Firebase access resolution before redirect
   assert.match(detail, /if \(authLoading\) return;/);
   assert.match(detail, /if \(!user\) \{\s*router\.replace\("\/login"\)/);
 });
+
+test("Social Links are administrator-managed, HTTPS-validated, and publicly limited to visible approved entries", async () => {
+  const [adminPage, provider, adminRoute, adminLibrary, publicRoute, footer, cmsData] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/admin/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/components/Footer.tsx"),
+    readSource("src/lib/cmsData.ts"),
+  ]);
+
+  assert.match(adminPage, /Social Links CMS/);
+  assert.match(adminPage, /updateSocialLinks\(socialLinkDraft\)/);
+  assert.match(adminPage, /Show in public footer/);
+  assert.match(provider, /updatePublicContent\("updateSocialLinks", \{ socialLinks: nextSocialLinks \}\)/);
+  assert.match(adminRoute, /body\.action === "updateSocialLinks"/);
+  assert.match(adminLibrary, /sanitizeSocialLinks/);
+  assert.match(adminLibrary, /const url = safeAssetUrl\(item\.url\)/);
+  assert.match(adminLibrary, /if \(!url \|\| seen\.has\(id\)\) return null/);
+  assert.match(publicRoute, /socialLinks: site\.socialLinks/);
+  assert.match(footer, /socialLinks\.filter\(\(link\) => link\.visible\)/);
+  assert.match(cmsData, /potential-without-limits-international-foundation/);
+  assert.match(cmsData, /DEFAULT_SOCIAL_LINKS/);
+  assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
+});

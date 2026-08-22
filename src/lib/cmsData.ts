@@ -28,6 +28,28 @@ export interface MissionVisionData {
   lastUpdated: string;
 }
 
+export type SocialPlatform = "LinkedIn" | "Facebook" | "Instagram" | "X" | "YouTube" | "TikTok" | "WhatsApp" | "Website";
+
+export interface SocialLink {
+  id: string;
+  platform: SocialPlatform;
+  label: string;
+  url: string;
+  visible: boolean;
+  order: number;
+}
+
+export const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
+  {
+    id: "linkedin-pwlif",
+    platform: "LinkedIn",
+    label: "Follow PWLIF on LinkedIn",
+    url: "https://www.linkedin.com/company/potential-without-limits-international-foundation/",
+    visible: true,
+    order: 1,
+  },
+];
+
 export interface StatMetric {
   value: string;
   label: string;
@@ -167,115 +189,28 @@ export const INITIAL_FAQ_ITEMS: FaqItem[] = [
 ];
 
 export const INITIAL_MISSION_VISION: MissionVisionData = {
-  mission:
-    "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
-  vision:
-    "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
-  foundersNote:
-    "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
-  foundersTitle:
-    "Potential Without Limits International Foundation",
+  mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
+  vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
+  foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
+  foundersTitle: "Potential Without Limits International Foundation",
   pillars: [],
   lastUpdated: "2026-08-01",
 };
 
 export const INITIAL_BRANDING: BrandingConfig = {
-  logoUrl: "/pwlif-logo.png",
-  siteTitle: "Potential Without Limits International Foundation",
-  primaryColor: "#0B2E6B",
-  secondaryColor: "#079432",
-  backgroundColor: "#FCFCFA",
-  cardBackgroundColor: "#FFFFFF",
-  textColor: "#0B2E6B",
-  headerFont: "Montserrat",
-  bodyFont: "Inter",
-  heroMediaType: "image",
-  heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
-  heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  heroBadgeText: "Potential Without Limits International Foundation (PWLIF)",
-  heroHeadline: "Potential grows when communities lead.",
-  heroSubheadline: "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.",
-  heroCtaText: "Explore Sponsor Talent",
-  heroSecondaryCtaText: "Book Sponsor Orientation",
-  heroCardLocation: "Sponsor Talent",
-  heroCardTitle: "Community-guided potential",
-  heroCardDescription: "Partnership conversations begin with an orientation call and safeguarding review.",
-  videoSectionBadge: "Foundation Introduction",
-  videoSectionTitle: "Foundation Introduction & Impact",
-  videoSectionSubtitle: "An introduction video will be shared when it is ready.",
-  sponsorSectionBadge: "Sponsor Talent",
-  sponsorSectionTitle: "Sponsor Talent",
-  sponsorSectionSubtitle: "Explore non-identifying Sponsor Talent information and begin with an orientation conversation.",
-  pathwaySectionBadge: "Our Pathway",
-  pathwaySectionTitle: "From Potential to Purpose",
-  pathwaySectionSubtitle: "A careful, community-guided pathway for Sponsor Talent opportunities.",
-  transparencySectionBadge: "Partnership",
-  transparencySectionTitle: "Accountability & stewardship",
-  transparencySectionSubtitle: "Detailed information is shared through appropriate private partnership conversations.",
-  statsMetrics: [
-    { value: "Sponsor", label: "Talent" },
-    { value: "Guided", label: "by community" },
-    { value: "Private", label: "orientation" },
-  ],
-  pathSteps: [
-    {
-      stepNumber: "STEP 01",
-      title: "Listen",
-      description: "Begin with community-informed planning.",
-    },
-    {
-      stepNumber: "STEP 02",
-      title: "Prepare",
-      description: "Review safeguarding and partnership needs.",
-    },
-    {
-      stepNumber: "STEP 03",
-      title: "Connect",
-      description: "Hold a private orientation conversation.",
-    },
-    {
-      stepNumber: "STEP 04",
-      title: "Support",
-      description: "Coordinate carefully with local partners.",
-    },
-  ],
+  logoUrl: "/pwlif-logo.png", siteTitle: "Potential Without Limits International Foundation", primaryColor: "#0B2E6B", secondaryColor: "#079432", backgroundColor: "#FCFCFA", cardBackgroundColor: "#FFFFFF", textColor: "#0B2E6B", headerFont: "Montserrat", bodyFont: "Inter", heroMediaType: "image", heroImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80", heroVideoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", heroBadgeText: "Potential Without Limits International Foundation (PWLIF)", heroHeadline: "Potential grows when communities lead.", heroSubheadline: "Potential Without Limits International Foundation is building careful, community-informed Sponsor Talent opportunities.", heroCtaText: "Explore Sponsor Talent", heroSecondaryCtaText: "Book Sponsor Orientation", heroCardLocation: "Sponsor Talent", heroCardTitle: "Community-guided potential", heroCardDescription: "Partnership conversations begin with an orientation call and safeguarding review.", videoSectionBadge: "Foundation Introduction", videoSectionTitle: "Foundation Introduction & Impact", videoSectionSubtitle: "An introduction video will be shared when it is ready.", sponsorSectionBadge: "Sponsor Talent", sponsorSectionTitle: "Sponsor Talent", sponsorSectionSubtitle: "Explore non-identifying Sponsor Talent information and begin with an orientation conversation.", pathwaySectionBadge: "Our Pathway", pathwaySectionTitle: "From Potential to Purpose", pathwaySectionSubtitle: "A careful, community-guided pathway for Sponsor Talent opportunities.", transparencySectionBadge: "Partnership", transparencySectionTitle: "Accountability & stewardship", transparencySectionSubtitle: "Detailed information is shared through appropriate private partnership conversations.", statsMetrics: [{ value: "Sponsor", label: "Talent" }, { value: "Guided", label: "by community" }, { value: "Private", label: "orientation" }], pathSteps: [{ stepNumber: "STEP 01", title: "Listen", description: "Begin with community-informed planning." }, { stepNumber: "STEP 02", title: "Prepare", description: "Review safeguarding and partnership needs." }, { stepNumber: "STEP 03", title: "Connect", description: "Hold a private orientation conversation." }, { stepNumber: "STEP 04", title: "Support", description: "Coordinate carefully with local partners." }],
 };
 
 export const INITIAL_LEGAL_SECURITY: LegalSecurityConfig = {
-  termsContent: `Terms of Service - Potential Without Limits International Foundation (PWLIF)
-
-1. Acceptance of Terms: By accessing the PWLIF platform, visitors, sponsors, donors, and partners agree to use the site responsibly and respect its safeguarding and privacy practices.
-
-2. Sponsor Conduct & Ethics: Sponsor access is considered only after an orientation call and manual approval. Any inappropriate use of private information or communications is prohibited and may result in access being withdrawn.
-
-3. Partnership Information: This site does not publish financial, tax, or transparency reports. Relevant partnership details are discussed through appropriate private channels.`,
-  privacyContent: `Privacy & Safeguarding Protocol
-
-1. Limited Public Information: PWLIF publishes only the Sponsor Talent information it has specifically approved for public display. Public pages are designed to avoid unnecessary personal or identifying information.
-
-2. Account Data: Orientation-request and sponsor-access information is handled through controlled, server-enforced systems. Access is limited to authorised foundation personnel.
-
-3. Private Communications: Partnership conversations are coordinated through appropriate PWLIF channels and are not an open public messaging service.`,
-  securityStandardsContent: `PWLIF Security & Safeguarding Standards
-
-1. Controlled Publication: Sponsor Talent records and team information use field-level publication controls, so information can be reviewed, published, edited, or withdrawn as appropriate.
-
-2. Sponsor Password Access: Sponsors receive a secure one-time email-link invitation only after an orientation call and manual approval. The invitation lets each sponsor create their own password; no passwords are generated, displayed, or stored by the portal.
-
-3. Administrative Accountability: Authorised administrative actions, including application reviews, invitations, and content updates, are recorded through protected server-side workflows.`,
+  termsContent: "Terms of Service - Potential Without Limits International Foundation (PWLIF)\n\n1. Acceptance of Terms: By accessing the PWLIF platform, visitors, sponsors, donors, and partners agree to use the site responsibly and respect its safeguarding and privacy practices.\n\n2. Sponsor Conduct & Ethics: Sponsor access is considered only after an orientation call and manual approval. Any inappropriate use of private information or communications is prohibited and may result in access being withdrawn.\n\n3. Partnership Information: This site does not publish financial, tax, or transparency reports. Relevant partnership details are discussed through appropriate private channels.",
+  privacyContent: "Privacy & Safeguarding Protocol\n\n1. Limited Public Information: PWLIF publishes only the Sponsor Talent information it has specifically approved for public display. Public pages are designed to avoid unnecessary personal or identifying information.\n\n2. Account Data: Orientation-request and sponsor-access information is handled through controlled, server-enforced systems. Access is limited to authorised foundation personnel.\n\n3. Private Communications: Partnership conversations are coordinated through appropriate PWLIF channels and are not an open public messaging service.",
+  securityStandardsContent: "PWLIF Security & Safeguarding Standards\n\n1. Controlled Publication: Sponsor Talent records and team information use field-level publication controls, so information can be reviewed, published, edited, or withdrawn as appropriate.\n\n2. Sponsor Password Access: Sponsors receive a secure one-time email-link invitation only after an orientation call and manual approval. The invitation lets each sponsor create their own password; no passwords are generated, displayed, or stored by the portal.\n\n3. Administrative Accountability: Authorised administrative actions, including application reviews, invitations, and content updates, are recorded through protected server-side workflows.",
   lastUpdated: "2026-08-01",
 };
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [];
 
-/**
- * The original client-side Firestore helpers were deliberately removed. Public
- * and administrator data must now come through server-enforced API routes.
- * These narrow compatibility stubs prevent accidental reintroduction of a
- * browser database write path while preserving imports in legacy components.
- */
 export const DEFAULTS = { siteContent: INITIAL_BRANDING, faqs: INITIAL_FAQ_ITEMS, mission: INITIAL_MISSION_VISION, team: INITIAL_TEAM_MEMBERS, legal_security: INITIAL_LEGAL_SECURITY };
-
 export function useFirestoreCollection<T>(_name: string, defaults: T[]): T[] { return defaults; }
 export function useFirestoreDoc<T>(_name: string, _docId: string, defaultValue: T): T { return defaultValue; }
 export async function addDocSafe(): Promise<never> { throw new Error("Client database writes are disabled."); }
