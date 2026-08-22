@@ -9,6 +9,7 @@ import { INITIAL_EDITORIAL_PAGES, type BrandingConfig, type EditorialPagesConfig
 
 type UserStatus = "logged_out" | "pending" | "admin" | "approved";
 type AdminRole = "Super Admin" | "Vetting Officer" | "Curator";
+type LoginDestination = "admin" | "approved";
 type FlexibleRecord = Record<string, any>;
 export type PendingSponsor = FlexibleRecord;
 type AuthContextType = {
@@ -36,7 +37,7 @@ type AuthContextType = {
   sponsorDreams: FlexibleRecord[];
   mfaVerified: boolean;
   adminRole: AdminRole;
-  login: (email: string, pass: string) => Promise<void>;
+  login: (email: string, pass: string) => Promise<LoginDestination>;
   logout: () => Promise<void>;
   setAdminRole: (role: AdminRole) => void;
   bookVettingCall: (...args: any[]) => void;
@@ -287,13 +288,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const login = async (email: string, pass: string) => {
-    const credential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), pass);
-    const token = await credential.user.getIdTokenResult(true);
-    if (token.claims.admin === true) { setStatus("admin"); return; }
-    if (token.claims.sponsor === true) { setStatus("approved"); return; }
-    await signOut(auth);
-    throw new Error("This account is not approved for the requested portal.");
+  const login = async (email: string, pass: string): Promise<LoginDestination> => {
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), pass);
+      const token = await credential.user.getIdTokenResult(true);
+      if (token.claims.admin === true) {
+        setStatus("admin");
+        return "admin";
+      }
+      if (token.claims.sponsor === true) {
+        setStatus("approved");
+        return "approved";
+      }
+      await signOut(auth);
+      throw new Error("This account is not approved for the requested portal.");
+    } catch (loginError: unknown) {
+      const code = typeof loginError === "object" && loginError && "code" in loginError
+        ? String((loginError as { code?: unknown }).code)
+        : "";
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+        throw new Error("We could not verify this Sponsor login. Please use the email and password you created through a current PWLIF invitation. Sponsor access is activated only after orientation approval.");
+      }
+      throw loginError;
+    }
   };
 
   const updateBranding = async (nextBranding: BrandingConfig) => {

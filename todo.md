@@ -145,3 +145,5 @@
 - [x] Remove the empty Foundation Introduction placeholder section from the public homepage without affecting the active orientation call-to-action.
 - [x] Restore public Sponsor Talent directory and individual profile routes using only explicitly published, consent-controlled fields and approved cover images; keep public video playback disabled pending separate end-to-end repair.
 - [x] Update regression coverage, production build verification, and Vercel preview checks for the revised public Talent release surface.
+- [x] Diagnose and repair the Sponsor login failure from `/login` through Firebase authentication, approved-sponsor claim resolution, and private dashboard routing; do not merge until verified.
+- [ ] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
