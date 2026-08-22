@@ -142,3 +142,6 @@
 - [x] Remove unstable public Talent detail, gallery, and media playback routes from the limited public launch surface while preserving private records for later repair.
 - [x] Replace public Sponsor Talent discovery with an honest orientation-led overview that does not expose draft Talent data, unverified media, or unavailable profile links.
 - [x] Run focused limited-launch regression, production-build, and preview-response verification before seeking merge approval.
+- [x] Remove the empty Foundation Introduction placeholder section from the public homepage without affecting the active orientation call-to-action.
+- [x] Restore public Sponsor Talent directory and individual profile routes using only explicitly published, consent-controlled fields and approved cover images; keep public video playback disabled pending separate end-to-end repair.
+- [ ] Update regression coverage, production build verification, and Vercel preview checks for the revised public Talent release surface.

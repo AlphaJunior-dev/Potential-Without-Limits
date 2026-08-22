@@ -5,12 +5,12 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const readSource = (path) => readFile(new URL(path, root), "utf8");
 
-test("homepage uses the approved Potential in Motion sequence while avoiding hard-coded profile fallbacks", async () => {
+test("homepage uses the approved Potential in Motion sequence, published Sponsor Talent cards, and no Foundation Introduction placeholder", async () => {
   const page = await readSource("src/app/page.tsx");
 
   for (const marker of [
     "Potential moves when possibility has a pathway.",
-    "An invitation to understand the work before taking part.",
+    "A glimpse of potential—shared with care.",
     "From initial interest to an appropriate private connection.",
   ]) {
     assert.match(page, new RegExp(marker));
@@ -18,6 +18,7 @@ test("homepage uses the approved Potential in Motion sequence while avoiding har
 
   for (const prohibitedPublicPattern of [
     "INITIAL_YOUTH_PROFILES",
+    "Foundation introduction",
   ]) {
     assert.doesNotMatch(page, new RegExp(prohibitedPublicPattern));
   }
@@ -209,7 +210,7 @@ test("the redesigned sponsor dashboard uses a dedicated portal header and separa
   assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
 });
 
-test("approved sponsors retain the private Talent pipeline while the limited public launch uses an orientation-led Sponsor Talent handoff", async () => {
+test("approved sponsors retain the private Talent pipeline while public visitors can browse only published consent-controlled Sponsor Talent profiles", async () => {
   const [provider, homepage, talentsPage, detailPage, publicRoute, adminLibrary] = await Promise.all([
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/page.tsx"),
@@ -228,12 +229,16 @@ test("approved sponsors retain the private Talent pipeline while the limited pub
   assert.match(provider, /setSponsorProfiles\(\[\]\)/);
   assert.match(provider, /location: record\.region \|\| \(record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"\)/);
   assert.match(homepage, /hasApprovedSponsorAccess/);
-  assert.match(talentsPage, /Start with orientation, not a public profile\./);
-  assert.match(talentsPage, /Individual records and media are not part of the current public release/);
-  assert.match(detailPage, /Private conversations are the right next step\./);
-  assert.match(detailPage, /does not display a public Talent record in the limited launch/);
-  assert.doesNotMatch(talentsPage, /hasApprovedSponsorAccess/);
-  assert.doesNotMatch(detailPage, /const profile = profiles\.find/);
+  assert.match(homepage, /const featuredProfiles = profiles\.slice\(0, 3\)/);
+  assert.match(homepage, /\/portfolio\/\$\{profile\.id\}/);
+  assert.doesNotMatch(homepage, /Foundation introduction/);
+  assert.match(talentsPage, /Explore a careful introduction to potential\./);
+  assert.match(talentsPage, /talentTags\.filter/);
+  assert.match(talentsPage, /hasApprovedSponsorAccess/);
+  assert.match(detailPage, /const profile = profiles\.find/);
+  assert.match(detailPage, /Published public overview/);
+  assert.match(detailPage, /publicVisibility\?\.photoVisible === true/);
+  assert.doesNotMatch(detailPage, /TalentVideo/);
   assert.match(publicRoute, /readPublicSite\(\)/);
   assert.match(publicRoute, /publicVisibility,/);
   assert.match(publicRoute, /galleryImages: card\.photoUrl \? \[card\.photoUrl\] : \[\]/);
@@ -315,7 +320,7 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(imageConfig, /remotePatterns/);
 });
 
-test("Talent videos remain in bounded private storage during the limited launch, with no public profile playback surface", async () => {
+test("Talent videos remain in bounded private storage while public profiles intentionally do not render video playback", async () => {
   const [adminPage, provider, uploadRoute, publicRoute, privateRoute, adminLibrary, mediaLibrary, player, publicDetail, sponsorDetail] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
@@ -381,8 +386,8 @@ test("Talent videos remain in bounded private storage during the limited launch,
   assert.match(provider, /galleryVideos\.some\(isSafeTalentVideoUrl\)/);
   assert.match(adminPage, /<TalentVideo src=\{vUrl\} access="private"/);
   assert.match(adminPage, /disabled=\{isImageUploading \|\| isVideoUploading\}/);
-  assert.match(publicDetail, /Individual Sponsor Talent profiles and media are not part of this public launch/);
-  assert.match(publicDetail, /does not display a public Talent record in the limited launch/);
+  assert.match(publicDetail, /const profile = profiles\.find/);
+  assert.match(publicDetail, /Cover image is not published\./);
   assert.doesNotMatch(publicDetail, /TalentVideo/);
   assert.doesNotMatch(publicDetail, /Approved media/);
   assert.match(sponsorDetail, /TalentVideo src=\{mediaUrl\} access="private"/);
@@ -401,7 +406,7 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
 });
 
-test("the limited public Sponsor Talent page is an orientation-led handoff while managed Talent data remains private", async () => {
+test("the public Sponsor Talent directory filters only server-sanitized published profile data", async () => {
   const [adminLibrary, adminPage, talentsPage, publicRoute] = await Promise.all([
     readSource("src/lib/admin.ts"),
     readSource("src/app/admin/page.tsx"),
@@ -415,9 +420,10 @@ test("the limited public Sponsor Talent page is an orientation-led handoff while
   assert.match(adminPage, /updateTalentTags/);
   assert.match(adminPage, /Add a new skill or interest/);
   assert.match(adminPage, /consentReference/);
-  assert.match(talentsPage, /How the public pathway works/);
-  assert.match(talentsPage, /Sponsor Talent details are arranged privately/);
-  assert.doesNotMatch(talentsPage, /talentTags\.filter/);
+  assert.match(talentsPage, /profiles\.filter/);
+  assert.match(talentsPage, /talentTags\.filter/);
+  assert.match(talentsPage, /\/portfolio\/\$\{profile\.id\}/);
+  assert.doesNotMatch(talentsPage, /TalentVideo/);
   assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
 });
 
@@ -465,9 +471,8 @@ test("Foundation conversations accept only server-authorized sponsor messages an
   assert.doesNotMatch(privateTalent, /if \(!body\) return null/);
 
   assert.match(navbar, /userStatus === "approved"[\s\S]*?Partnership Desk/);
-  assert.match(homepage, /hasApprovedSponsorAccess \? "\/sponsor\/dashboard" : "\/book-a-call"/);
-  assert.doesNotMatch(homepage, /\/portfolio\/\$\{profile\.id\}/);
-  assert.doesNotMatch(homepage, /\/sponsor\/talent\/\$\{profile\.id\}/);
+  assert.match(homepage, /action=\{hasApprovedSponsorAccess \? \{ href: "\/sponsor\/dashboard"[\s\S]*?\} : \{ href: "\/book-a-call"/);
+  assert.match(homepage, /hasApprovedSponsorAccess \? `\/sponsor\/talent\/\$\{profile\.id\}` : `\/portfolio\/\$\{profile\.id\}`/);
 });
 
 test("public forms stay separate from sponsor conversations and preserve their approved contextual fields", async () => {
