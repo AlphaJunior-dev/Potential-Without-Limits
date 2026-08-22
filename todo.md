@@ -155,3 +155,9 @@
 - [x] Repair the Firebase password-reset invitation handoff by using Firebase’s hosted reset action and returning the approved Sponsor to `/login?setup=complete` after password creation.
 - [x] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.
 - [x] Capture server-side evidence for the latest failed Sponsor login and define a public-only soft-launch boundary that does not misrepresent unavailable private access.
+- [x] Merge user-authorized PR #1 and verify the production deployment’s public routes after launch.
+- [ ] Audit required Firebase and server-side environment variable presence in preview versus production without exposing secret values; correct any production gaps and re-verify live integration health.
+- [ ] Diagnose and repair the live Admin Talent photo upload failure while preserving private Supabase storage, server-only service credentials, and consent-controlled publishing.
+- [ ] Verify the Vercel Production `SUPABASE_SERVICE_ROLE_KEY` is the legacy key for the same Supabase project as `pwlif-media`, then confirm the redeploy can write media without adding public bucket policies.
+- [x] Capture the Supabase storage operation that fails after the corrected Production redeploy and repair any unnecessary per-upload bucket update without changing private bucket access.
+- [ ] Push and merge the authorized private-media upload repair, then verify the resulting Production deployment can accept one Administrator Talent photo upload.

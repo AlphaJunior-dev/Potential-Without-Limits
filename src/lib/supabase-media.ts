@@ -24,28 +24,39 @@ function serverMediaClient() {
   });
 }
 
-/** Creates a private, server-managed bucket on its first administrator upload. */
+/** Creates a private, server-managed bucket only when it does not already exist. */
 async function ensurePrivateMediaBucket() {
   const client = serverMediaClient();
-  const { error } = await client.storage.createBucket(PWLIF_MEDIA_BUCKET, {
-    public: false,
-    fileSizeLimit: MAX_TALENT_VIDEO_BYTES,
-    allowedMimeTypes: [...permittedContentTypes],
-  });
+  const { data: existingBucket, error: lookupError } = await client.storage.getBucket(PWLIF_MEDIA_BUCKET);
+  if (existingBucket) return client;
 
-  if (error && !/already exists|duplicate/i.test(error.message)) {
+  // A missing bucket is the only state that should lead to a write against the
+  // bucket configuration. Reconfiguring an existing private bucket for every
+  // Talent upload adds a privileged operation that is unnecessary for media
+  // delivery and can fail even when the existing bucket is fully usable.
+  if (lookupError && String(lookupError.status ?? "") !== "404") {
+    console.error("Private media bucket lookup failed", {
+      operation: "getBucket",
+      status: lookupError.status ?? "unknown",
+      code: lookupError.name ?? "unknown",
+    });
     throw new Error("SUPABASE_MEDIA_BUCKET_UNAVAILABLE");
   }
 
-  // The bucket may have been created before Talent video support. Update it
-  // idempotently, retaining private access while widening only the controlled
-  // type and size policy required for direct signed uploads.
-  const { error: updateError } = await client.storage.updateBucket(PWLIF_MEDIA_BUCKET, {
+  const { error: createError } = await client.storage.createBucket(PWLIF_MEDIA_BUCKET, {
     public: false,
     fileSizeLimit: MAX_TALENT_VIDEO_BYTES,
     allowedMimeTypes: [...permittedContentTypes],
   });
-  if (updateError) throw new Error("SUPABASE_MEDIA_BUCKET_UNAVAILABLE");
+
+  if (createError && !/already exists|duplicate/i.test(createError.message)) {
+    console.error("Private media bucket creation failed", {
+      operation: "createBucket",
+      status: createError.status ?? "unknown",
+      code: createError.name ?? "unknown",
+    });
+    throw new Error("SUPABASE_MEDIA_BUCKET_UNAVAILABLE");
+  }
 
   return client;
 }

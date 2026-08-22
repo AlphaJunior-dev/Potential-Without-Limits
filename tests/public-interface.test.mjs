@@ -369,6 +369,9 @@ test("Talent videos remain in bounded private storage while public profiles inte
   assert.match(mediaLibrary, /video\/mp4/);
   assert.match(mediaLibrary, /video\/webm/);
   assert.match(mediaLibrary, /public: false/);
+  assert.match(mediaLibrary, /storage\.getBucket\(PWLIF_MEDIA_BUCKET\)/);
+  assert.doesNotMatch(mediaLibrary, /storage\.updateBucket\(/);
+  assert.match(mediaLibrary, /String\(lookupError\.status \?\? ""\) !== "404"/);
   assert.match(mediaLibrary, /createSignedUploadUrl/);
   assert.match(mediaLibrary, /createSignedUrl/);
 
