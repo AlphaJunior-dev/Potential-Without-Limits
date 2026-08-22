@@ -146,12 +146,12 @@
 - [x] Restore public Sponsor Talent directory and individual profile routes using only explicitly published, consent-controlled fields and approved cover images; keep public video playback disabled pending separate end-to-end repair.
 - [x] Update regression coverage, production build verification, and Vercel preview checks for the revised public Talent release surface.
 - [x] Diagnose and repair the Sponsor login failure from `/login` through Firebase authentication, approved-sponsor claim resolution, and private dashboard routing; do not merge until verified.
-- [ ] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
+- [x] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
 - [x] Correct the shared invalid-credential message so the Admin Login never displays Sponsor invitation guidance, while preserving role-specific routing and access controls.
 - [x] Repair the Sponsor Vetting overview action so it opens the intended record reliably on the current preview instead of a failed deployment page.
-- [ ] Verify the manual approval flow visibly completes the Sponsor invitation, password setup, Firebase claim refresh, and successful private dashboard sign-in before any production merge.
+- [x] Verify the manual approval flow visibly completes the Sponsor invitation, password setup, Firebase claim refresh, and successful private dashboard sign-in before any production merge.
 - [x] Trace the current Sponsor’s failed live password sign-in through Firebase credential validation, custom claims, Sponsor record authorization, and dashboard redirect; repair only the confirmed gate before any merge.
 - [x] Inspect and repair the Firebase account provisioning state for the confirmed approved Sponsor email, including password-provider availability and the Sponsor custom claim, before any merge.
 - [x] Repair the Firebase password-reset invitation handoff by using Firebase’s hosted reset action and returning the approved Sponsor to `/login?setup=complete` after password creation.
-- [ ] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.
-- [ ] Capture server-side evidence for the latest failed Sponsor login and define a public-only soft-launch boundary that does not misrepresent unavailable private access.
+- [x] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.
+- [x] Capture server-side evidence for the latest failed Sponsor login and define a public-only soft-launch boundary that does not misrepresent unavailable private access.
