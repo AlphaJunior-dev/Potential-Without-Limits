@@ -10,6 +10,22 @@ function optionalText(value: unknown, maxLength: number) {
     : undefined;
 }
 
+function timestampMillis(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value && typeof value === "object" && "toMillis" in value && typeof (value as { toMillis?: unknown }).toMillis === "function") {
+    return (value as { toMillis: () => number }).toMillis();
+  }
+  if (value && typeof value === "object") {
+    const seconds = (value as { seconds?: unknown; _seconds?: unknown }).seconds ?? (value as { _seconds?: unknown })._seconds;
+    if (typeof seconds === "number") return seconds * 1_000;
+  }
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
 function accessDenied(error: unknown) {
   const message = error instanceof Error ? error.message : "";
   const reason = message === "SPONSOR_ACCESS_REVOKED" ? "revoked" : "authorization";
@@ -31,8 +47,14 @@ function accessDenied(error: unknown) {
  * separate field-visibility sanitizer and never call this route.
  */
 export async function GET(request: NextRequest) {
+  let sponsor;
   try {
-    const sponsor = await requireApprovedSponsor(request);
+    sponsor = await requireApprovedSponsor(request);
+  } catch (error) {
+    return accessDenied(error);
+  }
+
+  try {
     const db = adminDb();
     const accountSnapshot = await db.collection("sponsor_accounts").doc(sponsor.uid).get();
     const account = accountSnapshot.exists ? accountSnapshot.data() : undefined;
@@ -44,7 +66,10 @@ export async function GET(request: NextRequest) {
 
     const [talentSnapshot, conversationSnapshot] = await Promise.all([
       db.collection("sponsor_talent_records").limit(100).get(),
-      db.collection("sponsor_messages").where("sponsorUid", "==", sponsor.uid).orderBy("updatedAt", "desc").limit(100).get(),
+      // Earlier projects may not have Firestore's composite index for this filter
+      // and sort. A missing index must never be translated into an authorization
+      // denial, so the bounded server-side result is sorted after retrieval.
+      db.collection("sponsor_messages").where("sponsorUid", "==", sponsor.uid).limit(100).get(),
     ]);
 
     const talent = talentSnapshot.docs
@@ -52,7 +77,7 @@ export async function GET(request: NextRequest) {
       .filter((record): record is NonNullable<typeof record> => Boolean(record))
       .sort((first, second) => first.displayOrder - second.displayOrder);
 
-    const conversations = await Promise.all(conversationSnapshot.docs.map(async (document) => {
+    const conversations = (await Promise.all(conversationSnapshot.docs.map(async (document) => {
       const messages = await document.ref.collection("thread").orderBy("createdAt", "asc").limit(200).get();
       const data = document.data();
       return {
@@ -64,7 +89,7 @@ export async function GET(request: NextRequest) {
         updatedAt: data.updatedAt,
         thread: messages.docs.map((message) => ({ id: message.id, ...message.data() })),
       };
-    }));
+    }))).sort((first, second) => timestampMillis(second.updatedAt) - timestampMillis(first.updatedAt));
 
     return NextResponse.json({
       sponsor: {
@@ -84,7 +109,11 @@ export async function GET(request: NextRequest) {
       conversations,
     });
   } catch (error) {
-    return accessDenied(error);
+    const code = error && typeof error === "object" && "code" in error && typeof (error as { code?: unknown }).code === "number"
+      ? String((error as { code: number }).code)
+      : "UNKNOWN";
+    console.error("sponsor_dashboard_read_failed", { code });
+    return NextResponse.json({ error: "The Sponsor dashboard is temporarily unavailable. Please try again." }, { status: 500 });
   }
 }
 
