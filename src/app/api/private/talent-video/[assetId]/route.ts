@@ -11,16 +11,15 @@ function notFound() {
   return NextResponse.json({ error: "Talent video not found." }, { status: 404, headers: { "Cache-Control": "no-store" } });
 }
 
-/** Approved sponsors may access linked private videos; administrators may preview only their own uploaded assets. */
+/** Approved sponsors may access linked private videos; authenticated administrators may preview all protected Talent media. */
 export async function GET(request: NextRequest, context: { params: Promise<{ assetId: string }> }) {
   const { assetId } = await context.params;
   if (!assetIdPattern.test(assetId)) return notFound();
 
   try {
     const videoUrl = `/api/talent-video/${assetId}`;
-    let administratorUid: string | null = null;
     try {
-      administratorUid = (await requireAdministrator(request)).uid;
+      await requireAdministrator(request);
     } catch {
       await requireApprovedSponsor(request);
       const linked = await adminDb().collection("sponsor_talent_records").where("mediaUrls", "array-contains", videoUrl).limit(1).get();
@@ -31,7 +30,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ass
     const data = asset.data();
     const storagePath = data?.storagePath;
     const contentType = data?.contentType;
-    if (!asset.exists || (administratorUid && data?.uploadedBy !== administratorUid) || data?.uploadState !== "ready" || typeof storagePath !== "string" || !allowedContentTypes.has(contentType)) return notFound();
+    if (!asset.exists || data?.uploadState !== "ready" || typeof storagePath !== "string" || !allowedContentTypes.has(contentType)) return notFound();
 
     return NextResponse.json({ url: await createTalentVideoReadUrl(storagePath) }, { headers: { "Cache-Control": "private, no-store" } });
   } catch {

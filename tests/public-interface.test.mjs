@@ -369,6 +369,7 @@ test("Talent videos use bounded private storage, administrator-issued upload cap
   assert.match(privateRoute, /requireApprovedSponsor\(request\)/);
   assert.match(privateRoute, /toSponsorTalentCard/);
   assert.match(privateRoute, /"Cache-Control": "private, no-store"/);
+  assert.doesNotMatch(privateRoute, /data\?\.uploadedBy !== administratorUid/);
 
   assert.match(player, /use client/);
   assert.match(player, /getIdToken\(true\)/);
