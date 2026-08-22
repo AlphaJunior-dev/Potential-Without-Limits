@@ -147,4 +147,4 @@
 - [x] Update regression coverage, production build verification, and Vercel preview checks for the revised public Talent release surface.
 - [x] Diagnose and repair the Sponsor login failure from `/login` through Firebase authentication, approved-sponsor claim resolution, and private dashboard routing; do not merge until verified.
 - [ ] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
-- [ ] Correct the shared invalid-credential message so the Admin Login never displays Sponsor invitation guidance, while preserving role-specific routing and access controls.
+- [x] Correct the shared invalid-credential message so the Admin Login never displays Sponsor invitation guidance, while preserving role-specific routing and access controls.
