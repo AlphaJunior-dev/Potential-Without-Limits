@@ -564,3 +564,18 @@ test("Sponsor sign-in validates the secured account before routing and Sponsor O
   assert.match(adminPage, /String\(selectedSponsorOverview\.email \|\| ""\)\.trim\(\)\.toLowerCase\(\)/);
   assert.match(adminPage, /typeof selectedSponsorOverview\.linkedin === "string"/);
 });
+
+test("private Sponsor routes wait for Firebase access resolution before redirecting", async () => {
+  const [dashboard, detail] = await Promise.all([
+    readSource("src/app/sponsor/dashboard/page.tsx"),
+    readSource("src/app/sponsor/talent/[id]/page.tsx"),
+  ]);
+
+  assert.match(dashboard, /loading: authLoading/);
+  assert.match(dashboard, /if \(authLoading\) return;/);
+  assert.match(dashboard, /if \(!user\) \{\s*router\.replace\("\/login"\)/);
+  assert.match(dashboard, /userStatus === "pending"\) router\.replace\("\/pending"\)/);
+  assert.match(detail, /loading: authLoading/);
+  assert.match(detail, /if \(authLoading\) return;/);
+  assert.match(detail, /if \(!user\) \{\s*router\.replace\("\/login"\)/);
+});

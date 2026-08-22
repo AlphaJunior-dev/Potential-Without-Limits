@@ -103,7 +103,7 @@ function conversationTime(value: unknown) {
 }
 
 export default function SponsorDashboardPage() {
-  const { user, userStatus, logout, sendInquiry, replyToFoundationConversation } = useAuth();
+  const { user, userStatus, loading: authLoading, logout, sendInquiry, replyToFoundationConversation } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -124,10 +124,17 @@ export default function SponsorDashboardPage() {
   const [replyingConversation, setReplyingConversation] = useState<string | null>(null);
 
   useEffect(() => {
-    if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") {
+    if (authLoading) return;
+    if (!user) {
       router.replace("/login");
+      return;
     }
-  }, [router, userStatus]);
+    if (userStatus === "admin") {
+      router.replace("/admin");
+      return;
+    }
+    if (userStatus === "pending") router.replace("/pending");
+  }, [authLoading, router, user, userStatus]);
 
   const handlePasswordChange = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -262,7 +269,11 @@ export default function SponsorDashboardPage() {
     if (!categories.includes(feedCategory)) setFeedCategory("All");
   }, [categories, feedCategory]);
 
-  if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") return null;
+  const isResolvingAccess = authLoading || (Boolean(user) && userStatus === "logged_out");
+  if (isResolvingAccess) {
+    return <main className="min-h-screen bg-[#F5F6F0] px-5 py-10 text-sm text-[#0B2E6B]/65 sm:px-8 sm:py-14">Verifying your secure Sponsor access…</main>;
+  }
+  if (!user || userStatus === "pending" || userStatus === "admin") return null;
 
   const profile = dashboard?.sponsor;
   const displayName = profileLabel(profile || { applicationRecorded: false });

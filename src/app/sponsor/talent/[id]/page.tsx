@@ -25,7 +25,7 @@ type PrivateTalentRecord = {
 
 export default function SponsorTalentDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user, userStatus } = useAuth();
+  const { user, userStatus, loading: authLoading } = useAuth();
   const router = useRouter();
   const [record, setRecord] = useState<PrivateTalentRecord | null>(null);
   const [error, setError] = useState("");
@@ -35,11 +35,20 @@ export default function SponsorTalentDetailPage() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   useEffect(() => {
-    if (userStatus === "logged_out" || userStatus === "pending" || userStatus === "admin") router.replace("/login");
-  }, [router, userStatus]);
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+    if (userStatus === "admin") {
+      router.replace("/admin");
+      return;
+    }
+    if (userStatus === "pending") router.replace("/pending");
+  }, [authLoading, router, user, userStatus]);
 
   useEffect(() => {
-    if (!user || userStatus !== "approved" || !id) return;
+    if (authLoading || !user || userStatus !== "approved" || !id) return;
     const authenticatedUser = user;
     let cancelled = false;
     async function loadRecord() {
@@ -63,7 +72,7 @@ export default function SponsorTalentDetailPage() {
     }
     void loadRecord();
     return () => { cancelled = true; };
-  }, [id, router, user, userStatus]);
+  }, [authLoading, id, router, user, userStatus]);
 
   const handleRecordMessage = async (event: React.FormEvent) => {
     event.preventDefault();
