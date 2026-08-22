@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { ArrowUpRight, LockKeyhole, Play, ShieldCheck, Sparkles, MessageCircleHeart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { TalentPhoto } from "@/components/TalentPhoto";
 import { EditorialSplit, PublicAction, PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
 
 export default function HomePage() {
-  const { profiles, foundationVideos, branding, userStatus } = useAuth();
-  const featuredProfiles = profiles.slice(0, 3);
+  const { foundationVideos, branding, userStatus } = useAuth();
   const activeVideo = foundationVideos?.[0];
   const hasApprovedSponsorAccess = userStatus === "approved";
 
@@ -51,20 +49,9 @@ export default function HomePage() {
 
       <section className="border-y border-[#0B2E6B]/8 bg-[#F2F8F4] px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
         <div className="mx-auto max-w-7xl">
-          <SectionHeading eyebrow="Sponsor Talent" title="A glimpse of potential—shared with care." intro={hasApprovedSponsorAccess ? "Your approved sponsor account can explore the full private pipeline from the directory." : "These public overviews reflect only information PWLIF administrators have approved for public display."} />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {featuredProfiles.map((profile, index) => (
-              <article key={profile.id} className="group overflow-hidden rounded-[1.8rem] bg-white shadow-[0_16px_48px_rgba(11,46,107,0.09)]">
-                <div className="relative aspect-[4/3] bg-[#061D45]">
-                  <TalentPhoto src={profile.coverPhoto} alt="Sponsor Talent overview" fill className="object-cover transition duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#061D45]/85 to-transparent p-5"><span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3]">0{index + 1} / {profile.category || "Sponsor Talent"}</span></div>
-                </div>
-                <div className="p-6"><h3 className="font-montserrat text-2xl font-black tracking-[-0.03em] text-[#0B2E6B]">{profile.name || "Sponsor Talent"}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-[#0B2E6B]/66">{profile.bio || profile.dream || "An approved non-identifying overview will appear here."}</p><Link href={hasApprovedSponsorAccess ? `/sponsor/talent/${profile.id}` : `/portfolio/${profile.id}`} className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-[#079432] hover:text-[#14B84A]">{hasApprovedSponsorAccess ? "Open private record" : "Explore overview"} <ArrowUpRight className="h-4 w-4" /></Link></div>
-              </article>
-            ))}
-          </div>
-          {featuredProfiles.length === 0 && <div className="mt-10 rounded-[1.8rem] border border-dashed border-[#0B2E6B]/18 bg-white p-10 text-sm text-[#0B2E6B]/65">No public Sponsor Talent overviews are currently available. PWLIF administrators can publish safe, non-identifying profiles from the Admin Portal.</div>}
-          <div className="mt-10"><PublicAction href={hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents"} label={hasApprovedSponsorAccess ? "Open private Talent directory" : "View Sponsor Talent"} /></div>
+          <SectionHeading eyebrow="Sponsor Talent" title="A careful pathway, not a public directory." intro={hasApprovedSponsorAccess ? "Your approved sponsor account can continue through the private Partnership Desk." : "Individual Sponsor Talent records and media are not part of this public launch. PWLIF begins with a private orientation conversation."} />
+          <div className="mt-12 grid gap-5 md:grid-cols-3">{[["01", "Introduce your work", "Share a short description of your organisation and the support conversation you hope to have."], ["02", "Choose orientation", "Complete the private request and select an introductory call through the booking route."], ["03", "Proceed thoughtfully", "PWLIF will guide the appropriate private next step after orientation."]].map(([number, title, copy]) => <article key={number} className="rounded-[1.75rem] bg-white p-7 shadow-[0_16px_48px_rgba(11,46,107,0.09)]"><span className="font-montserrat text-4xl font-black text-[#14B84A]">{number}</span><h3 className="mt-8 font-montserrat text-2xl font-black tracking-[-0.03em] text-[#0B2E6B]">{title}</h3><p className="mt-4 text-sm leading-7 text-[#0B2E6B]/66">{copy}</p></article>)}</div>
+          <div className="mt-10"><PublicAction href={hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents"} label={hasApprovedSponsorAccess ? "Open Partnership Desk" : "Understand Sponsor Talent"} /></div>
         </div>
       </section>
 

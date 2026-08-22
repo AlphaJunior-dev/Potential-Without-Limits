@@ -10,7 +10,6 @@ test("homepage uses the approved Potential in Motion sequence while avoiding har
 
   for (const marker of [
     "Potential moves when possibility has a pathway.",
-    "A glimpse of potential—shared with care.",
     "An invitation to understand the work before taking part.",
     "From initial interest to an appropriate private connection.",
   ]) {
@@ -210,7 +209,7 @@ test("the redesigned sponsor dashboard uses a dedicated portal header and separa
   assert.doesNotMatch(sponsorRoute, /firebase\/firestore|localStorage|sessionStorage/);
 });
 
-test("approved sponsors automatically receive the private Talent pipeline on shared Foundation pages without changing anonymous public data", async () => {
+test("approved sponsors retain the private Talent pipeline while the limited public launch uses an orientation-led Sponsor Talent handoff", async () => {
   const [provider, homepage, talentsPage, detailPage, publicRoute, adminLibrary] = await Promise.all([
     readSource("src/context/AuthContext.tsx"),
     readSource("src/app/page.tsx"),
@@ -229,11 +228,12 @@ test("approved sponsors automatically receive the private Talent pipeline on sha
   assert.match(provider, /setSponsorProfiles\(\[\]\)/);
   assert.match(provider, /location: record\.region \|\| \(record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"\)/);
   assert.match(homepage, /hasApprovedSponsorAccess/);
-  assert.match(talentsPage, /hasApprovedSponsorAccess/);
-  assert.match(detailPage, /profile\.privateSponsorAccess === true/);
-  assert.match(detailPage, /profile\.publicVisibility\?\.photoVisible === true/);
-  assert.match(detailPage, /const profile = profiles\.find\(\(p\) => p\.id === id\);/);
-  assert.doesNotMatch(detailPage, /profiles\.find\(\(p\) => p\.id === id\) \?\? profiles\[0\]/);
+  assert.match(talentsPage, /Start with orientation, not a public profile\./);
+  assert.match(talentsPage, /Individual records and media are not part of the current public release/);
+  assert.match(detailPage, /Private conversations are the right next step\./);
+  assert.match(detailPage, /does not display a public Talent record in the limited launch/);
+  assert.doesNotMatch(talentsPage, /hasApprovedSponsorAccess/);
+  assert.doesNotMatch(detailPage, /const profile = profiles\.find/);
   assert.match(publicRoute, /readPublicSite\(\)/);
   assert.match(publicRoute, /publicVisibility,/);
   assert.match(publicRoute, /galleryImages: card\.photoUrl \? \[card\.photoUrl\] : \[\]/);
@@ -315,7 +315,7 @@ test("Talent photo uploads use a verified administrator server boundary and pres
   assert.match(imageConfig, /remotePatterns/);
 });
 
-test("Talent videos use bounded private storage, administrator-issued upload capabilities, and explicit public-release consent", async () => {
+test("Talent videos remain in bounded private storage during the limited launch, with no public profile playback surface", async () => {
   const [adminPage, provider, uploadRoute, publicRoute, privateRoute, adminLibrary, mediaLibrary, player, publicDetail, sponsorDetail] = await Promise.all([
     readSource("src/app/admin/page.tsx"),
     readSource("src/context/AuthContext.tsx"),
@@ -381,11 +381,10 @@ test("Talent videos use bounded private storage, administrator-issued upload cap
   assert.match(provider, /galleryVideos\.some\(isSafeTalentVideoUrl\)/);
   assert.match(adminPage, /<TalentVideo src=\{vUrl\} access="private"/);
   assert.match(adminPage, /disabled=\{isImageUploading \|\| isVideoUploading\}/);
-  assert.match(publicDetail, /TalentVideo/);
-  assert.match(publicDetail, /hasCoverPhoto && canSeeVideo/);
-  assert.match(publicDetail, /Approved media/);
-  assert.match(publicDetail, /Watch the approved video/);
-  assert.match(publicDetail, /access=\{videoAccess\}/);
+  assert.match(publicDetail, /Individual Sponsor Talent profiles and media are not part of this public launch/);
+  assert.match(publicDetail, /does not display a public Talent record in the limited launch/);
+  assert.doesNotMatch(publicDetail, /TalentVideo/);
+  assert.doesNotMatch(publicDetail, /Approved media/);
   assert.match(sponsorDetail, /TalentVideo src=\{mediaUrl\} access="private"/);
 });
 
@@ -402,7 +401,7 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
 });
 
-test("the public Talent Showcase uses managed tags and remains empty until a reviewed Talent record is released", async () => {
+test("the limited public Sponsor Talent page is an orientation-led handoff while managed Talent data remains private", async () => {
   const [adminLibrary, adminPage, talentsPage, publicRoute] = await Promise.all([
     readSource("src/lib/admin.ts"),
     readSource("src/app/admin/page.tsx"),
@@ -416,7 +415,9 @@ test("the public Talent Showcase uses managed tags and remains empty until a rev
   assert.match(adminPage, /updateTalentTags/);
   assert.match(adminPage, /Add a new skill or interest/);
   assert.match(adminPage, /consentReference/);
-  assert.match(talentsPage, /talentTags\.filter/);
+  assert.match(talentsPage, /How the public pathway works/);
+  assert.match(talentsPage, /Sponsor Talent details are arranged privately/);
+  assert.doesNotMatch(talentsPage, /talentTags\.filter/);
   assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
 });
 
@@ -465,7 +466,8 @@ test("Foundation conversations accept only server-authorized sponsor messages an
 
   assert.match(navbar, /userStatus === "approved"[\s\S]*?Partnership Desk/);
   assert.match(homepage, /hasApprovedSponsorAccess \? "\/sponsor\/dashboard" : "\/book-a-call"/);
-  assert.match(homepage, /hasApprovedSponsorAccess \? `\/sponsor\/talent\/\$\{profile\.id\}` : `\/portfolio\/\$\{profile\.id\}`/);
+  assert.doesNotMatch(homepage, /\/portfolio\/\$\{profile\.id\}/);
+  assert.doesNotMatch(homepage, /\/sponsor\/talent\/\$\{profile\.id\}/);
 });
 
 test("public forms stay separate from sponsor conversations and preserve their approved contextual fields", async () => {

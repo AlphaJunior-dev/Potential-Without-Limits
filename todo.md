@@ -139,3 +139,6 @@
 - [x] Clarify and repair the Talent video save-and-public-release path so an explicitly approved record can surface on its public profile.
 - [x] Add a distinct consent-controlled Approved video section to public Talent detail pages so an existing cover photo does not hide released video media.
 - [x] Diagnose and repair the confirmed zero-duration Talent video byte-stream failure in the persisted Supabase object or protected delivery response.
+- [x] Remove unstable public Talent detail, gallery, and media playback routes from the limited public launch surface while preserving private records for later repair.
+- [x] Replace public Sponsor Talent discovery with an honest orientation-led overview that does not expose draft Talent data, unverified media, or unavailable profile links.
+- [x] Run focused limited-launch regression, production-build, and preview-response verification before seeking merge approval.
