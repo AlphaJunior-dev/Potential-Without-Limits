@@ -306,6 +306,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await signOut(auth);
           throw new Error("This account is approved for Sponsor access. Please use the Sponsor Login portal.");
         }
+        const sponsorAccess = await fetch("/api/sponsor", {
+          headers: { authorization: `Bearer ${await credential.user.getIdToken(true)}` },
+        });
+        if (!sponsorAccess.ok) {
+          await signOut(auth);
+          throw new Error("Your Sponsor account is not ready for dashboard access yet. Please complete the current PWLIF invitation email to set your password, or ask the foundation to resend the invitation.");
+        }
         setStatus("approved");
         return "approved";
       }

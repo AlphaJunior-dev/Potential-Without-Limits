@@ -552,3 +552,15 @@ test("administrative controls contain no financial CMS and audit rendering is op
   assert.match(adminPage, /Operational Audit Trail/);
   assert.match(adminPage, /Read-only record of protected administrator operations/);
 });
+
+test("Sponsor sign-in validates the secured account before routing and Sponsor Overview tolerates incomplete manual records", async () => {
+  const [provider, adminPage] = await Promise.all([
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/admin/page.tsx"),
+  ]);
+
+  assert.match(provider, /const sponsorAccess = await fetch\("\/api\/sponsor"/);
+  assert.match(provider, /Sponsor account is not ready for dashboard access yet/);
+  assert.match(adminPage, /String\(selectedSponsorOverview\.email \|\| ""\)\.trim\(\)\.toLowerCase\(\)/);
+  assert.match(adminPage, /typeof selectedSponsorOverview\.linkedin === "string"/);
+});

@@ -148,3 +148,5 @@
 - [x] Diagnose and repair the Sponsor login failure from `/login` through Firebase authentication, approved-sponsor claim resolution, and private dashboard routing; do not merge until verified.
 - [ ] Verify a current invited, approved Sponsor account completes sign-in and loads the private dashboard in the preview before any production merge.
 - [x] Correct the shared invalid-credential message so the Admin Login never displays Sponsor invitation guidance, while preserving role-specific routing and access controls.
+- [x] Repair the Sponsor Vetting overview action so it opens the intended record reliably on the current preview instead of a failed deployment page.
+- [ ] Verify the manual approval flow visibly completes the Sponsor invitation, password setup, Firebase claim refresh, and successful private dashboard sign-in before any production merge.

@@ -2863,14 +2863,18 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="sm:col-span-2">
                   <span className="text-[#0B2E6B]/40 block text-[10px] uppercase">LinkedIn Record</span>
-                  <a
-                    href={selectedSponsorOverview.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#079432] hover:underline font-semibold text-xs inline-flex items-center gap-1 mt-0.5"
-                  >
-                    {selectedSponsorOverview.linkedin} <ExternalLink className="w-3 h-3" />
-                  </a>
+                  {typeof selectedSponsorOverview.linkedin === "string" && selectedSponsorOverview.linkedin.trim() ? (
+                    <a
+                      href={selectedSponsorOverview.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#079432] hover:underline font-semibold text-xs inline-flex items-center gap-1 mt-0.5"
+                    >
+                      {selectedSponsorOverview.linkedin} <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="font-semibold text-[#0B2E6B]/60 text-xs block mt-0.5">Not provided</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -2923,9 +2927,9 @@ export default function AdminDashboardPage() {
               <h4 className="font-montserrat font-bold text-xs uppercase tracking-wider text-[#079432] flex items-center gap-1.5">
                 <MessageSquare className="w-3.5 h-3.5" /> Sponsorship Proposals &amp; Message Log
               </h4>
-              {inquiries.filter((i) => i.sponsorEmail?.toLowerCase() === selectedSponsorOverview.email.toLowerCase() || i.sponsorId === selectedSponsorOverview.id).length > 0 ? (
+              {inquiries.filter((i) => String(i.sponsorEmail || "").trim().toLowerCase() === String(selectedSponsorOverview.email || "").trim().toLowerCase() || i.sponsorId === selectedSponsorOverview.id).length > 0 ? (
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                  {inquiries.filter((i) => i.sponsorEmail?.toLowerCase() === selectedSponsorOverview.email.toLowerCase() || i.sponsorId === selectedSponsorOverview.id).map((inq) => (
+                  {inquiries.filter((i) => String(i.sponsorEmail || "").trim().toLowerCase() === String(selectedSponsorOverview.email || "").trim().toLowerCase() || i.sponsorId === selectedSponsorOverview.id).map((inq) => (
                     <div key={inq.id} className="bg-[#FCFCFA] p-3 rounded-xl border border-[#0B2E6B]/10 text-xs space-y-1">
                       <div className="flex items-center justify-between font-bold text-[#0B2E6B]">
                         <span>Target: {inq.talentName}</span>
