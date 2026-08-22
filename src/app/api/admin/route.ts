@@ -1,4 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
+import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import {
   adminAuth,
@@ -71,13 +72,29 @@ async function requestSponsorSetupEmail(email: string) {
   const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${encodeURIComponent(apiKey)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ requestType: "EMAIL_SIGNIN", email, continueUrl, canHandleCodeInApp: true }),
+    body: JSON.stringify({ requestType: "PASSWORD_RESET", email, continueUrl }),
   });
   const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;
   if (!response.ok) {
     const providerMessage = payload?.error?.message;
     throw new Error(providerMessage ? `Firebase could not accept the sponsor invitation request: ${providerMessage}` : "Firebase could not accept the sponsor invitation request.");
   }
+}
+
+async function provisionPasswordSponsorAccount(email: string) {
+  const temporaryPassword = randomBytes(32).toString("base64url");
+  let userRecord;
+  try {
+    userRecord = await adminAuth().getUserByEmail(email);
+    if (userRecord.customClaims?.admin === true) throw new Error("An administrator account cannot be provisioned as a sponsor.");
+    await adminAuth().updateUser(userRecord.uid, { password: temporaryPassword, disabled: false });
+  } catch (error: unknown) {
+    const code = typeof error === "object" && error && "code" in error ? (error as { code?: string }).code : undefined;
+    if (code !== "auth/user-not-found") throw error;
+    userRecord = await adminAuth().createUser({ email, password: temporaryPassword, emailVerified: false, disabled: false });
+  }
+  await adminAuth().setCustomUserClaims(userRecord.uid, { ...(userRecord.customClaims ?? {}), sponsor: true });
+  return userRecord;
 }
 
 export async function GET(request: NextRequest) {
@@ -248,13 +265,7 @@ export async function PATCH(request: NextRequest) {
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
-      let userRecord;
-      try {
-        userRecord = await adminAuth().getUserByEmail(email);
-      } catch {
-        userRecord = await adminAuth().createUser({ email, emailVerified: false, disabled: false });
-      }
-      await adminAuth().setCustomUserClaims(userRecord.uid, { ...(userRecord.customClaims ?? {}), sponsor: true });
+      const userRecord = await provisionPasswordSponsorAccount(email);
       try {
         await requestSponsorSetupEmail(email);
       } catch (error) {
@@ -280,13 +291,7 @@ export async function PATCH(request: NextRequest) {
       const data = application.data();
       const email = typeof data?.email === "string" ? data.email.trim().toLowerCase() : "";
       if (!application.exists || !email || data?.status !== "approved") return NextResponse.json({ error: "Only an approved application with an email address can receive an invitation." }, { status: 400 });
-      let userRecord;
-      try {
-        userRecord = await adminAuth().getUserByEmail(email);
-      } catch {
-        userRecord = await adminAuth().createUser({ email, emailVerified: false, disabled: false });
-      }
-      await adminAuth().setCustomUserClaims(userRecord.uid, { ...(userRecord.customClaims ?? {}), sponsor: true });
+      const userRecord = await provisionPasswordSponsorAccount(email);
       try {
         await requestSponsorSetupEmail(email);
       } catch (error) {

@@ -134,6 +134,9 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.match(provider, /postCallConfirmed: true/);
   assert.match(adminRoute, /body\.action === "sendSponsorInvitation"/);
   assert.match(adminRoute, /requestSponsorSetupEmail/);
+  assert.match(adminRoute, /requestType: "PASSWORD_RESET"/);
+  assert.match(adminRoute, /provisionPasswordSponsorAccount/);
+  assert.match(adminRoute, /randomBytes\(32\)/);
   assert.match(adminRoute, /invitationStatus: "requested"/);
   assert.match(adminRoute, /body\.action === "revokeSponsorAccess"/);
   assert.match(adminRoute, /revokeRefreshTokens/);
@@ -150,9 +153,9 @@ test("sponsor access is issued by post-call verified invitation with sponsor-cho
   assert.match(provider, /signInWithEmailAndPassword/);
   assert.match(loginPage, /\/sponsor\/setup/);
   assert.doesNotMatch(loginPage, /updatePassword|signInWithEmailLink/);
-  assert.match(sponsorSetupPage, /isSignInWithEmailLink/);
-  assert.match(sponsorSetupPage, /signInWithEmailLink/);
-  assert.match(sponsorSetupPage, /updatePassword/);
+  assert.match(sponsorSetupPage, /verifyPasswordResetCode/);
+  assert.match(sponsorSetupPage, /confirmPasswordReset/);
+  assert.match(sponsorSetupPage, /signInWithEmailAndPassword/);
   assert.match(sponsorSetupPage, /validLink === false/);
   assert.match(sponsorSetupPage, /validLink === true && <>/);
   assert.match(sponsorSetupPage, /available only from a current PWLIF invitation link/);
