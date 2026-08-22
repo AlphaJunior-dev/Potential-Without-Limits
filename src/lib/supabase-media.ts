@@ -14,10 +14,38 @@ function talentVideoExtension(contentType: string) {
   throw new Error("UNSUPPORTED_TALENT_VIDEO_TYPE");
 }
 
+/**
+ * Supabase's client appends its own `/storage/v1` segment. Administrators may
+ * reasonably copy the REST endpoint from the dashboard, so accept that common
+ * suffix while ensuring server-side media requests always start at the project
+ * origin. The service credential is never logged or exposed.
+ */
+function normalizeSupabaseServerUrl(rawUrl: string) {
+  const parsed = new URL(rawUrl);
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password) {
+    throw new Error("SUPABASE_MEDIA_URL_INVALID");
+  }
+
+  const apiPath = parsed.pathname.replace(/\/+$/, "");
+  if (apiPath && apiPath !== "/rest/v1" && apiPath !== "/storage/v1") {
+    throw new Error("SUPABASE_MEDIA_URL_INVALID");
+  }
+
+  return parsed.origin;
+}
+
 function serverMediaClient() {
-  const url = process.env.SUPABASE_URL;
+  const rawUrl = process.env.SUPABASE_URL;
   const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !secretKey) throw new Error("SUPABASE_MEDIA_NOT_CONFIGURED");
+  if (!rawUrl || !secretKey) throw new Error("SUPABASE_MEDIA_NOT_CONFIGURED");
+
+  let url: string;
+  try {
+    url = normalizeSupabaseServerUrl(rawUrl);
+  } catch {
+    console.error("Private media URL is invalid", { operation: "normalizeSupabaseServerUrl" });
+    throw new Error("SUPABASE_MEDIA_URL_INVALID");
+  }
 
   return createClient(url, secretKey, {
     auth: { autoRefreshToken: false, persistSession: false },

@@ -161,3 +161,6 @@
 - [ ] Verify the Vercel Production `SUPABASE_SERVICE_ROLE_KEY` is the legacy key for the same Supabase project as `pwlif-media`, then confirm the redeploy can write media without adding public bucket policies.
 - [x] Capture the Supabase storage operation that fails after the corrected Production redeploy and repair any unnecessary per-upload bucket update without changing private bucket access.
 - [ ] Push and merge the authorized private-media upload repair, then verify the resulting Production deployment can accept one Administrator Talent photo upload.
+- [x] Inspect the post-release production storage diagnostic and resolve the remaining Supabase authorization failure without exposing credentials or making the media bucket public.
+- [x] Correct the confirmed Production Supabase storage endpoint path (404 on `getBucket` and `createBucket`) and preserve the existing private media bucket configuration.
+- [ ] Push and merge the authorized Supabase endpoint normalization fix, then confirm the resulting Production deployment can complete one private Administrator Talent photo upload.
