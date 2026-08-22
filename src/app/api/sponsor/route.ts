@@ -13,6 +13,10 @@ function optionalText(value: unknown, maxLength: number) {
 function accessDenied(error: unknown) {
   const message = error instanceof Error ? error.message : "";
   const reason = message === "SPONSOR_ACCESS_REVOKED" ? "revoked" : "authorization";
+  // Keep operational evidence useful while never writing an email, UID, token, or
+  // Sponsor-record content to logs. The internal code is deliberately not returned
+  // to the browser, which continues to receive a generic authorization response.
+  console.warn("sponsor_access_denied", { code: message || "UNKNOWN" });
   return NextResponse.json(
     { error: "Approved sponsor access is required.", reason },
     { status: message === "UNAUTHENTICATED" ? 401 : 403 },

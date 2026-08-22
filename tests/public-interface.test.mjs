@@ -569,7 +569,10 @@ test("Sponsor sign-in validates the secured account before routing and Sponsor O
   assert.match(provider, /Sponsor account is not ready for dashboard access yet/);
   assert.match(provider, /payload\?\.reason === "revoked"/);
   assert.match(sponsorRoute, /reason = message === "SPONSOR_ACCESS_REVOKED" \? "revoked" : "authorization"/);
+  assert.match(sponsorRoute, /console\.warn\("sponsor_access_denied", \{ code: message \|\| "UNKNOWN" \}\)/);
   assert.match(adminLibrary, /Earlier manual-approval records predate UID-keyed `sponsor_accounts` entries/);
+  assert.match(adminLibrary, /SPONSOR_CLAIM_REQUIRED/);
+  assert.match(adminLibrary, /SPONSOR_APPROVAL_REQUIRED/);
   assert.match(adminLibrary, /data\.status === "approved" && data\.accessStatus !== "revoked"/);
   assert.match(adminPage, /String\(selectedSponsorOverview\.email \|\| ""\)\.trim\(\)\.toLowerCase\(\)/);
   assert.match(adminPage, /typeof selectedSponsorOverview\.linkedin === "string"/);

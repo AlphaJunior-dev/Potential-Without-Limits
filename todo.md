@@ -154,3 +154,4 @@
 - [x] Inspect and repair the Firebase account provisioning state for the confirmed approved Sponsor email, including password-provider availability and the Sponsor custom claim, before any merge.
 - [x] Repair the Firebase password-reset invitation handoff by using Firebase’s hosted reset action and returning the approved Sponsor to `/login?setup=complete` after password creation.
 - [ ] Diagnose and repair the approved Sponsor session that briefly loads `/sponsor/dashboard` and then returns to `/login` after successful password sign-in.
+- [ ] Capture server-side evidence for the latest failed Sponsor login and define a public-only soft-launch boundary that does not misrepresent unavailable private access.

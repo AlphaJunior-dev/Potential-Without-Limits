@@ -51,7 +51,7 @@ export async function requireApprovedSponsor(request: NextRequest) {
   if (!token) throw new Error("UNAUTHENTICATED");
 
   const decoded = await adminAuth().verifyIdToken(token);
-  if (decoded.sponsor !== true) throw new Error("FORBIDDEN");
+  if (decoded.sponsor !== true) throw new Error("SPONSOR_CLAIM_REQUIRED");
   const db = adminDb();
   const accountRef = db.collection("sponsor_accounts").doc(decoded.uid);
   let account = await accountRef.get();
@@ -63,13 +63,13 @@ export async function requireApprovedSponsor(request: NextRequest) {
   // application. This preserves the server-side invitation and revocation gates.
   if (!account.exists) {
     const email = typeof decoded.email === "string" ? decoded.email.trim().toLowerCase() : "";
-    if (!email) throw new Error("SPONSOR_ACCOUNT_REQUIRED");
+    if (!email) throw new Error("SPONSOR_EMAIL_REQUIRED");
     const applications = await db.collection("sponsor_applications").where("email", "==", email).limit(20).get();
     const approvedApplication = applications.docs.find((document) => {
       const data = document.data();
       return data.status === "approved" && data.accessStatus !== "revoked";
     });
-    if (!approvedApplication) throw new Error("SPONSOR_ACCOUNT_REQUIRED");
+    if (!approvedApplication) throw new Error("SPONSOR_APPROVAL_REQUIRED");
     await accountRef.set({
       email,
       applicationId: approvedApplication.id,
