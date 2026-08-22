@@ -166,5 +166,8 @@
 - [x] Push and merge the authorized Supabase endpoint normalization fix, then confirm the resulting Production deployment can complete one private Administrator Talent photo upload.
 - [x] Add an administrator-managed Social Links CMS page that supports safe creation, editing, ordering, visibility control, and removal of public foundation social links.
 - [x] Seed the approved Potential Without Limits International Foundation LinkedIn URL and render visible approved social links in the existing public interface.
-- [ ] Release the tested Social Links CMS change and verify the LinkedIn footer entry on the Production deployment.
-- [ ] Push and merge the user-authorized Social Links feature, then confirm the live Production footer displays the approved LinkedIn link.
+- [x] Release the tested Social Links CMS change and verify the LinkedIn footer entry on the Production deployment.
+- [x] Push and merge the user-authorized Social Links feature, then confirm the live Production footer displays the approved LinkedIn link.
+- [ ] Audit and contain the GitHub-detected Google API key exposure in `src/lib/firebase.ts`; rotate or restrict it appropriately, remove tracked key material, and preserve the required Firebase browser configuration.
+- [x] Remove the committed Firebase browser API-key fallback from current source and add a regression test preventing future Google API-key literals in the client configuration.
+- [ ] Release the Firebase browser configuration cleanup after the rotated `NEXT_PUBLIC_FIREBASE_API_KEY` has been saved for Preview and Production, then confirm the new Production build initializes successfully.

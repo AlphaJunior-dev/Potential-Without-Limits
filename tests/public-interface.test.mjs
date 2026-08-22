@@ -627,3 +627,11 @@ test("Social Links are administrator-managed, HTTPS-validated, and publicly limi
   assert.match(cmsData, /DEFAULT_SOCIAL_LINKS/);
   assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
 });
+
+test("Firebase browser configuration receives its API key only from build-time environment configuration", async () => {
+  const firebaseClient = await readSource("src/lib/firebase.ts");
+
+  assert.match(firebaseClient, /apiKey: process\.env\.NEXT_PUBLIC_FIREBASE_API_KEY \|\| ""/);
+  assert.doesNotMatch(firebaseClient, /AIza[0-9A-Za-z_-]{20,}/);
+  assert.doesNotMatch(firebaseClient, /FIREBASE_PRIVATE_KEY|SUPABASE_SERVICE_ROLE_KEY/);
+});
