@@ -186,3 +186,5 @@
 - [x] Enhance the public header with a stronger frosted-glass appearance during scroll while preserving menu access and contrast.
 - [x] Add administrator-managed Team member ordering controls so the public leadership roster can be arranged in the desired role sequence without changing visibility or profile-link settings.
 - [ ] Release the frosted scrolling header and Team ordering controls, then verify the live scroll-state header and a saved Founder-first leadership sequence.
+- [x] Keep the rounded glass treatment on the header only, restore the homepage hero to its normal full-width presentation, and fit five public Team profiles into one readable desktop row.
+- [ ] Release the header-only glass treatment and five-profile Team grid, then verify the normal Production homepage hero and five-profile desktop roster.

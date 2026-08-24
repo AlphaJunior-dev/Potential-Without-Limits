@@ -24,17 +24,15 @@ test("homepage uses the approved Potential in Motion sequence, published Sponsor
   }
 });
 
-test("homepage uses the original PWLIF centred rounded hero composition without adding an unapproved email capture field", async () => {
+test("homepage keeps the glass treatment in the shared header and uses the normal full-width hero without an unapproved email capture field", async () => {
   const [page, hero] = await Promise.all([
     readSource("src/app/page.tsx"),
     readSource("src/components/PublicStory.tsx"),
   ]);
 
-  assert.match(page, /<PublicHero[\s\S]*?centered/);
-  assert.doesNotMatch(page, /PWLIF approach|A considered introduction, not a public transaction\./);
-  assert.match(hero, /if \(centered\)/);
-  assert.match(hero, /rounded-\[2rem\]/);
-  assert.match(hero, /text-center/);
+  assert.match(page, /<PublicHero[\s\S]*?dark/);
+  assert.doesNotMatch(page, /<PublicHero[\s\S]*?centered/);
+  assert.match(hero, /pwlif-motion-field/);
   assert.doesNotMatch(page, /type="email"/);
 });
 
@@ -714,6 +712,8 @@ test("Meet the Team profile links are administrator-managed, HTTPS-only, and exp
   assert.match(teamPage, /Professional social profile/);
   assert.match(teamPage, /rel="noopener noreferrer"/);
   assert.match(teamPage, /whitespace-pre-line/);
+  assert.match(teamPage, /xl:grid-cols-5/);
+  assert.match(teamPage, /max-w-\[92rem\]/);
   assert.doesNotMatch(teamPage, /line-clamp-4/);
 });
 
