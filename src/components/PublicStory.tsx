@@ -15,6 +15,7 @@ export function PublicHero({
   secondaryAction,
   children,
   dark = false,
+  centered = false,
 }: {
   eyebrow: string;
   title: string;
@@ -23,9 +24,37 @@ export function PublicHero({
   secondaryAction?: Action;
   children?: ReactNode;
   dark?: boolean;
+  centered?: boolean;
 }) {
   const textClass = dark ? "text-white" : "text-[#0B2E6B]";
   const mutedClass = dark ? "text-white/72" : "text-[#0B2E6B]/72";
+
+  if (centered) {
+    return (
+      <section className="bg-[#FCFCFA] px-3 pb-4 sm:px-5 sm:pb-6 lg:px-8">
+        <div className={`relative mx-auto max-w-[92rem] overflow-hidden rounded-[2rem] ${dark ? "bg-[#061D45]" : "bg-white"}`}>
+          <div className="pwlif-motion-field opacity-75" aria-hidden="true" />
+          <div className="relative mx-auto flex min-h-[34rem] max-w-5xl flex-col items-center justify-center px-6 py-20 text-center sm:min-h-[38rem] sm:px-10 sm:py-24 lg:min-h-[42rem] lg:px-16">
+            <p className={`mb-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.22em] ${dark ? "text-[#A9F1C3]" : "text-[#079432]"}`}>
+              <span className={`h-px w-8 ${dark ? "bg-[#F7B500]" : "bg-[#0A8CF5]"}`} />
+              {eyebrow}
+              <span className={`h-px w-8 ${dark ? "bg-[#F7B500]" : "bg-[#0A8CF5]"}`} />
+            </p>
+            <h1 className={`max-w-4xl font-montserrat text-5xl font-black leading-[0.98] tracking-[-0.055em] sm:text-6xl md:text-7xl lg:text-[5.65rem] ${textClass}`}>
+              {title}
+            </h1>
+            <p className={`mt-7 max-w-2xl text-base leading-8 sm:text-lg ${mutedClass}`}>{intro}</p>
+            {(primaryAction || secondaryAction) && (
+              <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+                {primaryAction && <PublicAction {...primaryAction} />}
+                {secondaryAction && <Link href={secondaryAction.href} className={`group inline-flex items-center gap-2 rounded-full border px-5 py-3.5 text-sm font-bold transition ${dark ? "border-white/24 text-white hover:border-[#A9F1C3] hover:text-[#A9F1C3]" : "border-[#0B2E6B]/18 text-[#0B2E6B] hover:border-[#079432] hover:text-[#079432]"}`}>{secondaryAction.label}<ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" /></Link>}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`relative overflow-hidden ${dark ? "bg-[#061D45]" : "bg-[#FCFCFA]"}`}>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, MessageCircleHeart, Sparkles } from "lucide-react";
+import { ArrowUpRight, MessageCircleHeart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
 import { EditorialSplit, PublicAction, PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
@@ -15,24 +15,13 @@ export default function HomePage() {
     <div className="overflow-x-hidden bg-[#FCFCFA] text-[#0B2E6B]">
       <PublicHero
         dark
+        centered
         eyebrow={branding?.heroBadgeText || "Potential Without Limits International Foundation"}
         title={branding?.heroHeadline || "Potential moves when possibility has a pathway."}
         intro={branding?.heroSubheadline || "PWLIF creates careful, privacy-first conversations around learning, talent development, mentorship, and the people ready to support that journey."}
         primaryAction={{ href: hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents", label: hasApprovedSponsorAccess ? "View Sponsor Talent Pipeline" : branding?.heroCtaText || "Explore Sponsor Talent" }}
         secondaryAction={hasApprovedSponsorAccess ? { href: "/sponsor/dashboard", label: "Open Partnership Desk" } : { href: "/book-a-call", label: branding?.heroSecondaryCtaText || "Book Sponsor Orientation" }}
-      >
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-white/8 p-7 shadow-2xl backdrop-blur-sm">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(20,184,74,0.32),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(183,21,200,0.25),transparent_42%)]" />
-          <div className="relative">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#F7B500] text-[#061D45]"><Sparkles className="h-5 w-5" /></span>
-            <p className="mt-12 text-[10px] font-bold uppercase tracking-[0.18em] text-[#A9F1C3]">PWLIF approach</p>
-            <p className="mt-3 font-montserrat text-2xl font-bold leading-tight text-white">A considered introduction, not a public transaction.</p>
-            <div className="mt-8 grid grid-cols-3 gap-3 border-t border-white/12 pt-5 text-[10px] font-bold uppercase tracking-[0.09em] text-white/60">
-              <span>Listen</span><span>Orient</span><span>Connect</span>
-            </div>
-          </div>
-        </div>
-      </PublicHero>
+      />
 
       <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
         <div className="mx-auto max-w-7xl">

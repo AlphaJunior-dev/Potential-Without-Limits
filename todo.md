@@ -181,3 +181,5 @@
 - [ ] Release the validated Mission & Vision president-photo feature and verify a saved president photo renders in the public founding-perspective section.
 - [x] Repair the public Meet the Team card layout so every administrator-approved biography is fully readable without weakening visibility or profile-link controls.
 - [ ] Release the full Team biography rendering repair and verify the saved public biography is fully visible on the Production Team page.
+- [x] Redesign the public homepage hero and header as an original PWLIF rounded-shell, centred composition informed by the provided reference while preserving navigation and authorization behavior.
+- [ ] Release the rounded homepage hero and header redesign and verify the new Production homepage layout and navigation behavior.
