@@ -68,7 +68,7 @@ const safeMission: MissionVisionData = {
   mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
   vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
   foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
-  foundersTitle: "Potential Without Limits International Foundation", pillars: [], lastUpdated: "",
+  foundersTitle: "Potential Without Limits International Foundation", presidentPhotoUrl: "", pillars: [], lastUpdated: "",
 };
 
 function isTemporaryMissionCopy(value: unknown) {
@@ -84,6 +84,7 @@ const safeLegal: LegalSecurityConfig = { termsContent: "", privacyContent: "", s
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const internalTalentPhotoPattern = /^\/api\/talent-photo\/[A-Za-z0-9_-]{8,80}$/;
 const internalTalentVideoPattern = /^\/api\/talent-video\/[A-Za-z0-9_-]{8,80}$/;
+const internalMissionPresidentPhotoPattern = /^\/api\/mission-president-photo\/[A-Za-z0-9_-]{8,80}$/;
 const MAX_TALENT_PHOTO_SOURCE_BYTES = 4 * 1024 * 1024;
 const MAX_TALENT_VIDEO_SOURCE_BYTES = 50 * 1024 * 1024;
 
@@ -105,6 +106,10 @@ async function prepareTalentPhotoForPrivateMedia(source: File) {
 
 function isSafeTalentPhotoUrl(value: unknown) {
   return typeof value === "string" && (/^https:\/\//i.test(value) || internalTalentPhotoPattern.test(value));
+}
+
+function isSafeMissionPresidentPhotoUrl(value: unknown): value is string {
+  return typeof value === "string" && internalMissionPresidentPhotoPattern.test(value);
 }
 
 function noClientAuthority() {
@@ -401,6 +406,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result.url;
   };
 
+  const uploadMissionPresidentPhoto = async (photo: File) => {
+    if (!user || userStatus !== "admin") throw new Error("Administrator access is required to upload the president photo.");
+    const token = await user.getIdToken(true);
+    const preparedPhoto = await prepareTalentPhotoForPrivateMedia(photo);
+    const form = new FormData();
+    form.append("photo", preparedPhoto);
+    const response = await fetch("/api/admin/mission-president-photo", {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` },
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !isSafeMissionPresidentPhotoUrl(result?.url)) {
+      throw new Error(typeof result?.error === "string" ? result.error : "The president photo could not be stored.");
+    }
+    return result.url;
+  };
+
   const uploadTalentVideo = async (video: File) => {
     if (!user || userStatus !== "admin") throw new Error("Administrator access is required to upload a Talent video.");
     if (!/^(video\/mp4|video\/webm)$/i.test(video.type) || video.size < 1 || video.size > MAX_TALENT_VIDEO_SOURCE_BYTES) {
@@ -585,7 +608,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     submitSupportInquiry: (name: string, email: string, subject: string, message: string, source = "Support Concierge") => {
       void fetch("/api/contact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, email, subject, message, source }) });
     },
-    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, uploadTalentVideo, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateEditorialPages, updateMissionVision, updateTeamMembers, updateSocialLinks, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string) => runOperationalAction("resolvePublicSubmission", { submissionId: itemId }), resolveSponsorConversation: (itemId: string) => runOperationalAction("resolveInboxItem", { itemId }), replyToSponsorConversation, replyToFoundationConversation, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
+    register: noClientAuthority, approveSponsor, rejectSponsor, deleteSponsor, revokeSponsorAccess, updateSponsorPassword: noClientAuthority, updateSponsorCategoryAndTier: noClientAuthority, generateCredentials, provisionSponsorManual, updateSponsorProfile: noClientAuthority, completeFirstTimeProfile: noClientAuthority, approveTalentAddition: noClientAuthority, rejectTalentAddition: noClientAuthority, uploadTalentPhoto, uploadMissionPresidentPhoto, uploadTalentVideo, addProfile: (profile: YouthProfile) => saveTalentRecord(profile), updateProfile: (profile: YouthProfile) => saveTalentRecord(profile, profile.id), deleteProfile: (id: string) => runOperationalAction("deleteTalentRecord", { talentId: id }), updateBranding, updateLegalSecurity, updateEditorialPages, updateMissionVision, updateTeamMembers, updateSocialLinks, updateTalentTags, updateTalentCategories, addFaqItem: noClientAuthority, updateFaqItem: noClientAuthority, deleteFaqItem: noClientAuthority, resolveSupportInquiry: (itemId: string) => runOperationalAction("resolvePublicSubmission", { submissionId: itemId }), resolveSponsorConversation: (itemId: string) => runOperationalAction("resolveInboxItem", { itemId }), replyToSponsorConversation, replyToFoundationConversation, addTransparencyReport: noClientAuthority, deleteTransparencyReport: noClientAuthority, addFoundationVideo: async (video: FlexibleRecord) => updateFoundationVideos([...foundationVideos, video]), deleteFoundationVideo: async (id: string) => updateFoundationVideos(foundationVideos.filter((video) => video.id !== id)), adoptSponsorDream: noClientAuthority, logAuditAction: noClientAuthority, setUserStatus: noClientAuthority, sendInquiry,
   }), [adminRole, adminProfiles, auditLogs, branding, editorialPages, faqItems, foundationVideos, inquiries, legalSecurity, loading, missionVision, pendingSponsors, profiles, publicProfiles, publicSubmissions, socialLinks, sponsorConversations, sponsorProfiles, talentCategories, talentTags, teamMembers, user, userStatus]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

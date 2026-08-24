@@ -21,6 +21,7 @@ export interface MissionVisionData {
   vision: string;
   foundersNote: string;
   foundersTitle: string;
+  presidentPhotoUrl?: string;
   pillars: {
     title: string;
     description: string;
@@ -193,6 +194,7 @@ export const INITIAL_MISSION_VISION: MissionVisionData = {
   vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
   foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
   foundersTitle: "Potential Without Limits International Foundation",
+  presidentPhotoUrl: "",
   pillars: [],
   lastUpdated: "2026-08-01",
 };

@@ -176,3 +176,6 @@
 - [x] Push and merge the user-authorized Meet the Team title repair, then confirm the Production deployment preserves the next saved role title verbatim.
 - [x] Add a Meet the Team CMS professional social-profile link field with HTTPS validation, per-member public visibility control, and safe direct-link rendering on the public Team page.
 - [ ] Release the tested Team profile-link feature and verify a saved visible profile link renders on the Production Team page.
+- [ ] Assess the current public homepage UI and propose an approved visual refinement before making any implementation changes.
+- [x] Add an administrator-managed Mission & Vision president-photo upload with protected storage, validation, and public rendering only in the existing right-hand founding-perspective section.
+- [ ] Release the validated Mission & Vision president-photo feature and verify a saved president photo renders in the public founding-perspective section.

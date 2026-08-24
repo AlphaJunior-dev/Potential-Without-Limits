@@ -137,6 +137,7 @@ export default function AdminDashboardPage() {
     addFoundationVideo,
     deleteFoundationVideo,
     uploadTalentPhoto,
+    uploadMissionPresidentPhoto,
     uploadTalentVideo,
     talentTags,
     updateTalentTags,
@@ -303,6 +304,9 @@ export default function AdminDashboardPage() {
   const [visionText, setVisionText] = useState(missionVision?.vision || INITIAL_MISSION_VISION.vision);
   const [foundersNoteText, setFoundersNoteText] = useState(missionVision?.foundersNote || INITIAL_MISSION_VISION.foundersNote);
   const [foundersTitleText, setFoundersTitleText] = useState(missionVision?.foundersTitle || INITIAL_MISSION_VISION.foundersTitle);
+  const [presidentPhotoUrl, setPresidentPhotoUrl] = useState(missionVision?.presidentPhotoUrl || "");
+  const [isUploadingPresidentPhoto, setIsUploadingPresidentPhoto] = useState(false);
+  const [presidentPhotoUploadError, setPresidentPhotoUploadError] = useState<string | null>(null);
   const [pillars, setPillars] = useState(missionVision?.pillars || INITIAL_MISSION_VISION.pillars);
   const [cmsSavedNotice, setCmsSavedNotice] = useState(false);
 
@@ -516,6 +520,7 @@ export default function AdminDashboardPage() {
         vision: visionText,
         foundersNote: foundersNoteText,
         foundersTitle: foundersTitleText,
+        presidentPhotoUrl,
         pillars,
         lastUpdated: new Date().toISOString().split("T")[0],
       });
@@ -524,6 +529,26 @@ export default function AdminDashboardPage() {
       setTimeout(() => setCmsSavedNotice(false), 3000);
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save Mission & Vision. Check your connection and try again.");
+    }
+  };
+
+  const handlePresidentPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (!photo) return;
+    setPresidentPhotoUploadError(null);
+    setIsUploadingPresidentPhoto(true);
+    try {
+      const preparedPhoto = await prepareTeamHeadshotUpload(photo);
+      const url = await uploadMissionPresidentPhoto(preparedPhoto);
+      setPresidentPhotoUrl(url);
+      triggerToast("✓ President Photo Stored", "Save Mission & Vision to publish this photo in the right-hand founding-perspective section.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The president photo could not be stored.";
+      setPresidentPhotoUploadError(message);
+      triggerToast("✗ President Photo Not Stored", message);
+    } finally {
+      setIsUploadingPresidentPhoto(false);
+      e.target.value = "";
     }
   };
 
@@ -1734,6 +1759,23 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setFoundersTitleText(e.target.value)}
                   className="w-full p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
                 />
+              </div>
+
+              <div className="rounded-xl border border-[#0B2E6B]/10 bg-[#F8FAFC] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <label className="block text-[#0B2E6B]/80 font-semibold">President Photo</label>
+                    <p className="mt-1 max-w-xl text-[11px] leading-5 text-[#0B2E6B]/60">Upload a JPEG, PNG, or WebP portrait. It is stored privately first and appears publicly only after you save these Mission &amp; Vision updates.</p>
+                  </div>
+                  {presidentPhotoUrl && <button type="button" onClick={() => setPresidentPhotoUrl("")} className="rounded-lg border border-[#0B2E6B]/15 px-3 py-2 text-[11px] font-bold text-[#0B2E6B] hover:border-red-300 hover:text-red-600">Remove selection</button>}
+                </div>
+                <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#0B2E6B] px-4 py-2.5 text-[11px] font-bold text-white transition hover:brightness-110">
+                  <Upload className="h-4 w-4" />
+                  <span>{isUploadingPresidentPhoto ? "Preparing photo…" : presidentPhotoUrl ? "Replace president photo" : "Upload president photo"}</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePresidentPhotoUpload} disabled={isUploadingPresidentPhoto} className="sr-only" />
+                </label>
+                {presidentPhotoUrl && <p className="mt-3 text-[11px] font-semibold text-emerald-700">A president photo is ready. Select “Publish CMS Updates” to display it on the public page.</p>}
+                {presidentPhotoUploadError && <p role="alert" className="mt-3 text-[11px] font-semibold text-red-600">{presidentPhotoUploadError}</p>}
               </div>
 
               <div className="pt-2 flex justify-end">

@@ -179,6 +179,11 @@ function safeAssetUrl(value: unknown) {
   }
 }
 
+function safeMissionPresidentPhotoUrl(value: unknown) {
+  const url = safeAssetUrl(value);
+  return url && /^\/api\/mission-president-photo\/[A-Za-z0-9_-]{8,80}$/.test(url) ? url : undefined;
+}
+
 function safeTalentVideoUrl(value: unknown) {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
@@ -216,6 +221,7 @@ export function sanitizePublicMissionVision(input: unknown) {
     vision: safePublicText(source.vision, 1_500),
     foundersNote: safePublicText(source.foundersNote, 2_000),
     foundersTitle: safePublicText(source.foundersTitle, 180),
+    ...(safeMissionPresidentPhotoUrl(source.presidentPhotoUrl) ? { presidentPhotoUrl: safeMissionPresidentPhotoUrl(source.presidentPhotoUrl) } : {}),
     pillars,
     lastUpdated: new Date().toISOString().slice(0, 10),
   };
