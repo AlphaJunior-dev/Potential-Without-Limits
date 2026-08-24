@@ -184,6 +184,12 @@ function safeMissionPresidentPhotoUrl(value: unknown) {
   return url && /^\/api\/mission-president-photo\/[A-Za-z0-9_-]{8,80}$/.test(url) ? url : undefined;
 }
 
+function safeMissionPhotoFrameValue(value: unknown, fallback: number, minimum: number, maximum: number) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(minimum, Math.min(maximum, Math.round(value)))
+    : fallback;
+}
+
 function safeTalentVideoUrl(value: unknown) {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
@@ -207,6 +213,7 @@ function safeTeamText(value: unknown, maxLength: number) {
 
 export function sanitizePublicMissionVision(input: unknown) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const presidentPhotoUrl = safeMissionPresidentPhotoUrl(source.presidentPhotoUrl);
   const pillars = Array.isArray(source.pillars)
     ? source.pillars.slice(0, 8).map((pillar) => {
       const item = pillar && typeof pillar === "object" ? pillar as Record<string, unknown> : {};
@@ -221,7 +228,11 @@ export function sanitizePublicMissionVision(input: unknown) {
     vision: safePublicText(source.vision, 1_500),
     foundersNote: safePublicText(source.foundersNote, 2_000),
     foundersTitle: safePublicText(source.foundersTitle, 180),
-    ...(safeMissionPresidentPhotoUrl(source.presidentPhotoUrl) ? { presidentPhotoUrl: safeMissionPresidentPhotoUrl(source.presidentPhotoUrl) } : {}),
+    ...(presidentPhotoUrl ? {
+      presidentPhotoUrl,
+      presidentPhotoFocusY: safeMissionPhotoFrameValue(source.presidentPhotoFocusY, 35, 0, 100),
+      presidentPhotoZoom: safeMissionPhotoFrameValue(source.presidentPhotoZoom, 100, 100, 150),
+    } : {}),
     pillars,
     lastUpdated: new Date().toISOString().slice(0, 10),
   };

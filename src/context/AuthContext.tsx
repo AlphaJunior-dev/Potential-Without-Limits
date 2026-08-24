@@ -68,7 +68,7 @@ const safeMission: MissionVisionData = {
   mission: "PWLIF develops community-informed Sponsor Talent opportunities through careful partnership, learning, and youth potential.",
   vision: "A future in which young people can access dignified, locally guided pathways to learn and thrive.",
   foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
-  foundersTitle: "Potential Without Limits International Foundation", presidentPhotoUrl: "", pillars: [], lastUpdated: "",
+  foundersTitle: "Potential Without Limits International Foundation", presidentPhotoUrl: "", presidentPhotoFocusY: 35, presidentPhotoZoom: 100, pillars: [], lastUpdated: "",
 };
 
 function isTemporaryMissionCopy(value: unknown) {
