@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, MessageCircleHeart } from "lucide-react";
+import { ArrowUpRight, Lock, MessageCircleHeart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
 import { EditorialSplit, PublicAction, PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
 
 export default function HomePage() {
-  const { profiles, branding, userStatus } = useAuth();
-  const featuredProfiles = profiles.slice(0, 3);
+  const { profiles, publicProfiles, branding, userStatus } = useAuth();
   const hasApprovedSponsorAccess = userStatus === "approved";
+  const featuredProfiles = (hasApprovedSponsorAccess ? profiles : publicProfiles).slice(0, 3);
 
   return (
     <div className="overflow-x-hidden bg-[#FCFCFA] text-[#0B2E6B]">
@@ -40,15 +40,19 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <SectionHeading eyebrow="Sponsor Talent" title="A glimpse of potential—shared with care." intro={hasApprovedSponsorAccess ? "Your approved sponsor account can explore the full private pipeline from the directory." : "These public overviews show only the information PWLIF administrators have explicitly approved for public display."} />
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {featuredProfiles.map((profile, index) => (
-              <article key={profile.id} className="group overflow-hidden rounded-[1.8rem] bg-white shadow-[0_16px_48px_rgba(11,46,107,0.09)]">
+            {featuredProfiles.map((profile, index) => {
+              const visibility = profile.publicVisibility;
+              const canSee = (field: "photoVisible" | "summaryVisible" | "storyVisible") => hasApprovedSponsorAccess || visibility?.[field] === true;
+              const canSeePhoto = canSee("photoVisible") && Boolean(profile.coverPhoto && profile.coverPhoto !== "/pwlif-logo.png");
+              const overview = (canSee("storyVisible") && profile.story) || (canSee("summaryVisible") && profile.bio) || "A carefully reviewed, non-identifying overview will appear here when PWLIF chooses to share more.";
+              return <article key={profile.id} className="group overflow-hidden rounded-[1.8rem] bg-white shadow-[0_16px_48px_rgba(11,46,107,0.09)]">
                 <div className="relative aspect-[4/3] bg-[#061D45]">
-                  <TalentPhoto src={profile.coverPhoto} alt="Sponsor Talent overview" fill className="object-cover transition duration-700 group-hover:scale-105" />
+                  {canSeePhoto ? <TalentPhoto src={profile.coverPhoto} alt="Sponsor Talent overview" fill className="object-cover transition duration-700 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_72%_22%,rgba(20,184,74,0.25),transparent_38%),linear-gradient(135deg,#061D45,#0B2E6B)]"><div className="text-center"><Lock className="mx-auto h-6 w-6 text-[#A9F1C3]" /><p className="mt-3 text-xs font-semibold text-white/75">Cover image not published</p></div></div>}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#061D45]/85 to-transparent p-5"><span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#A9F1C3]">{String(index + 1).padStart(2, "0")} / {profile.category || "Sponsor Talent"}</span></div>
                 </div>
-                <div className="p-6"><h3 className="font-montserrat text-2xl font-black tracking-[-0.03em] text-[#0B2E6B]">{profile.name || "Sponsor Talent"}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-[#0B2E6B]/66">{profile.story || profile.bio || profile.dream || "An approved non-identifying overview will appear here."}</p><Link href={hasApprovedSponsorAccess ? `/sponsor/talent/${profile.id}` : `/portfolio/${profile.id}`} className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-[#079432] hover:text-[#14B84A]">{hasApprovedSponsorAccess ? "Open private record" : "Explore overview"} <ArrowUpRight className="h-4 w-4" /></Link></div>
+                <div className="p-6"><h3 className="font-montserrat text-2xl font-black tracking-[-0.03em] text-[#0B2E6B]">{profile.name || "Sponsor Talent"}</h3><p className="mt-3 line-clamp-3 text-sm leading-6 text-[#0B2E6B]/66">{overview}</p><Link href={hasApprovedSponsorAccess ? `/sponsor/talent/${profile.id}` : `/portfolio/${profile.id}`} className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-[#079432] hover:text-[#14B84A]">{hasApprovedSponsorAccess ? "Open private record" : "Explore overview"} <ArrowUpRight className="h-4 w-4" /></Link></div>
               </article>
-            ))}
+            })}
           </div>
           {featuredProfiles.length === 0 && <div className="mt-10 rounded-[1.8rem] border border-dashed border-[#0B2E6B]/18 bg-white p-10 text-sm text-[#0B2E6B]/65">No public Sponsor Talent overviews are currently available. PWLIF administrators can publish safe, non-identifying profiles from the Admin Portal.</div>}
           <div className="mt-10"><PublicAction href={hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents"} label={hasApprovedSponsorAccess ? "Open private Talent directory" : "View Sponsor Talent"} /></div>

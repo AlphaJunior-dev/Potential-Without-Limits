@@ -46,36 +46,56 @@ export async function GET() {
     profiles: site.pilotCards.map((card) => {
       const showcaseCard = card as typeof card & { ageBand?: string; region?: string; skills?: string[]; story?: string; aspiration?: string; supportPathway?: string };
       const mediaUrls = Array.isArray(card.mediaUrls) ? card.mediaUrls : [];
-      const publicVisibility = card.visibility || {
+      const publicVisibility: {
+        profileVisible: boolean;
+        photoVisible: boolean;
+        mediaVisible: boolean;
+        summaryVisible: boolean;
+        ageBandVisible?: boolean;
+        regionVisible?: boolean;
+        skillsVisible?: boolean;
+        storyVisible?: boolean;
+        aspirationVisible?: boolean;
+        supportPathwayVisible?: boolean;
+      } = card.visibility || {
         profileVisible: true,
         photoVisible: Boolean(card.photoUrl),
         mediaVisible: mediaUrls.length > 0,
         summaryVisible: true,
       };
+      const showPhoto = publicVisibility.photoVisible === true && Boolean(card.photoUrl);
+      const showMedia = publicVisibility.mediaVisible === true;
+      const showSummary = publicVisibility.summaryVisible === true;
+      const showAgeBand = publicVisibility.ageBandVisible === true;
+      const showRegion = publicVisibility.regionVisible === true;
+      const showSkills = publicVisibility.skillsVisible === true;
+      const showStory = publicVisibility.storyVisible === true;
+      const showAspiration = publicVisibility.aspirationVisible === true;
+      const showSupportPathway = publicVisibility.supportPathwayVisible === true;
       return {
         id: card.id,
         name: card.title,
         age: 0,
         category: card.supportArea || "Sponsor Talent",
-        location: showcaseCard.region || "Sponsor Talent",
-        country_community: showcaseCard.region || "Sponsor Talent",
-        bio: card.summary,
-        coverPhoto: card.photoUrl || "/pwlif-logo.png",
-        galleryImages: card.photoUrl ? [card.photoUrl] : [],
-        galleryVideos: mediaUrls,
+        location: showRegion ? showcaseCard.region || "" : "",
+        country_community: showRegion ? showcaseCard.region || "" : "",
+        bio: showSummary ? card.summary : "",
+        coverPhoto: showPhoto ? card.photoUrl : "/pwlif-logo.png",
+        galleryImages: showPhoto && card.photoUrl ? [card.photoUrl] : [],
+        galleryVideos: showMedia ? mediaUrls : [],
         publicVisibility,
         status: "active" as const,
-        skills: Array.isArray(showcaseCard.skills) ? showcaseCard.skills : [],
-        dream: showcaseCard.aspiration || card.summary,
-        current_situation: showcaseCard.story || "Information is shared through appropriate private conversations.",
+        skills: showSkills && Array.isArray(showcaseCard.skills) ? showcaseCard.skills : [],
+        dream: showAspiration ? showcaseCard.aspiration || "" : "",
+        current_situation: showStory ? showcaseCard.story || "" : "",
         progress: "",
-        current_needs: showcaseCard.supportPathway || card.supportArea || "Orientation conversation",
+        current_needs: showSupportPathway ? showcaseCard.supportPathway || "" : "",
         consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" },
-        ageBand: showcaseCard.ageBand || "",
-        region: showcaseCard.region || "",
-        story: showcaseCard.story || "",
-        aspiration: showcaseCard.aspiration || "",
-        supportPathway: showcaseCard.supportPathway || "",
+        ageBand: showAgeBand ? showcaseCard.ageBand || "" : "",
+        region: showRegion ? showcaseCard.region || "" : "",
+        story: showStory ? showcaseCard.story || "" : "",
+        aspiration: showAspiration ? showcaseCard.aspiration || "" : "",
+        supportPathway: showSupportPathway ? showcaseCard.supportPathway || "" : "",
       };
     }),
     talentTags: site.talentTags.filter((tag) => tag.status === "active"),

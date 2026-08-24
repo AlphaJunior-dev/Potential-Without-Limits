@@ -295,7 +295,6 @@ export default function AdminDashboardPage() {
   const [story, setStory] = useState("");
   const [aspiration, setAspiration] = useState("");
   const [supportPathway, setSupportPathway] = useState("");
-  const [consentReference, setConsentReference] = useState("");
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [isVideoUploading, setIsVideoUploading] = useState(false);
@@ -420,11 +419,11 @@ export default function AdminDashboardPage() {
             aspiration,
             supportPathway,
             consentRecord: {
+              ...existing.consentRecord,
               parentalConsent: true,
               mediaReleasePermission: mediaReleasePermission,
               signedDate: existing.consentRecord?.signedDate || "2026-01-10",
               guardianName: existing.consentRecord?.guardianName || "Parent/Guardian",
-              reference: consentReference,
             }
           });
         }
@@ -459,8 +458,7 @@ export default function AdminDashboardPage() {
             parentalConsent: true,
             mediaReleasePermission: mediaReleasePermission,
             signedDate: "2026-01-10",
-              guardianName: "Parent/Guardian",
-              reference: consentReference,
+            guardianName: "Parent/Guardian",
             }
         };
         await addProfile(newProfile);
@@ -479,7 +477,6 @@ export default function AdminDashboardPage() {
       setStory("");
       setAspiration("");
       setSupportPathway("");
-      setConsentReference("");
       setMediaReleasePermission(false);
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save talent profile. Check your connection and try again.");
@@ -502,7 +499,6 @@ export default function AdminDashboardPage() {
     setStory(p.story || p.current_situation || "");
     setAspiration(p.aspiration || p.dream || "");
     setSupportPathway(p.supportPathway || p.current_needs || "");
-    setConsentReference(p.consentRecord?.reference || "");
     setMediaReleasePermission(p.consentRecord?.mediaReleasePermission === true);
   };
 
@@ -1474,7 +1470,7 @@ export default function AdminDashboardPage() {
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Where they are heading</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved learning or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">What support could unlock</label><input value={supportPathway} onChange={(event) => setSupportPathway(event.target.value)} placeholder="Examples: mentoring, equipment, training, creative materials" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 
-	                  <div className="space-y-2 rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent record — never public</p><input value={consentReference} onChange={(event) => setConsentReference(event.target.value)} placeholder="Consent reference / internal file ID" className="w-full rounded-lg border border-amber-700/15 bg-white p-2 text-[#0B2E6B]" /><p className="text-[10px] leading-relaxed text-amber-900/70">Consent review is handled by your safeguarding team. This CMS keeps only the private reference and the public-release switches.</p></div>
+	                  <div className="rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent safeguard</p><p className="mt-2 text-[10px] leading-relaxed text-amber-900/70">Consent review remains a private safeguarding responsibility. Public visibility and approved-media controls are the only publication controls shown in this editor.</p></div>
 
 	                  {/* Persistent server-authorized Talent photo uploads */}
                   <div className="p-3 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl space-y-2">

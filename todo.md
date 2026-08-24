@@ -194,3 +194,6 @@
 - [ ] Release the aligned Team card layout and verify the five-profile desktop roster maintains consistent role, name, biography, and link regions with live records.
 - [x] Add Mission & Vision president-photo guidance and administrator-controlled crop positioning so the public right-hand portrait panel preserves the intended framing.
 - [ ] Release the president-photo framing controls and verify a saved portrait framing keeps the president visible in the public Mission & Vision image panel.
+- [x] Repair public Talent field rendering so only explicitly selected visibility controls display, remove the unused Consent ID field from Talent CMS, and give the public Talent detail panel a clear support and enquiry purpose.
+- [ ] Release the validated Talent visibility repair and confirm a live public record displays only the selected fields, the removed Consent ID input stays absent, and the detail support panel routes safely to orientation.
+- [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent visibility repair.
