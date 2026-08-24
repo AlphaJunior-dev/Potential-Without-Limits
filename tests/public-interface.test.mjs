@@ -648,3 +648,20 @@ test("Meet the Team role titles retain the exact administrator-entered wording",
   assert.doesNotMatch(teamSanitizers, /const role = safePublicText\(item\.role, 160\)/);
   assert.match(provider, /setTeamMembers\(Array\.isArray\(data\.site\?\.teamMembers\)/);
 });
+
+test("Meet the Team profile links are administrator-managed, HTTPS-only, and explicitly public", async () => {
+  const [adminPage, adminLibrary, teamPage] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/meet-the-team/page.tsx"),
+  ]);
+
+  assert.match(adminPage, /Professional Social Profile Link/);
+  assert.match(adminPage, /memberProfileLink/);
+  assert.match(adminPage, /Use a complete HTTPS professional profile link/);
+  assert.match(adminPage, /Show public profile link/);
+  assert.match(adminLibrary, /safeAssetUrl\(item\.linkedinUrl\)/);
+  assert.match(teamPage, /member\.linkedinUrl/);
+  assert.match(teamPage, /Professional social profile/);
+  assert.match(teamPage, /rel="noopener noreferrer"/);
+});
