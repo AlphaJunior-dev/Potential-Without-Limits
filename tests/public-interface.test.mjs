@@ -462,7 +462,9 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /event\.key === "Escape"/);
   assert.match(navbar, /rounded-\[1\.65rem\]/);
   assert.match(navbar, /top-\[5\.25rem\]/);
+  assert.match(navbar, /-mb-\[5\.25rem\]/);
   assert.match(navbar, /nav-glass-scrolled/);
+  assert.doesNotMatch(navbar, /bg-\[\#FCFCFA\]\/55 backdrop-blur-md/);
   assert.match(globals, /\.nav-glass-scrolled/);
   assert.match(globals, /backdrop-filter: blur\(24px\) saturate\(155%\)/);
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);

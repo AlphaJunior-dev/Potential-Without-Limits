@@ -55,11 +55,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 h-[5.25rem] bg-[#FCFCFA] px-3 py-2 transition-all duration-300 font-inter sm:px-5 ${
-        isScrolled
-          ? "bg-[#FCFCFA]/55 backdrop-blur-md"
-          : "bg-[#FCFCFA]"
-      }`}
+      className="sticky top-0 z-50 -mb-[5.25rem] h-[5.25rem] bg-transparent px-3 py-2 font-inter sm:px-5"
     >
       <div className={`mx-auto flex h-full max-w-[92rem] items-center justify-between rounded-[1.65rem] border px-5 transition-all duration-300 sm:px-8 lg:px-10 ${isScrolled ? "nav-glass-scrolled" : "border-[#0B2E6B]/8 bg-white shadow-[0_8px_24px_rgba(11,46,107,0.06)]"}`}>
         {/* Brand Logo & Title */}
