@@ -25,6 +25,8 @@ const fallbackMissionVision = {
   foundersNote: "Our work will be guided by careful listening, safeguarding, and respectful partnership.",
   foundersTitle: "Potential Without Limits International Foundation",
   presidentPhotoUrl: "",
+  presidentPhotoFocusY: 35,
+  presidentPhotoZoom: 100,
   pillars: [],
   lastUpdated: "",
 };

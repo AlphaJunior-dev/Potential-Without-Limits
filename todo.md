@@ -192,3 +192,5 @@
 - [ ] Release the isolated glass-cylinder header correction and verify the floating navigation shell on the Production homepage at the top and during scrolling.
 - [x] Standardize the public Team card layout so role, name, full biography, and professional-profile link occupy consistent aligned regions across the desktop roster.
 - [ ] Release the aligned Team card layout and verify the five-profile desktop roster maintains consistent role, name, biography, and link regions with live records.
+- [x] Add Mission & Vision president-photo guidance and administrator-controlled crop positioning so the public right-hand portrait panel preserves the intended framing.
+- [ ] Release the president-photo framing controls and verify a saved portrait framing keeps the president visible in the public Mission & Vision image panel.

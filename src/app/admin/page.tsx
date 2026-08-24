@@ -307,6 +307,8 @@ export default function AdminDashboardPage() {
   const [foundersNoteText, setFoundersNoteText] = useState(missionVision?.foundersNote || INITIAL_MISSION_VISION.foundersNote);
   const [foundersTitleText, setFoundersTitleText] = useState(missionVision?.foundersTitle || INITIAL_MISSION_VISION.foundersTitle);
   const [presidentPhotoUrl, setPresidentPhotoUrl] = useState(missionVision?.presidentPhotoUrl || "");
+  const [presidentPhotoFocusY, setPresidentPhotoFocusY] = useState(missionVision?.presidentPhotoFocusY ?? 35);
+  const [presidentPhotoZoom, setPresidentPhotoZoom] = useState(missionVision?.presidentPhotoZoom ?? 100);
   const [isUploadingPresidentPhoto, setIsUploadingPresidentPhoto] = useState(false);
   const [presidentPhotoUploadError, setPresidentPhotoUploadError] = useState<string | null>(null);
   const [pillars, setPillars] = useState(missionVision?.pillars || INITIAL_MISSION_VISION.pillars);
@@ -523,6 +525,8 @@ export default function AdminDashboardPage() {
         foundersNote: foundersNoteText,
         foundersTitle: foundersTitleText,
         presidentPhotoUrl,
+        presidentPhotoFocusY,
+        presidentPhotoZoom,
         pillars,
         lastUpdated: new Date().toISOString().split("T")[0],
       });
@@ -543,6 +547,8 @@ export default function AdminDashboardPage() {
       const preparedPhoto = await prepareTeamHeadshotUpload(photo);
       const url = await uploadMissionPresidentPhoto(preparedPhoto);
       setPresidentPhotoUrl(url);
+      setPresidentPhotoFocusY(35);
+      setPresidentPhotoZoom(100);
       triggerToast("✓ President Photo Stored", "Save Mission & Vision to publish this photo in the right-hand founding-perspective section.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "The president photo could not be stored.";
@@ -1785,14 +1791,16 @@ export default function AdminDashboardPage() {
                     <label className="block text-[#0B2E6B]/80 font-semibold">President Photo</label>
                     <p className="mt-1 max-w-xl text-[11px] leading-5 text-[#0B2E6B]/60">Upload a JPEG, PNG, or WebP portrait. It is stored privately first and appears publicly only after you save these Mission &amp; Vision updates.</p>
                   </div>
-                  {presidentPhotoUrl && <button type="button" onClick={() => setPresidentPhotoUrl("")} className="rounded-lg border border-[#0B2E6B]/15 px-3 py-2 text-[11px] font-bold text-[#0B2E6B] hover:border-red-300 hover:text-red-600">Remove selection</button>}
+                  {presidentPhotoUrl && <button type="button" onClick={() => { setPresidentPhotoUrl(""); setPresidentPhotoFocusY(35); setPresidentPhotoZoom(100); }} className="rounded-lg border border-[#0B2E6B]/15 px-3 py-2 text-[11px] font-bold text-[#0B2E6B] hover:border-red-300 hover:text-red-600">Remove selection</button>}
                 </div>
+                <div className="mt-4 rounded-lg border border-[#079432]/20 bg-[#079432]/5 px-3 py-2.5 text-[11px] leading-5 text-[#0B2E6B]/70"><strong className="text-[#087A2C]">Best fit:</strong> use a horizontal 3:2 photo, ideally at least 1600 × 1067 pixels. Leave space above the head and keep the head and shoulders inside the centre of the image. Portrait-only photos can still work—use the framing controls below to bring the face into view.</div>
                 <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#0B2E6B] px-4 py-2.5 text-[11px] font-bold text-white transition hover:brightness-110">
                   <Upload className="h-4 w-4" />
                   <span>{isUploadingPresidentPhoto ? "Preparing photo…" : presidentPhotoUrl ? "Replace president photo" : "Upload president photo"}</span>
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePresidentPhotoUpload} disabled={isUploadingPresidentPhoto} className="sr-only" />
                 </label>
-                {presidentPhotoUrl && <p className="mt-3 text-[11px] font-semibold text-emerald-700">A president photo is ready. Select “Publish CMS Updates” to display it on the public page.</p>}
+                {presidentPhotoUrl && <div className="mt-4 grid gap-4 rounded-xl border border-[#0B2E6B]/10 bg-white p-3 sm:grid-cols-[11rem_1fr]"><div className="relative aspect-[10/7] overflow-hidden rounded-lg bg-[#0B2E6B]"><img src={presidentPhotoUrl} alt="President photo framing preview" className="h-full w-full object-cover" style={{ objectPosition: `50% ${presidentPhotoFocusY}%`, transform: `scale(${presidentPhotoZoom / 100})`, transformOrigin: `50% ${presidentPhotoFocusY}%` }} /></div><div className="space-y-4"><div><div className="flex items-center justify-between gap-3"><label htmlFor="president-photo-focus" className="font-semibold text-[#0B2E6B]">Vertical framing</label><span className="text-[#079432]">{presidentPhotoFocusY}%</span></div><input id="president-photo-focus" type="range" min="0" max="100" step="1" value={presidentPhotoFocusY} onChange={(event) => setPresidentPhotoFocusY(Number(event.target.value))} className="mt-2 w-full accent-[#079432]" /><p className="mt-1 text-[10px] leading-4 text-[#0B2E6B]/60">Move left to show more of the top of the photo; move right to shift the framing lower.</p></div><div><div className="flex items-center justify-between gap-3"><label htmlFor="president-photo-zoom" className="font-semibold text-[#0B2E6B]">Image size</label><span className="text-[#079432]">{presidentPhotoZoom}%</span></div><input id="president-photo-zoom" type="range" min="100" max="150" step="1" value={presidentPhotoZoom} onChange={(event) => setPresidentPhotoZoom(Number(event.target.value))} className="mt-2 w-full accent-[#079432]" /><p className="mt-1 text-[10px] leading-4 text-[#0B2E6B]/60">Use a small increase only when you need a closer crop. The preview matches the public panel’s landscape framing.</p></div></div></div>}
+                {presidentPhotoUrl && <p className="mt-3 text-[11px] font-semibold text-emerald-700">A president photo and its framing are ready. Select “Publish CMS Updates” to display them on the public page.</p>}
                 {presidentPhotoUploadError && <p role="alert" className="mt-3 text-[11px] font-semibold text-red-600">{presidentPhotoUploadError}</p>}
               </div>
 
