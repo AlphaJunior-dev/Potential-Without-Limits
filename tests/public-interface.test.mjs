@@ -286,19 +286,19 @@ test("approved sponsors retain the private Talent pipeline while public visitors
   assert.match(provider, /setSponsorProfiles\(\[\]\)/);
   assert.match(provider, /location: record\.region \|\| \(record\.visibility\?\.profileVisible === true \? "Publicly displayed" : "Not publicly displayed"\)/);
   assert.match(homepage, /hasApprovedSponsorAccess/);
-  assert.match(homepage, /const featuredProfiles = profiles\.slice\(0, 3\)/);
+  assert.match(homepage, /const featuredProfiles = \(hasApprovedSponsorAccess \? profiles : publicProfiles\)\.slice\(0, 3\)/);
   assert.match(homepage, /\/portfolio\/\$\{profile\.id\}/);
   assert.doesNotMatch(homepage, /Foundation introduction/);
   assert.match(talentsPage, /Explore a careful introduction to potential\./);
   assert.match(talentsPage, /talentTags\.filter/);
   assert.match(talentsPage, /hasApprovedSponsorAccess/);
-  assert.match(detailPage, /const profile = profiles\.find/);
-  assert.match(detailPage, /Published public overview/);
-  assert.match(detailPage, /publicVisibility\?\.photoVisible === true/);
+  assert.match(detailPage, /const profile = publicProfiles\.find/);
+  assert.match(detailPage, /How to support this pathway/);
+  assert.match(detailPage, /const canSeePhoto = canSee\("photoVisible"\)/);
   assert.doesNotMatch(detailPage, /TalentVideo/);
   assert.match(publicRoute, /readPublicSite\(\)/);
   assert.match(publicRoute, /publicVisibility,/);
-  assert.match(publicRoute, /galleryImages: card\.photoUrl \? \[card\.photoUrl\] : \[\]/);
+  assert.match(publicRoute, /galleryImages: showPhoto && card\.photoUrl \? \[card\.photoUrl\] : \[\]/);
   assert.match(adminLibrary, /export function toPublicTalentCard/);
   assert.match(adminLibrary, /visibility: \{/);
   assert.match(adminLibrary, /export function toSponsorTalentCard/);
@@ -449,7 +449,7 @@ test("Talent videos remain in bounded private storage while public profiles inte
   assert.match(provider, /galleryVideos\.some\(isSafeTalentVideoUrl\)/);
   assert.match(adminPage, /<TalentVideo src=\{vUrl\} access="private"/);
   assert.match(adminPage, /disabled=\{isImageUploading \|\| isVideoUploading\}/);
-  assert.match(publicDetail, /const profile = profiles\.find/);
+  assert.match(publicDetail, /const profile = publicProfiles\.find/);
   assert.match(publicDetail, /Cover image is not published\./);
   assert.doesNotMatch(publicDetail, /TalentVideo/);
   assert.doesNotMatch(publicDetail, /Approved media/);
@@ -491,12 +491,38 @@ test("the public Sponsor Talent directory filters only server-sanitized publishe
   assert.match(adminLibrary, /skillsVisible/);
   assert.match(adminPage, /updateTalentTags/);
   assert.match(adminPage, /Add a new skill or interest/);
-  assert.match(adminPage, /consentReference/);
-  assert.match(talentsPage, /profiles\.filter/);
+  assert.doesNotMatch(adminPage, /consentReference/);
+  assert.doesNotMatch(adminPage, /Consent reference \/ internal file ID/);
+  assert.match(adminPage, /Private consent safeguard/);
+  assert.match(talentsPage, /const visibleProfiles = hasApprovedSponsorAccess \? profiles : publicProfiles/);
+  assert.match(talentsPage, /visibleProfiles\.filter/);
   assert.match(talentsPage, /talentTags\.filter/);
   assert.match(talentsPage, /\/portfolio\/\$\{profile\.id\}/);
+  assert.doesNotMatch(talentsPage, /profile\.story \|\| profile\.bio/);
   assert.doesNotMatch(talentsPage, /TalentVideo/);
-  assert.match(publicRoute, /skills: Array\.isArray\(showcaseCard\.skills\)/);
+  assert.match(publicRoute, /const showSkills = publicVisibility\.skillsVisible === true/);
+  assert.match(publicRoute, /skills: showSkills && Array\.isArray\(showcaseCard\.skills\)/);
+  assert.match(publicRoute, /story: showStory \? showcaseCard\.story \|\| "" : ""/);
+});
+
+test("the public Talent detail only renders explicitly released fields and provides a safe support path", async () => {
+  const [provider, publicDetail] = await Promise.all([
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/portfolio/[id]/page.tsx"),
+  ]);
+
+  assert.match(provider, /publicProfiles: YouthProfile\[\]/);
+  assert.match(provider, /user, userStatus, loading, profiles, publicProfiles/);
+  assert.match(publicDetail, /const \{ publicProfiles \} = useAuth\(\)/);
+  assert.match(publicDetail, /const profile = publicProfiles\.find/);
+  assert.match(publicDetail, /const summary = canSee\("summaryVisible"\) && profile\.bio \? profile\.bio : ""/);
+  assert.match(publicDetail, /const story = canSee\("storyVisible"\) && profile\.story \? profile\.story : ""/);
+  assert.doesNotMatch(publicDetail, /profile\.bio \|\| overview/);
+  assert.doesNotMatch(publicDetail, /hasPrivateAccess/);
+  assert.match(publicDetail, /How to support this pathway/);
+  assert.match(publicDetail, /not a request for a payment or a direct commitment/);
+  assert.match(publicDetail, /Request an orientation call/);
+  assert.doesNotMatch(publicDetail, /Discuss Sponsor Talent/);
 });
 
 test("Foundation conversations accept only server-authorized sponsor messages and approved sessions no longer receive orientation prompts", async () => {

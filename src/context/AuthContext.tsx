@@ -18,6 +18,7 @@ type AuthContextType = {
   userStatus: UserStatus;
   loading: boolean;
   profiles: YouthProfile[];
+  publicProfiles: YouthProfile[];
   branding: BrandingConfig;
   legalSecurity: LegalSecurityConfig;
   editorialPages: EditorialPagesConfig;
@@ -597,7 +598,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo<AuthContextType>(() => ({
-    user, userStatus, loading, profiles, branding, missionVision, legalSecurity, editorialPages, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
+    user, userStatus, loading, profiles, publicProfiles, branding, missionVision, legalSecurity, editorialPages, adminRole, mfaVerified: userStatus === "admin", talentTags, talentCategories,
     pendingSponsors, inquiries, supportInquiries: publicSubmissions, publicSubmissions, sponsorConversations, faqItems, teamMembers, socialLinks, auditLogs, transparencyReports: [], foundationVideos, sponsorDreams: [],
     login, logout: async () => { await signOut(auth); setSponsorProfiles([]); setUser(null); setStatus("logged_out"); }, setAdminRole,
     verifyMfa: () => false,
