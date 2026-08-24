@@ -172,5 +172,7 @@
 - [x] Remove the committed Firebase browser API-key fallback from current source and add a regression test preventing future Google API-key literals in the client configuration.
 - [x] Release the Firebase browser configuration cleanup after the rotated `NEXT_PUBLIC_FIREBASE_API_KEY` has been saved for Preview and Production, then confirm the new Production build initializes successfully.
 - [x] Repair the Meet the Team CMS role-title mismatch so the exact administrator-saved title is persisted and shown on the Team card and public page.
-- [ ] Release the tested Meet the Team title repair and verify the corrected title in the live Administrator roster and public Team page.
-- [ ] Push and merge the user-authorized Meet the Team title repair, then confirm the Production deployment preserves the next saved role title verbatim.
+- [x] Release the tested Meet the Team title repair and verify the corrected title in the live Administrator roster and public Team page.
+- [x] Push and merge the user-authorized Meet the Team title repair, then confirm the Production deployment preserves the next saved role title verbatim.
+- [x] Add a Meet the Team CMS professional social-profile link field with HTTPS validation, per-member public visibility control, and safe direct-link rendering on the public Team page.
+- [ ] Release the tested Team profile-link feature and verify a saved visible profile link renders on the Production Team page.

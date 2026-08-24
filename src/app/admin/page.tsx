@@ -312,6 +312,7 @@ export default function AdminDashboardPage() {
   const [memberRole, setMemberRole] = useState("");
   const [memberBio, setMemberBio] = useState("");
   const [memberPhoto, setMemberPhoto] = useState("");
+  const [memberProfileLink, setMemberProfileLink] = useState("");
   const [isUploadingMemberPhoto, setIsUploadingMemberPhoto] = useState(false);
   const [memberVisibility, setMemberVisibility] = useState({ isPublic: false, showPhoto: false, showRole: false, showBio: false, showLink: false });
 
@@ -530,6 +531,10 @@ export default function AdminDashboardPage() {
   const handleSaveTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const profileLink = memberProfileLink.trim();
+      if (profileLink && !/^https:\/\//i.test(profileLink)) {
+        throw new Error("Use a complete HTTPS professional profile link.");
+      }
       if (editingMemberId) {
         const updated = teamMembers.map((m) =>
           m.id === editingMemberId
@@ -539,6 +544,7 @@ export default function AdminDashboardPage() {
                 role: memberRole,
                 bio: memberBio,
                 photoUrl: memberPhoto || m.photoUrl,
+                linkedinUrl: profileLink || undefined,
                 visibility: memberVisibility,
               }
             : m
@@ -553,6 +559,7 @@ export default function AdminDashboardPage() {
           role: memberRole,
           bio: memberBio,
           photoUrl: memberPhoto,
+          ...(profileLink ? { linkedinUrl: profileLink } : {}),
           visibility: memberVisibility,
           order: teamMembers.length + 1,
         };
@@ -563,6 +570,7 @@ export default function AdminDashboardPage() {
       setMemberRole("");
       setMemberBio("");
       setMemberPhoto("");
+      setMemberProfileLink("");
       setMemberVisibility({ isPublic: false, showPhoto: false, showRole: false, showBio: false, showLink: false });
     } catch (err) {
       triggerToast("✗ Save Failed", err instanceof Error ? err.message : "Could not save team member. Check your connection and try again.");
@@ -606,6 +614,7 @@ export default function AdminDashboardPage() {
     setMemberRole(m.role);
     setMemberBio(m.bio);
     setMemberPhoto(m.photoUrl);
+    setMemberProfileLink(m.linkedinUrl || "");
     setMemberVisibility(m.visibility || { isPublic: true, showPhoto: true, showRole: true, showBio: true, showLink: true });
   };
 
@@ -1794,6 +1803,19 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div>
+                    <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Professional Social Profile Link <span className="font-normal text-[#0B2E6B]/50">(optional)</span></label>
+                    <input
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://www.linkedin.com/in/member-profile"
+                      value={memberProfileLink}
+                      onChange={(e) => setMemberProfileLink(e.target.value)}
+                      className="w-full p-2.5 bg-[#F8FAFC] border border-[#0B2E6B]/15 rounded-xl text-[#0B2E6B] focus:outline-none focus:border-[#079432]"
+                    />
+                    <p className="mt-1 text-[10px] text-[#0B2E6B]/55">Use an approved HTTPS profile link. It stays private unless “Show public profile link” is enabled below.</p>
+                  </div>
+
+                  <div>
                     <label className="block text-[#0B2E6B]/80 font-semibold mb-1">Headshot Photo (persistent upload or HTTPS URL)</label>
                     <div className="space-y-2">
                       <input
@@ -1827,7 +1849,7 @@ export default function AdminDashboardPage() {
                       ["showPhoto", "Show photo"],
                       ["showRole", "Show role title"],
                       ["showBio", "Show biography"],
-                      ["showLink", "Show approved external link"],
+                      ["showLink", "Show public profile link"],
                     ].map(([field, label]) => (
                       <label key={field} className="flex items-center gap-2 text-[11px] text-[#0B2E6B] cursor-pointer">
                         <input
