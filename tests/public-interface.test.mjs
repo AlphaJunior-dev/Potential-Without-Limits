@@ -98,6 +98,34 @@ test("approved public CMS actions use the protected route and the public reader 
   assert.doesNotMatch(provider, /firebase\/firestore|setDoc\(|updateDoc\(/);
 });
 
+test("Mission & Vision president photos use administrator-only private storage and render only after the CMS publishes their internal reference", async () => {
+  const [adminPage, provider, publicRoute, adminLibrary, missionPage, uploadRoute, deliveryRoute, media] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/mission-vision/page.tsx"),
+    readSource("src/app/api/admin/mission-president-photo/route.ts"),
+    readSource("src/app/api/mission-president-photo/[id]/route.ts"),
+    readSource("src/lib/supabase-media.ts"),
+  ]);
+
+  assert.match(adminPage, /President Photo/);
+  assert.match(adminPage, /handlePresidentPhotoUpload/);
+  assert.match(adminPage, /presidentPhotoUrl/);
+  assert.match(provider, /uploadMissionPresidentPhoto/);
+  assert.match(provider, /user\.getIdToken\(true\)/);
+  assert.match(publicRoute, /presidentPhotoUrl/);
+  assert.match(adminLibrary, /safeMissionPresidentPhotoUrl/);
+  assert.match(missionPage, /missionVision\.presidentPhotoUrl/);
+  assert.match(uploadRoute, /requireAdministrator\(request\)/);
+  assert.match(uploadRoute, /imageTypeFromBytes/);
+  assert.match(uploadRoute, /storeMissionPresidentPhoto/);
+  assert.match(deliveryRoute, /missionVision\?\.presidentPhotoUrl !== `\/api\/mission-president-photo\/\$\{id\}`/);
+  assert.match(deliveryRoute, /loadMissionPresidentPhoto/);
+  assert.match(media, /mission-president-photos/);
+});
+
 test("public Talent retrieval applies the strict sanitizer after a server-only collection read", async () => {
   const adminLibrary = await readSource("src/lib/admin.ts");
 

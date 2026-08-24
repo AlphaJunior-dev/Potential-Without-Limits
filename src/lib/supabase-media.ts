@@ -115,6 +115,19 @@ export async function storeTeamHeadshot(assetId: string, bytes: Uint8Array, cont
   return storagePath;
 }
 
+export async function storeMissionPresidentPhoto(assetId: string, bytes: Uint8Array, contentType: string, extension: string) {
+  if (!permittedImageContentTypes.has(contentType)) throw new Error("UNSUPPORTED_MEDIA_TYPE");
+  const storagePath = `mission-president-photos/${assetId}.${extension}`;
+  const client = await ensurePrivateMediaBucket();
+  const { error } = await client.storage.from(PWLIF_MEDIA_BUCKET).upload(storagePath, bytes, {
+    contentType,
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  if (error) throw new Error("SUPABASE_MEDIA_UPLOAD_FAILED");
+  return storagePath;
+}
+
 export async function loadTalentPhoto(storagePath: string) {
   if (!/^talent-photos\/[A-Za-z0-9_-]{8,80}\.(?:jpg|png|webp)$/.test(storagePath)) {
     throw new Error("INVALID_MEDIA_PATH");
@@ -127,6 +140,16 @@ export async function loadTalentPhoto(storagePath: string) {
 
 export async function loadTeamHeadshot(storagePath: string) {
   if (!/^team-headshots\/[A-Za-z0-9_-]{8,80}\.(?:jpg|png|webp)$/.test(storagePath)) {
+    throw new Error("INVALID_MEDIA_PATH");
+  }
+
+  const { data, error } = await serverMediaClient().storage.from(PWLIF_MEDIA_BUCKET).download(storagePath);
+  if (error || !data) throw new Error("SUPABASE_MEDIA_NOT_FOUND");
+  return Buffer.from(await data.arrayBuffer());
+}
+
+export async function loadMissionPresidentPhoto(storagePath: string) {
+  if (!/^mission-president-photos\/[A-Za-z0-9_-]{8,80}\.(?:jpg|png|webp)$/.test(storagePath)) {
     throw new Error("INVALID_MEDIA_PATH");
   }
 
