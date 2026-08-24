@@ -1467,7 +1467,7 @@ export default function AdminDashboardPage() {
                   </div>
 
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved story</label><textarea rows={3} value={story} onChange={(event) => setStory(event.target.value)} placeholder="Focus on learning, effort, and interests — never private family, school, health, or financial details." className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
-	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Where they are heading</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved learning or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
+	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Dream</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved dream or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">What support could unlock</label><input value={supportPathway} onChange={(event) => setSupportPathway(event.target.value)} placeholder="Examples: mentoring, equipment, training, creative materials" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 
 	                  <div className="rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent safeguard</p><p className="mt-2 text-[10px] leading-relaxed text-amber-900/70">Consent review remains a private safeguarding responsibility. Public visibility and approved-media controls are the only publication controls shown in this editor.</p></div>
@@ -1602,7 +1602,7 @@ export default function AdminDashboardPage() {
                       ["mediaVisible", "Show approved media"],
                       ["skillsVisible", "Show approved skills and interests"],
                       ["storyVisible", "Show the approved story"],
-                      ["aspirationVisible", "Show where they are heading"],
+                      ["aspirationVisible", "Show Dream"],
                       ["supportPathwayVisible", "Show what support could unlock"],
                       ["regionVisible", "Show broad region / community"],
                       ["ageBandVisible", "Show approved age band"],

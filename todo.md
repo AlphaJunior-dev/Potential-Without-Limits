@@ -197,3 +197,6 @@
 - [x] Repair public Talent field rendering so only explicitly selected visibility controls display, remove the unused Consent ID field from Talent CMS, and give the public Talent detail panel a clear support and enquiry purpose.
 - [ ] Release the validated Talent visibility repair and confirm a live public record displays only the selected fields, the removed Consent ID input stays absent, and the detail support panel routes safely to orientation.
 - [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent visibility repair.
+- [x] Rename the Talent CMS “Where they are heading” field and its public release wording to “Dream” without changing the stored aspiration value or visibility safeguards.
+- [ ] Release the validated Talent CMS Dream wording update and verify the renamed field and public-release checkbox in Production.
+- [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent CMS Dream wording update.

@@ -491,6 +491,9 @@ test("the public Sponsor Talent directory filters only server-sanitized publishe
   assert.match(adminLibrary, /skillsVisible/);
   assert.match(adminPage, /updateTalentTags/);
   assert.match(adminPage, /Add a new skill or interest/);
+  assert.match(adminPage, />Dream<\/label>/);
+  assert.match(adminPage, /\["aspirationVisible", "Show Dream"\]/);
+  assert.doesNotMatch(adminPage, /Where they are heading/);
   assert.doesNotMatch(adminPage, /consentReference/);
   assert.doesNotMatch(adminPage, /Consent reference \/ internal file ID/);
   assert.match(adminPage, /Private consent safeguard/);
