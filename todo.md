@@ -168,6 +168,9 @@
 - [x] Seed the approved Potential Without Limits International Foundation LinkedIn URL and render visible approved social links in the existing public interface.
 - [x] Release the tested Social Links CMS change and verify the LinkedIn footer entry on the Production deployment.
 - [x] Push and merge the user-authorized Social Links feature, then confirm the live Production footer displays the approved LinkedIn link.
-- [ ] Audit and contain the GitHub-detected Google API key exposure in `src/lib/firebase.ts`; rotate or restrict it appropriately, remove tracked key material, and preserve the required Firebase browser configuration.
+- [x] Audit and contain the GitHub-detected Google API key exposure in `src/lib/firebase.ts`; rotate or restrict it appropriately, remove tracked key material, and preserve the required Firebase browser configuration.
 - [x] Remove the committed Firebase browser API-key fallback from current source and add a regression test preventing future Google API-key literals in the client configuration.
-- [ ] Release the Firebase browser configuration cleanup after the rotated `NEXT_PUBLIC_FIREBASE_API_KEY` has been saved for Preview and Production, then confirm the new Production build initializes successfully.
+- [x] Release the Firebase browser configuration cleanup after the rotated `NEXT_PUBLIC_FIREBASE_API_KEY` has been saved for Preview and Production, then confirm the new Production build initializes successfully.
+- [x] Repair the Meet the Team CMS role-title mismatch so the exact administrator-saved title is persisted and shown on the Team card and public page.
+- [ ] Release the tested Meet the Team title repair and verify the corrected title in the live Administrator roster and public Team page.
+- [ ] Push and merge the user-authorized Meet the Team title repair, then confirm the Production deployment preserves the next saved role title verbatim.

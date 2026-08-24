@@ -191,6 +191,15 @@ function safePublicText(value: unknown, maxLength: number) {
   return text || undefined;
 }
 
+// Team biographies and titles are organizational records, not Sponsor Talent
+// copy. Preserve the administrator's exact wording rather than applying the
+// public Sponsor Talent terminology migration to a person's role.
+function safeTeamText(value: unknown, maxLength: number) {
+  if (typeof value !== "string") return undefined;
+  const text = value.trim().slice(0, maxLength);
+  return text || undefined;
+}
+
 export function sanitizePublicMissionVision(input: unknown) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
   const pillars = Array.isArray(source.pillars)
@@ -216,9 +225,9 @@ export function sanitizePublicTeam(input: unknown) {
   if (!Array.isArray(input)) return [];
   return input.slice(0, 12).map((member, index) => {
     const item = member && typeof member === "object" ? member as Record<string, unknown> : {};
-    const name = safePublicText(item.name, 120);
-    const role = safePublicText(item.role, 160);
-    const bio = safePublicText(item.bio, 1_200);
+    const name = safeTeamText(item.name, 120);
+    const role = safeTeamText(item.role, 160);
+    const bio = safeTeamText(item.bio, 1_200);
     if (!name || !role || !bio) return null;
     const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
     const visibility = {
@@ -248,9 +257,9 @@ export function sanitizeAdminTeam(input: unknown) {
   if (!Array.isArray(input)) return [];
   return input.slice(0, 12).map((member, index) => {
     const item = member && typeof member === "object" ? member as Record<string, unknown> : {};
-    const name = safePublicText(item.name, 120);
-    const role = safePublicText(item.role, 160);
-    const bio = safePublicText(item.bio, 1_200);
+    const name = safeTeamText(item.name, 120);
+    const role = safeTeamText(item.role, 160);
+    const bio = safeTeamText(item.bio, 1_200);
     if (!name || !role || !bio) return null;
     const rawVisibility = item.visibility && typeof item.visibility === "object" ? item.visibility as Record<string, unknown> : {};
     return {

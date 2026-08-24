@@ -635,3 +635,16 @@ test("Firebase browser configuration receives its API key only from build-time e
   assert.doesNotMatch(firebaseClient, /AIza[0-9A-Za-z_-]{20,}/);
   assert.doesNotMatch(firebaseClient, /FIREBASE_PRIVATE_KEY|SUPABASE_SERVICE_ROLE_KEY/);
 });
+
+test("Meet the Team role titles retain the exact administrator-entered wording", async () => {
+  const [adminLibrary, provider] = await Promise.all([
+    readSource("src/lib/admin.ts"),
+    readSource("src/context/AuthContext.tsx"),
+  ]);
+
+  assert.match(adminLibrary, /function safeTeamText\(value: unknown, maxLength: number\)/);
+  const teamSanitizers = adminLibrary.slice(adminLibrary.indexOf("export function sanitizePublicTeam"), adminLibrary.indexOf("export function sanitizeTalentRecord"));
+  assert.match(teamSanitizers, /const role = safeTeamText\(item\.role, 160\)/);
+  assert.doesNotMatch(teamSanitizers, /const role = safePublicText\(item\.role, 160\)/);
+  assert.match(provider, /setTeamMembers\(Array\.isArray\(data\.site\?\.teamMembers\)/);
+});
