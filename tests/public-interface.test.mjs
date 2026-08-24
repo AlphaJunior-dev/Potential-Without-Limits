@@ -24,15 +24,22 @@ test("homepage uses the approved Potential in Motion sequence, published Sponsor
   }
 });
 
-test("homepage keeps the glass treatment in the shared header and uses the normal full-width hero without an unapproved email capture field", async () => {
-  const [page, hero] = await Promise.all([
+test("homepage keeps the glass treatment in the shared header and uses the requested image-led Fraunces hero without an unapproved email capture field", async () => {
+  const [page, layout, globalStyles] = await Promise.all([
     readSource("src/app/page.tsx"),
-    readSource("src/components/PublicStory.tsx"),
+    readSource("src/app/layout.tsx"),
+    readSource("src/app/globals.css"),
   ]);
 
-  assert.match(page, /<PublicHero[\s\S]*?dark/);
-  assert.doesNotMatch(page, /<PublicHero[\s\S]*?centered/);
-  assert.match(hero, /pwlif-motion-field/);
+  assert.match(page, /pwlif-community-learning-hero/);
+  assert.match(page, /pwlif-hero-display/);
+  assert.match(page, /bg-cover bg-center/);
+  assert.doesNotMatch(page, /<PublicHero/);
+  assert.match(layout, /Fraunces/);
+  assert.match(layout, /--font-fraunces/);
+  assert.match(layout, /font-inter/);
+  assert.match(globalStyles, /\.pwlif-hero-display/);
+  assert.match(globalStyles, /var\(--font-fraunces\)/);
   assert.doesNotMatch(page, /type="email"/);
 });
 

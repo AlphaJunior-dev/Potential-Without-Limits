@@ -202,4 +202,7 @@
 - [x] Push, deploy, merge, and confirm Production for the user-authorized Talent CMS Dream wording update.
 - [x] Add an Education level field to the Talent CMS, retain it privately by default, and display it publicly only when its explicit visibility control is enabled.
 - [ ] Release the validated Talent education-level feature and verify that only a record with Show education level enabled displays the value publicly.
-- [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent education-level feature.
+- [x] Push, deploy, merge, and confirm Production for the user-authorized Talent education-level feature.
+- [x] Restyle the homepage hero with a centered image-led composition and apply Fraunces for headlines with Inter for body copy, while preserving all existing content, actions, routes, and safeguards.
+- [ ] Release the validated homepage hero restyle and verify the image-led hero, Fraunces heading, Inter body copy, and existing calls to action in Production.
+- [ ] Push, deploy, merge, and confirm Production for the user-authorized homepage hero redesign.
