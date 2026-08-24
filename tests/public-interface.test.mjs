@@ -716,6 +716,10 @@ test("Meet the Team profile links are administrator-managed, HTTPS-only, and exp
   assert.match(teamPage, /whitespace-pre-line/);
   assert.match(teamPage, /xl:grid-cols-5/);
   assert.match(teamPage, /max-w-\[92rem\]/);
+  assert.match(teamPage, /flex h-full flex-col/);
+  assert.match(teamPage, /min-h-\[2\.75rem\]/);
+  assert.match(teamPage, /min-h-\[4\.5rem\]/);
+  assert.match(teamPage, /mt-auto inline-flex/);
   assert.doesNotMatch(teamPage, /line-clamp-4/);
 });
 
