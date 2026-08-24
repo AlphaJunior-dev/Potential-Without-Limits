@@ -256,7 +256,7 @@ export function sanitizePublicTeam(input: unknown) {
       visibility,
       order: Math.max(1, Math.min(99, Number.isFinite(item.order) ? Math.trunc(item.order as number) : index + 1)),
     };
-  }).filter((member): member is NonNullable<typeof member> => Boolean(member));
+  }).filter((member): member is NonNullable<typeof member> => Boolean(member)).sort((left, right) => left.order - right.order);
 }
 
 export function sanitizeAdminTeam(input: unknown) {
@@ -284,7 +284,7 @@ export function sanitizeAdminTeam(input: unknown) {
         showLink: rawVisibility.showLink === true,
       },
     };
-  }).filter((member): member is NonNullable<typeof member> => Boolean(member));
+  }).filter((member): member is NonNullable<typeof member> => Boolean(member)).sort((left, right) => left.order - right.order);
 }
 
 export function sanitizeTalentRecord(input: unknown) {

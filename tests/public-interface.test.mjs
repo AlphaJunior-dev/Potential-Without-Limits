@@ -451,7 +451,10 @@ test("Talent videos remain in bounded private storage while public profiles inte
 });
 
 test("the public header removes the redundant strapline and supports hover, click, keyboard, and mobile navigation", async () => {
-  const navbar = await readSource("src/components/Navbar.tsx");
+  const [navbar, globals] = await Promise.all([
+    readSource("src/components/Navbar.tsx"),
+    readSource("src/app/globals.css"),
+  ]);
 
   assert.doesNotMatch(navbar, /Potential in Motion\s*<span[^>]*>\/\s*<\/span>\s*Privacy-first Talent development/);
   assert.match(navbar, /const \[activeDesktopMenu, setActiveDesktopMenu\]/);
@@ -461,6 +464,9 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /event\.key === "Escape"/);
   assert.match(navbar, /rounded-\[1\.65rem\]/);
   assert.match(navbar, /top-\[5\.25rem\]/);
+  assert.match(navbar, /nav-glass-scrolled/);
+  assert.match(globals, /\.nav-glass-scrolled/);
+  assert.match(globals, /backdrop-filter: blur\(24px\) saturate\(155%\)/);
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
 });
 
@@ -709,4 +715,21 @@ test("Meet the Team profile links are administrator-managed, HTTPS-only, and exp
   assert.match(teamPage, /rel="noopener noreferrer"/);
   assert.match(teamPage, /whitespace-pre-line/);
   assert.doesNotMatch(teamPage, /line-clamp-4/);
+});
+
+test("Meet the Team order is administrator-managed and the public roster uses the saved role sequence", async () => {
+  const [adminPage, adminLibrary, teamPage] = await Promise.all([
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/meet-the-team/page.tsx"),
+  ]);
+
+  assert.match(adminPage, /handleMoveTeamMember/);
+  assert.match(adminPage, /Leadership Order Updated/);
+  assert.match(adminPage, /Move \$\{m\.name\} up in the leadership order/);
+  assert.match(adminPage, /Move \$\{m\.name\} down in the leadership order/);
+  assert.match(adminPage, /\.sort\(\(left, right\) => left\.order - right\.order\)/);
+  const teamSanitizers = adminLibrary.slice(adminLibrary.indexOf("export function sanitizePublicTeam"), adminLibrary.indexOf("export function sanitizeTalentRecord"));
+  assert.match(teamSanitizers, /sort\(\(left, right\) => left\.order - right\.order\)/);
+  assert.match(teamPage, /teamMembers\.map/);
 });

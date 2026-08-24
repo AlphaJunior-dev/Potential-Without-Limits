@@ -44,7 +44,9 @@ import {
   Award,
   Mail,
   User,
-  Link2
+  Link2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 
 const prepareTeamHeadshotUpload = async (file: File): Promise<File> => {
@@ -586,7 +588,7 @@ export default function AdminDashboardPage() {
           photoUrl: memberPhoto,
           ...(profileLink ? { linkedinUrl: profileLink } : {}),
           visibility: memberVisibility,
-          order: teamMembers.length + 1,
+          order: Math.max(0, ...teamMembers.map((member) => member.order || 0)) + 1,
         };
         await updateTeamMembers([...teamMembers, newMember]);
         triggerToast("✓ Member Added", "New leadership member added to roster.");
@@ -645,11 +647,27 @@ export default function AdminDashboardPage() {
 
   const handleDeleteMember = async (id: string) => {
     try {
-      const updated = teamMembers.filter((m) => m.id !== id);
+      const updated = teamMembers.filter((m) => m.id !== id).map((member, index) => ({ ...member, order: index + 1 }));
       await updateTeamMembers(updated);
       triggerToast("✓ Member Removed", "Team member deleted from roster.");
     } catch (err) {
       triggerToast("✗ Delete Failed", err instanceof Error ? err.message : "Could not remove team member. Check your connection and try again.");
+    }
+  };
+
+  const handleMoveTeamMember = async (id: string, direction: -1 | 1) => {
+    const ordered = [...teamMembers].sort((left, right) => left.order - right.order);
+    const sourceIndex = ordered.findIndex((member) => member.id === id);
+    const destinationIndex = sourceIndex + direction;
+    if (sourceIndex < 0 || destinationIndex < 0 || destinationIndex >= ordered.length) return;
+
+    const reordered = [...ordered];
+    [reordered[sourceIndex], reordered[destinationIndex]] = [reordered[destinationIndex], reordered[sourceIndex]];
+    try {
+      await updateTeamMembers(reordered.map((member, index) => ({ ...member, order: index + 1 })));
+      triggerToast("✓ Leadership Order Updated", "The public Team page will use this new role sequence.");
+    } catch (err) {
+      triggerToast("✗ Order Update Failed", err instanceof Error ? err.message : "Could not update the leadership order. Check your connection and try again.");
     }
   };
 
@@ -1920,8 +1938,10 @@ export default function AdminDashboardPage() {
                   Leadership Roster ({teamMembers.length})
                 </h2>
 
+                <p className="text-xs leading-5 text-[#0B2E6B]/60">Use the arrows to set the exact public leadership sequence, for example Founder &amp; President first, then Secretary.</p>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {teamMembers.map((m) => (
+                  {[...teamMembers].sort((left, right) => left.order - right.order).map((m, index, orderedMembers) => (
                     <div
                       key={m.id}
                       className="bg-white rounded-2xl p-4 border border-[#0B2E6B]/10 flex items-center justify-between gap-4"
@@ -1931,12 +1951,31 @@ export default function AdminDashboardPage() {
                           <Image src={m.photoUrl} alt={m.name} fill className="object-cover" />
                         </div>
                         <div>
+                          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#0B2E6B]/45">Position {index + 1}</span>
                           <h3 className="font-montserrat font-bold text-sm text-[#0B2E6B]">{m.name}</h3>
                           <span className="text-[10px] text-[#079432] block">{m.role}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveTeamMember(m.id, -1)}
+                          disabled={index === 0}
+                          aria-label={`Move ${m.name} up in the leadership order`}
+                          className="p-1.5 bg-[#079432]/10 hover:bg-[#079432]/20 text-[#079432] rounded-lg text-xs disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveTeamMember(m.id, 1)}
+                          disabled={index === orderedMembers.length - 1}
+                          aria-label={`Move ${m.name} down in the leadership order`}
+                          className="p-1.5 bg-[#079432]/10 hover:bg-[#079432]/20 text-[#079432] rounded-lg text-xs disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => handleEditMember(m)}
                           className="p-1.5 bg-[#0B2E6B]/10 hover:bg-[#0B2E6B]/20 text-[#0B2E6B] rounded-lg text-xs"
