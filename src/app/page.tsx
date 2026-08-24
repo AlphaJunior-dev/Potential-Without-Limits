@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, Lock, MessageCircleHeart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { TalentPhoto } from "@/components/TalentPhoto";
-import { EditorialSplit, PublicAction, PublicCtaBand, PublicHero, SectionHeading } from "@/components/PublicStory";
+import { EditorialSplit, PublicAction, PublicCtaBand, SectionHeading } from "@/components/PublicStory";
 
 export default function HomePage() {
   const { profiles, publicProfiles, branding, userStatus } = useAuth();
@@ -13,14 +13,43 @@ export default function HomePage() {
 
   return (
     <div className="overflow-x-hidden bg-[#FCFCFA] text-[#0B2E6B]">
-      <PublicHero
-        dark
-        eyebrow={branding?.heroBadgeText || "Potential Without Limits International Foundation"}
-        title={branding?.heroHeadline || "Potential moves when possibility has a pathway."}
-        intro={branding?.heroSubheadline || "PWLIF creates careful, privacy-first conversations around learning, talent development, mentorship, and the people ready to support that journey."}
-        primaryAction={{ href: hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents", label: hasApprovedSponsorAccess ? "View Sponsor Talent Pipeline" : branding?.heroCtaText || "Explore Sponsor Talent" }}
-        secondaryAction={hasApprovedSponsorAccess ? { href: "/sponsor/dashboard", label: "Open Partnership Desk" } : { href: "/book-a-call", label: branding?.heroSecondaryCtaText || "Book Sponsor Orientation" }}
-      />
+      <section className="bg-[#FCFCFA] px-3 pb-4 pt-3 sm:px-5 sm:pb-6 lg:px-8" aria-label="PWLIF hero">
+        <div className="relative mx-auto flex min-h-[38rem] max-w-[92rem] items-center justify-center overflow-hidden rounded-[1.75rem] bg-[#061D45] px-6 py-20 text-center shadow-[0_26px_72px_rgba(6,29,69,0.18)] sm:min-h-[42rem] sm:rounded-[2.25rem] sm:px-10 lg:min-h-[calc(100vh-7rem)] lg:px-16">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/manus-storage/pwlif-community-learning-hero_1f04debf.jpg')" }}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,20,45,0.86)_0%,rgba(6,29,69,0.7)_36%,rgba(6,29,69,0.56)_64%,rgba(4,15,35,0.88)_100%)]" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,17,39,0.38)_0%,transparent_35%,rgba(3,17,39,0.72)_100%)]" aria-hidden="true" />
+          <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
+            <p className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#D7F6E2] sm:text-[11px]">
+              <span className="h-px w-7 bg-[#A9F1C3]" />
+              {branding?.heroBadgeText || "Potential Without Limits International Foundation"}
+              <span className="h-px w-7 bg-[#A9F1C3]" />
+            </p>
+            <h1 className="pwlif-hero-display mt-7 max-w-4xl text-5xl font-black leading-[0.97] tracking-[-0.055em] text-white drop-shadow-[0_5px_18px_rgba(0,0,0,0.35)] sm:mt-8 sm:text-6xl md:text-7xl lg:text-[5.7rem]">
+              {branding?.heroHeadline || "Potential moves when possibility has a pathway."}
+            </h1>
+            <p className="mt-7 max-w-2xl text-base leading-8 text-white/85 sm:text-lg">
+              {branding?.heroSubheadline || "PWLIF creates careful, privacy-first conversations around learning, talent development, mentorship, and the people ready to support that journey."}
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href={hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/talents"} className="inline-flex min-w-56 items-center justify-center gap-2 rounded-xl bg-[#14B84A] px-6 py-4 text-sm font-bold text-[#061D45] shadow-[0_10px_0_rgba(1,42,25,0.75)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#A9F1C3] active:translate-y-0 active:scale-[0.98]">
+                {hasApprovedSponsorAccess ? "View Sponsor Talent Pipeline" : branding?.heroCtaText || "Explore Sponsor Talent"}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link href={hasApprovedSponsorAccess ? "/sponsor/dashboard" : "/book-a-call"} className="inline-flex min-w-56 items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/8 px-6 py-4 text-sm font-bold text-white backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#A9F1C3] hover:bg-white/16 active:translate-y-0 active:scale-[0.98]">
+                {hasApprovedSponsorAccess ? "Open Partnership Desk" : branding?.heroSecondaryCtaText || "Book Sponsor Orientation"}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          <div className="absolute bottom-6 left-1/2 hidden w-[min(90%,50rem)] -translate-x-1/2 items-center justify-between border-t border-white/20 pt-4 text-[9px] font-bold uppercase tracking-[0.14em] text-white/60 sm:flex" aria-hidden="true">
+            <span>Listen with care</span><span className="h-px flex-1 bg-white/18 mx-5" /><span>Open appropriate pathways</span><span className="h-px flex-1 bg-white/18 mx-5" /><span>Grow potential</span>
+          </div>
+        </div>
+      </section>
 
       <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
         <div className="mx-auto max-w-7xl">

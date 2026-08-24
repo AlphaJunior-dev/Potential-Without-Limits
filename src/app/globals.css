@@ -37,6 +37,11 @@
   --pwlif-card-light: #FFFFFF;
 }
 
+.pwlif-hero-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-variation-settings: "opsz" 72, "SOFT" 45, "WONK" 0;
+}
+
 body {
   background-color: #FCFCFA;
   color: #0B2E6B;
