@@ -15,7 +15,6 @@ export default function HomePage() {
     <div className="overflow-x-hidden bg-[#FCFCFA] text-[#0B2E6B]">
       <PublicHero
         dark
-        centered
         eyebrow={branding?.heroBadgeText || "Potential Without Limits International Foundation"}
         title={branding?.heroHeadline || "Potential moves when possibility has a pathway."}
         intro={branding?.heroSubheadline || "PWLIF creates careful, privacy-first conversations around learning, talent development, mentorship, and the people ready to support that journey."}
