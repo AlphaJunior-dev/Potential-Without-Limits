@@ -40,6 +40,7 @@ export interface YouthProfile {
     mediaVisible: boolean;
     summaryVisible: boolean;
     ageBandVisible?: boolean;
+    educationLevelVisible?: boolean;
     regionVisible?: boolean;
     skillsVisible?: boolean;
     storyVisible?: boolean;
@@ -55,6 +56,7 @@ export interface YouthProfile {
   country_community: string;
   consentRecord: ConsentRecord;
   ageBand?: string;
+  educationLevel?: string;
   region?: string;
   story?: string;
   aspiration?: string;
