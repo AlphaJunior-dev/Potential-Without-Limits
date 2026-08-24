@@ -55,13 +55,13 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 font-inter ${
+      className={`sticky top-0 z-50 h-[5.25rem] bg-[#FCFCFA] px-3 py-2 transition-all duration-300 font-inter sm:px-5 ${
         isScrolled
-          ? "bg-[#FCFCFA]/95 backdrop-blur-xl border-b border-[#0B2E6B]/10 shadow-sm"
-          : "bg-[#FCFCFA]/92 backdrop-blur-md border-b border-[#0B2E6B]/8"
+          ? "bg-[#FCFCFA]/94 backdrop-blur-xl"
+          : "bg-[#FCFCFA]"
       }`}
     >
-      <div className="max-w-[92rem] mx-auto px-5 sm:px-8 lg:px-10 h-[4.85rem] flex items-center justify-between">
+      <div className={`mx-auto flex h-full max-w-[92rem] items-center justify-between rounded-[1.65rem] border px-5 transition-all duration-300 sm:px-8 lg:px-10 ${isScrolled ? "border-[#0B2E6B]/10 bg-white/96 shadow-[0_12px_30px_rgba(11,46,107,0.10)]" : "border-[#0B2E6B]/8 bg-white shadow-[0_8px_24px_rgba(11,46,107,0.06)]"}`}>
         {/* Brand Logo & Title */}
         <Link
           href="/"
@@ -216,7 +216,7 @@ export function Navbar() {
 
       {/* Mobile Slide-Over Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="xl:hidden fixed inset-x-0 top-[4.85rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+        <div className="xl:hidden fixed inset-x-0 top-[5.25rem] bg-[#FCFCFA]/98 backdrop-blur-2xl border-b border-[#0B2E6B]/10 shadow-2xl p-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
           <nav className="flex flex-col space-y-3 text-sm font-semibold text-[#0B2E6B]">
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-2 border-b border-[#0B2E6B]/10 hover:text-[#079432] transition flex items-center justify-between"><span>Home</span><ArrowRight className="w-4 h-4 text-[#0B2E6B]/40" /></Link>
             {publicMenus.map((menu) => (

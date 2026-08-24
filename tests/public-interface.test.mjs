@@ -24,6 +24,20 @@ test("homepage uses the approved Potential in Motion sequence, published Sponsor
   }
 });
 
+test("homepage uses the original PWLIF centred rounded hero composition without adding an unapproved email capture field", async () => {
+  const [page, hero] = await Promise.all([
+    readSource("src/app/page.tsx"),
+    readSource("src/components/PublicStory.tsx"),
+  ]);
+
+  assert.match(page, /<PublicHero[\s\S]*?centered/);
+  assert.doesNotMatch(page, /PWLIF approach|A considered introduction, not a public transaction\./);
+  assert.match(hero, /if \(centered\)/);
+  assert.match(hero, /rounded-\[2rem\]/);
+  assert.match(hero, /text-center/);
+  assert.doesNotMatch(page, /type="email"/);
+});
+
 test("restored original interface receives public data through the safe provider boundary", async () => {
   const provider = await readSource("src/context/AuthContext.tsx");
   const cms = await readSource("src/lib/cmsData.ts");
@@ -445,7 +459,8 @@ test("the public header removes the redundant strapline and supports hover, clic
   assert.match(navbar, /onMouseLeave=\{\(\) => setActiveDesktopMenu\(null\)\}/);
   assert.match(navbar, /aria-expanded=\{isMenuOpen\}/);
   assert.match(navbar, /event\.key === "Escape"/);
-  assert.match(navbar, /top-\[4\.85rem\]/);
+  assert.match(navbar, /rounded-\[1\.65rem\]/);
+  assert.match(navbar, /top-\[5\.25rem\]/);
   assert.match(navbar, /\{\/\* Mobile Slide-Over Menu Drawer \*\/\}[\s\S]*?<details key=\{menu\.label\}/);
 });
 
