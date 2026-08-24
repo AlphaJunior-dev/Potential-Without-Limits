@@ -179,3 +179,5 @@
 - [ ] Assess the current public homepage UI and propose an approved visual refinement before making any implementation changes.
 - [x] Add an administrator-managed Mission & Vision president-photo upload with protected storage, validation, and public rendering only in the existing right-hand founding-perspective section.
 - [ ] Release the validated Mission & Vision president-photo feature and verify a saved president photo renders in the public founding-perspective section.
+- [x] Repair the public Meet the Team card layout so every administrator-approved biography is fully readable without weakening visibility or profile-link controls.
+- [ ] Release the full Team biography rendering repair and verify the saved public biography is fully visible on the Production Team page.
