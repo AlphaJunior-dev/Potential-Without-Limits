@@ -188,3 +188,5 @@
 - [ ] Release the frosted scrolling header and Team ordering controls, then verify the live scroll-state header and a saved Founder-first leadership sequence.
 - [x] Keep the rounded glass treatment on the header only, restore the homepage hero to its normal full-width presentation, and fit five public Team profiles into one readable desktop row.
 - [ ] Release the header-only glass treatment and five-profile Team grid, then verify the normal Production homepage hero and five-profile desktop roster.
+- [x] Remove the remaining full-width header backdrop so only the rounded glass navigation cylinder floats over the normal homepage hero and page content.
+- [ ] Release the isolated glass-cylinder header correction and verify the floating navigation shell on the Production homepage at the top and during scrolling.
