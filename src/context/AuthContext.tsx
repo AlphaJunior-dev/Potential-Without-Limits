@@ -170,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTalentTags(Array.isArray(data.site?.talentTags) ? data.site.talentTags : []);
     setTalentCategories(Array.isArray(data.site?.talentCategories) ? data.site.talentCategories : []);
     setEditorialPages({ ...INITIAL_EDITORIAL_PAGES, ...(data.site?.editorialPages && typeof data.site.editorialPages === "object" ? data.site.editorialPages : {}) } as EditorialPagesConfig);
+    setTeamMembers(Array.isArray(data.site?.teamMembers) ? data.site.teamMembers as TeamMember[] : []);
     const records = Array.isArray(data.talentRecords) ? data.talentRecords : [];
     setAdminProfiles(records.map((record: FlexibleRecord) => ({
       id: record.id,
@@ -270,7 +271,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (Array.isArray(data?.talentTags)) setTalentTags(data.talentTags);
       if (Array.isArray(data?.profiles)) setPublicProfiles(data.profiles);
       if (Array.isArray(data?.faqItems)) setFaqItems(data.faqItems);
-      if (Array.isArray(data?.teamMembers)) setTeamMembers(data.teamMembers);
+      if (Array.isArray(data?.teamMembers)) {
+        setTeamMembers((current) => current.length > 0 ? current : data.teamMembers);
+      }
       if (Array.isArray(data?.socialLinks)) setSocialLinks(data.socialLinks as SocialLink[]);
       if (Array.isArray(data?.foundationVideos)) setFoundationVideos(data.foundationVideos);
       if (data?.editorialPages && typeof data.editorialPages === "object") {
