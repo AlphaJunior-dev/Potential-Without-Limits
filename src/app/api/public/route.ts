@@ -44,7 +44,7 @@ export async function GET() {
     branding: { ...baseBranding, ...site.branding, heroHeadline: site.heroTitle, heroSubheadline: site.heroText },
     missionVision: { ...fallbackMissionVision, ...site.missionVision },
     profiles: site.pilotCards.map((card) => {
-      const showcaseCard = card as typeof card & { ageBand?: string; region?: string; skills?: string[]; story?: string; aspiration?: string; supportPathway?: string };
+      const showcaseCard = card as typeof card & { ageBand?: string; educationLevel?: string; region?: string; skills?: string[]; story?: string; aspiration?: string; supportPathway?: string };
       const mediaUrls = Array.isArray(card.mediaUrls) ? card.mediaUrls : [];
       const publicVisibility: {
         profileVisible: boolean;
@@ -52,6 +52,7 @@ export async function GET() {
         mediaVisible: boolean;
         summaryVisible: boolean;
         ageBandVisible?: boolean;
+        educationLevelVisible?: boolean;
         regionVisible?: boolean;
         skillsVisible?: boolean;
         storyVisible?: boolean;
@@ -67,6 +68,7 @@ export async function GET() {
       const showMedia = publicVisibility.mediaVisible === true;
       const showSummary = publicVisibility.summaryVisible === true;
       const showAgeBand = publicVisibility.ageBandVisible === true;
+      const showEducationLevel = publicVisibility.educationLevelVisible === true;
       const showRegion = publicVisibility.regionVisible === true;
       const showSkills = publicVisibility.skillsVisible === true;
       const showStory = publicVisibility.storyVisible === true;
@@ -92,6 +94,7 @@ export async function GET() {
         current_needs: showSupportPathway ? showcaseCard.supportPathway || "" : "",
         consentRecord: { parentalConsent: false, mediaReleasePermission: false, signedDate: "", guardianName: "" },
         ageBand: showAgeBand ? showcaseCard.ageBand || "" : "",
+        educationLevel: showEducationLevel ? showcaseCard.educationLevel || "" : "",
         region: showRegion ? showcaseCard.region || "" : "",
         story: showStory ? showcaseCard.story || "" : "",
         aspiration: showAspiration ? showcaseCard.aspiration || "" : "",

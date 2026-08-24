@@ -288,12 +288,13 @@ export default function AdminDashboardPage() {
   const [rawMediaUrl, setRawMediaUrl] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<string[]>([]);
-  const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
+  const [talentVisibility, setTalentVisibility] = useState({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, educationLevelVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [story, setStory] = useState("");
   const [aspiration, setAspiration] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
   const [supportPathway, setSupportPathway] = useState("");
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
@@ -415,6 +416,7 @@ export default function AdminDashboardPage() {
             country_community: countryCommunity || existing.country_community,
             skills: selectedSkills,
             ageBand: age,
+            educationLevel,
             story,
             aspiration,
             supportPathway,
@@ -451,6 +453,7 @@ export default function AdminDashboardPage() {
           country_community: countryCommunity || location,
           skills: selectedSkills,
           ageBand: age,
+          educationLevel,
           story,
           aspiration,
           supportPathway,
@@ -472,10 +475,11 @@ export default function AdminDashboardPage() {
       setRawMediaUrl("");
       setUploadedImages([]);
       setUploadedVideos([]);
-      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
+      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, educationLevelVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
       setSelectedSkills([]);
       setStory("");
       setAspiration("");
+      setEducationLevel("");
       setSupportPathway("");
       setMediaReleasePermission(false);
     } catch (err) {
@@ -494,10 +498,11 @@ export default function AdminDashboardPage() {
     setRawMediaUrl(p.rawMediaUrl || "");
     setUploadedImages(p.galleryImages || []);
     setUploadedVideos(p.galleryVideos || []);
-    setTalentVisibility({ profileVisible: p.publicVisibility?.profileVisible ?? p.featuredOnHomepage === true, photoVisible: p.publicVisibility?.photoVisible ?? p.featuredOnHomepage === true, mediaVisible: p.publicVisibility?.mediaVisible ?? p.featuredOnHomepage === true, summaryVisible: p.publicVisibility?.summaryVisible ?? p.featuredOnHomepage === true, ageBandVisible: p.publicVisibility?.ageBandVisible ?? false, regionVisible: p.publicVisibility?.regionVisible ?? false, skillsVisible: p.publicVisibility?.skillsVisible ?? false, storyVisible: p.publicVisibility?.storyVisible ?? false, aspirationVisible: p.publicVisibility?.aspirationVisible ?? false, supportPathwayVisible: p.publicVisibility?.supportPathwayVisible ?? false });
+    setTalentVisibility({ profileVisible: p.publicVisibility?.profileVisible ?? p.featuredOnHomepage === true, photoVisible: p.publicVisibility?.photoVisible ?? p.featuredOnHomepage === true, mediaVisible: p.publicVisibility?.mediaVisible ?? p.featuredOnHomepage === true, summaryVisible: p.publicVisibility?.summaryVisible ?? p.featuredOnHomepage === true, ageBandVisible: p.publicVisibility?.ageBandVisible ?? false, educationLevelVisible: p.publicVisibility?.educationLevelVisible ?? false, regionVisible: p.publicVisibility?.regionVisible ?? false, skillsVisible: p.publicVisibility?.skillsVisible ?? false, storyVisible: p.publicVisibility?.storyVisible ?? false, aspirationVisible: p.publicVisibility?.aspirationVisible ?? false, supportPathwayVisible: p.publicVisibility?.supportPathwayVisible ?? false });
     setSelectedSkills(p.skills || []);
     setStory(p.story || p.current_situation || "");
     setAspiration(p.aspiration || p.dream || "");
+    setEducationLevel(p.educationLevel || "");
     setSupportPathway(p.supportPathway || p.current_needs || "");
     setMediaReleasePermission(p.consentRecord?.mediaReleasePermission === true);
   };
@@ -1383,7 +1388,7 @@ export default function AdminDashboardPage() {
                       setBio("Add an approved, non-identifying summary of the talent and their support pathway.");
                       setCoverPhoto("");
                       setRawMediaUrl("");
-                      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
+                      setTalentVisibility({ profileVisible: false, photoVisible: false, mediaVisible: false, summaryVisible: false, ageBandVisible: false, educationLevelVisible: false, regionVisible: false, skillsVisible: false, storyVisible: false, aspirationVisible: false, supportPathwayVisible: false });
                     }}
                     className="text-[11px] font-bold text-[#079432] hover:underline flex items-center gap-1 cursor-pointer bg-[#079432]/10 px-2.5 py-1 rounded-md border border-[#079432]/20"
                   >
@@ -1468,6 +1473,7 @@ export default function AdminDashboardPage() {
 
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Approved story</label><textarea rows={3} value={story} onChange={(event) => setStory(event.target.value)} placeholder="Focus on learning, effort, and interests — never private family, school, health, or financial details." className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Dream</label><input value={aspiration} onChange={(event) => setAspiration(event.target.value)} placeholder="An approved dream or future goal" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
+	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">Education level</label><input value={educationLevel} onChange={(event) => setEducationLevel(event.target.value)} placeholder="For example: Primary, secondary, vocational, or tertiary" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 	                  <div><label className="block text-[#0B2E6B]/80 font-semibold mb-1">What support could unlock</label><input value={supportPathway} onChange={(event) => setSupportPathway(event.target.value)} placeholder="Examples: mentoring, equipment, training, creative materials" className="w-full rounded-xl border border-[#0B2E6B]/15 bg-[#F8FAFC] p-2.5 text-[#0B2E6B] focus:border-[#079432] focus:outline-none" /></div>
 
 	                  <div className="rounded-xl border border-amber-500/25 bg-amber-50 p-3"><p className="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-800">Private consent safeguard</p><p className="mt-2 text-[10px] leading-relaxed text-amber-900/70">Consent review remains a private safeguarding responsibility. Public visibility and approved-media controls are the only publication controls shown in this editor.</p></div>
@@ -1603,6 +1609,7 @@ export default function AdminDashboardPage() {
                       ["skillsVisible", "Show approved skills and interests"],
                       ["storyVisible", "Show the approved story"],
                       ["aspirationVisible", "Show Dream"],
+                      ["educationLevelVisible", "Show education level"],
                       ["supportPathwayVisible", "Show what support could unlock"],
                       ["regionVisible", "Show broad region / community"],
                       ["ageBandVisible", "Show approved age band"],

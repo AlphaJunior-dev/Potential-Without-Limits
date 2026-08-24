@@ -199,4 +199,7 @@
 - [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent visibility repair.
 - [x] Rename the Talent CMS “Where they are heading” field and its public release wording to “Dream” without changing the stored aspiration value or visibility safeguards.
 - [ ] Release the validated Talent CMS Dream wording update and verify the renamed field and public-release checkbox in Production.
-- [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent CMS Dream wording update.
+- [x] Push, deploy, merge, and confirm Production for the user-authorized Talent CMS Dream wording update.
+- [x] Add an Education level field to the Talent CMS, retain it privately by default, and display it publicly only when its explicit visibility control is enabled.
+- [ ] Release the validated Talent education-level feature and verify that only a record with Show education level enabled displays the value publicly.
+- [ ] Push, deploy, merge, and confirm Production for the user-authorized Talent education-level feature.

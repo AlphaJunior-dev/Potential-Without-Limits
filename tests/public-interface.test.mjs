@@ -304,6 +304,35 @@ test("approved sponsors retain the private Talent pipeline while public visitors
   assert.match(adminLibrary, /export function toSponsorTalentCard/);
 });
 
+test("Talent education level is administrator-managed and released publicly only through its explicit visibility flag", async () => {
+  const [dataTypes, adminPage, provider, adminLibrary, publicRoute, talentsPage, detailPage] = await Promise.all([
+    readSource("src/lib/data.ts"),
+    readSource("src/app/admin/page.tsx"),
+    readSource("src/context/AuthContext.tsx"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/app/talents/page.tsx"),
+    readSource("src/app/portfolio/[id]/page.tsx"),
+  ]);
+
+  assert.match(dataTypes, /educationLevelVisible\?: boolean/);
+  assert.match(dataTypes, /educationLevel\?: string/);
+  assert.match(adminPage, />Education level<\/label>/);
+  assert.match(adminPage, /setEducationLevel/);
+  assert.match(adminPage, /\["educationLevelVisible", "Show education level"\]/);
+  assert.match(provider, /educationLevelVisible: profileVisible && requestedVisibility\?\.educationLevelVisible === true/);
+  assert.match(provider, /educationLevel: profile\.educationLevel \|\| ""/);
+  assert.match(adminLibrary, /educationLevel: safePublicText\(item\.educationLevel, 120\) \|\| ""/);
+  assert.match(adminLibrary, /educationLevelVisible: rawVisibility\.educationLevelVisible === true/);
+  assert.match(adminLibrary, /record\.visibility\.educationLevelVisible && record\.educationLevel/);
+  assert.match(adminLibrary, /educationLevel: record\.educationLevel/);
+  assert.match(publicRoute, /const showEducationLevel = publicVisibility\.educationLevelVisible === true/);
+  assert.match(publicRoute, /educationLevel: showEducationLevel \? showcaseCard\.educationLevel \|\| "" : ""/);
+  assert.match(talentsPage, /canSee\("educationLevelVisible"\)/);
+  assert.match(detailPage, /const educationLevel = canSee\("educationLevelVisible"\) && profile\.educationLevel/);
+  assert.match(detailPage, />Education level<\/p>/);
+});
+
 test("the Talent design preview is administrator-only and never seeds mock records into live sponsor or public data paths", async () => {
   const [previewPage, previewRoute, sponsorRoute, publicRoute] = await Promise.all([
     readSource("src/app/admin/talent-preview/page.tsx"),
