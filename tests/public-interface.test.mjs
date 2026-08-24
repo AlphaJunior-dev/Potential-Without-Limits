@@ -692,4 +692,6 @@ test("Meet the Team profile links are administrator-managed, HTTPS-only, and exp
   assert.match(teamPage, /member\.linkedinUrl/);
   assert.match(teamPage, /Professional social profile/);
   assert.match(teamPage, /rel="noopener noreferrer"/);
+  assert.match(teamPage, /whitespace-pre-line/);
+  assert.doesNotMatch(teamPage, /line-clamp-4/);
 });
