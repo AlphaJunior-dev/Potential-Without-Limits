@@ -190,3 +190,5 @@
 - [ ] Release the header-only glass treatment and five-profile Team grid, then verify the normal Production homepage hero and five-profile desktop roster.
 - [x] Remove the remaining full-width header backdrop so only the rounded glass navigation cylinder floats over the normal homepage hero and page content.
 - [ ] Release the isolated glass-cylinder header correction and verify the floating navigation shell on the Production homepage at the top and during scrolling.
+- [x] Standardize the public Team card layout so role, name, full biography, and professional-profile link occupy consistent aligned regions across the desktop roster.
+- [ ] Release the aligned Team card layout and verify the five-profile desktop roster maintains consistent role, name, biography, and link regions with live records.
