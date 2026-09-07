@@ -812,3 +812,26 @@ test("Meet the Team order is administrator-managed and the public roster uses th
   assert.match(teamSanitizers, /sort\(\(left, right\) => left\.order - right\.order\)/);
   assert.match(teamPage, /teamMembers\.map/);
 });
+
+test("News & Updates keeps the approved report in an admin-managed draft and publishes only explicit, sanitized entries", async () => {
+  const [cmsData, adminLibrary, publicRoute, updatesPage, adminRoute] = await Promise.all([
+    readSource("src/lib/cmsData.ts"),
+    readSource("src/lib/admin.ts"),
+    readSource("src/app/api/public/route.ts"),
+    readSource("src/app/foundation-updates/page.tsx"),
+    readSource("src/app/api/admin/route.ts"),
+  ]);
+
+  assert.match(cmsData, /interface NewsUpdate/);
+  assert.match(cmsData, /materials-distribution-2026-2027/);
+  assert.match(cmsData, /status: "draft"/);
+  assert.match(cmsData, /materials-000_2a30e949\.png/);
+  assert.match(adminLibrary, /function sanitizeNewsUpdates/);
+  assert.match(adminLibrary, /!includeDrafts && status !== "published"/);
+  assert.match(adminLibrary, /safeAssetUrl\(item\.imageUrl\)/);
+  assert.match(publicRoute, /editorialPages: site\.editorialPages/);
+  assert.match(updatesPage, /update\.status === "published"/);
+  assert.match(updatesPage, /ComingSoonPage/);
+  assert.match(adminRoute, /body\.action === "updateEditorialPages"/);
+  assert.match(adminRoute, /requireAdministrator/);
+});

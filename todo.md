@@ -206,3 +206,8 @@
 - [x] Restyle the homepage hero with a centered image-led composition and apply Fraunces for headlines with Inter for body copy, while preserving all existing content, actions, routes, and safeguards.
 - [ ] Release the validated homepage hero restyle and verify the image-led hero, Fraunces heading, Inter body copy, and existing calls to action in Production.
 - [ ] Push, deploy, merge, and confirm Production for the user-authorized homepage hero redesign.
+
+- [x] Add the approved materials-distribution report as an editable News & Updates entry with protected admin publishing controls and only reviewed non-identifying images; keep it unpublished until explicit release approval.
+- [ ] Release the News CMS implementation and explicitly publish the approved materials-distribution entry after final admin review.
+
+- [ ] Push, deploy, merge, and confirm Production for the user-authorized News CMS update while keeping the materials-distribution report as a private draft.

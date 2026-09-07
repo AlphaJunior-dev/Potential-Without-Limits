@@ -110,19 +110,50 @@ export interface LegalSecurityConfig {
 
 export type EditorialPageKey = "howItWorks" | "foundationUpdates" | "mediaPress";
 
+export interface NewsUpdate {
+  id: string;
+  title: string;
+  byline: string;
+  introduction: string;
+  body: string;
+  status: "draft" | "published";
+  updatedAt: string;
+  publishedAt?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+}
+
 export interface EditorialPageContent {
   title: string;
   introduction: string;
   body: string;
   status: "draft" | "published";
   updatedAt: string;
+  updates?: NewsUpdate[];
 }
 
 export type EditorialPagesConfig = Record<EditorialPageKey, EditorialPageContent>;
 
 export const INITIAL_EDITORIAL_PAGES: EditorialPagesConfig = {
   howItWorks: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
-  foundationUpdates: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
+  foundationUpdates: {
+    title: "News & Updates",
+    introduction: "Verified updates from Potential Without Limits International Foundation.",
+    body: "",
+    status: "draft",
+    updatedAt: "",
+    updates: [{
+      id: "materials-distribution-2026-2027",
+      title: "PWLIF Supports Rwandan Students with Educational Materials for the 2026–2027 Academic Year",
+      byline: "By Ishimwe Gloria",
+      introduction: "Six pupils from different districts across Rwanda have received educational materials, including books, from PWLIF to support their studies during the upcoming 2026–2027 academic year.",
+      body: "School and hygiene materials were provided to help vulnerable students access the resources they need. The materials include books and other essential learning resources that can support learners as they read, complete assignments, and work to improve their academic performance.\n\nStudents and their parents welcomed the support, saying the materials would help them prepare for the new academic year. The students also promised to study hard so they would not disappoint those supporting them.\n\nFor PWLIF, the initiative is part of its effort to contribute to students’ education and encourage them to remain committed to their studies. It also reflects the Foundation’s goal of identifying potential, supporting vulnerable children through talent development, and connecting them with opportunities that can contribute to a better future.\n\nAs the new academic year approaches, the beneficiaries are expected to make good use of the materials provided to improve their knowledge and academic performance.",
+      status: "draft",
+      updatedAt: "",
+      imageUrl: "/manus-storage/materials-000_2a30e949.png",
+      imageAlt: "School and hygiene materials prepared for six vulnerable children",
+    }],
+  },
   mediaPress: { title: "", introduction: "", body: "", status: "draft", updatedAt: "" },
 };
 
