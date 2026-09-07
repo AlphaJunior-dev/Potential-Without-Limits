@@ -106,6 +106,7 @@ export async function GET() {
     teamMembers: site.teamMembers.length ? site.teamMembers : fallbackTeamMembers,
     legalSecurity: { ...fallbackLegalSecurity, ...site.legalSecurity },
     foundationVideos: site.foundationVideos,
+    editorialPages: site.editorialPages,
     socialLinks: site.socialLinks,
   });
 }

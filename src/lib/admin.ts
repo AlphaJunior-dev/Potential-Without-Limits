@@ -434,6 +434,36 @@ export function sanitizePublicLegal(input: unknown) {
   };
 }
 
+function sanitizeNewsUpdates(input: unknown, includeDrafts: boolean) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 12).map((candidate, index) => {
+    const item = candidate && typeof candidate === "object" && !Array.isArray(candidate) ? candidate as Record<string, unknown> : {};
+    const title = safePublicText(item.title, 180);
+    const introduction = safePublicText(item.introduction, 1_200);
+    const body = safePublicText(item.body, 20_000);
+    if (!title || !introduction || !body) return null;
+    const status = item.status === "published" ? "published" : "draft";
+    if (!includeDrafts && status !== "published") return null;
+    const id = safePublicText(item.id, 80)?.replace(/[^a-zA-Z0-9_-]/g, "") || `update-${index + 1}`;
+    const byline = safePublicText(item.byline, 120);
+    const imageUrl = safeAssetUrl(item.imageUrl);
+    const imageAlt = safePublicText(item.imageAlt, 180);
+    const publishedAt = safePublicText(item.publishedAt, 32);
+    return {
+      id,
+      title,
+      byline,
+      introduction,
+      body,
+      status,
+      updatedAt: safePublicText(item.updatedAt, 32),
+      ...(publishedAt ? { publishedAt } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
+      ...(imageAlt ? { imageAlt } : {}),
+    };
+  }).filter((item): item is NonNullable<typeof item> => Boolean(item));
+}
+
 export function sanitizeEditorialPages(input: unknown, includeDrafts = false) {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
   const keys = ["howItWorks", "foundationUpdates", "mediaPress"] as const;
@@ -446,9 +476,10 @@ export function sanitizeEditorialPages(input: unknown, includeDrafts = false) {
       body: safePublicText(candidate.body, 20_000),
       status,
       updatedAt: typeof candidate.updatedAt === "string" ? candidate.updatedAt.slice(0, 32) : "",
+      ...(key === "foundationUpdates" ? { updates: sanitizeNewsUpdates(candidate.updates, includeDrafts) } : {}),
     };
-    return [key, includeDrafts || status === "published" ? page : { title: "", introduction: "", body: "", status: "draft", updatedAt: "" }];
-  })) as Record<typeof keys[number], { title: string; introduction: string; body: string; status: "draft" | "published"; updatedAt: string }>;
+    return [key, includeDrafts || status === "published" ? page : { title: "", introduction: "", body: "", status: "draft", updatedAt: "", ...(key === "foundationUpdates" ? { updates: [] } : {}) }];
+  })) as Record<typeof keys[number], { title: string; introduction: string; body: string; status: "draft" | "published"; updatedAt: string; updates?: ReturnType<typeof sanitizeNewsUpdates> }>;
 }
 
 export function sanitizePublicVideos(input: unknown) {
